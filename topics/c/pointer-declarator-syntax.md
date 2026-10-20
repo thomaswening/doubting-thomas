@@ -26,6 +26,7 @@ tags: [c, cpp, pointer, declarator, const, dereference]
 - <a id="c4"></a>**C4.** In an expression, unary `*p` (dereference) yields the object `p` points to, unary `&x` yields the address of `x`, and binary `a * b` is multiplication; the meaning of `*` depends on whether it appears in a declaration or an expression, and on whether it has one operand or two.
 - <a id="c5"></a>**C5.** `p->m` is equivalent to `(*p).m`: it accesses member `m` of the struct that `p` points to.
 - <a id="c6"></a>**C6.** In `const int* p` (equivalently `int const* p`) the pointed-to `int` cannot be changed through `p` but `p` can be re-pointed; in `int* const p` the pointer cannot be re-pointed but the `int` can be changed through it.
+- <a id="c7"></a>**C7.** A `const` in a pointer type restricts access through that pointer, not the object itself: converting `int*` to `const int*` is implicit and allowed for any non-const object, while converting `const int*` back to `int*` requires an explicit cast.
 
 ## Explanation
 
@@ -55,6 +56,10 @@ Where you put the space is a matter of style ([C1](#c1)). C programmers tend to 
 - `int* const p`: p is a const pointer to an int. `p` always points to the same place, but the int there can change.
 - `const int* const p`: neither.
 
+### Adding const is always allowed
+
+`const int* ro = &value;` compiles even though `value` is a plain `int` ([C7](#c7)). The `const` is a promise about the pointer: "I won't change the int through `ro`". It says nothing about whether the int may change in other ways: `value = 7;` still works, and `*ro` then reads 7. Handing out a more restricted view of an object is always safe, so the compiler converts `int*` to `const int*` silently. Going the other way, from `const int*` to `int*`, would drop a promise, so it needs an explicit cast. The C# analogy is passing a `List<int>` to a method that takes `IReadOnlyList<int>`: the list stays mutable, but the method can't change it.
+
 ## Examples
 
 ```c
@@ -73,7 +78,7 @@ int main(void)
     point* pp = &pt;
     pp->x = 10;           /* same as (*pp).x = 10 */
 
-    const int* ro = &value;
+    const int* ro = &value;   /* allowed: value isn't const, but ro promises not to change it */
     /* *ro = 7;   error: assignment of read-only location */
     ro = &b;              /* fine: the pointer itself may change */
 
@@ -93,6 +98,7 @@ Expected output:
 - Writing `int* a, b;` and expecting two pointers ([C2](#c2)), especially when coming from C# ([C3](#c3)).
 - Writing `*p.x` meaning `(*p).x`: it parses as `*(p.x)`. Use `p->x` ([C5](#c5)).
 - Reading `const int* p` as "a constant pointer"; it is a pointer to a constant ([C6](#c6)).
+- Believing the object behind a `const int*` cannot change: only changes through that pointer are forbidden ([C7](#c7)).
 - Dereferencing a pointer that is null or no longer points to a live object: undefined behaviour in C, where C# would throw.
 
 ## Sources

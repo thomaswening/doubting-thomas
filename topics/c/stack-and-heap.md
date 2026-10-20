@@ -67,11 +67,11 @@ The nearest .NET picture is a `using` block around an `IDisposable`, but applied
 
 char* make_greeting(const char* name)
 {
-    char local[16] = "Hello, ";              /* automatic: gone when the function returns */
-    char* result = malloc(strlen(local) + strlen(name) + 1);  /* allocated: survives */
-    if (result == NULL) return NULL;
-    strcpy(result, local);
-    strcat(result, name);
+    char local[16] = "Hello, ";              /* array of 16 chars on the stack; gone when the function returns */
+    char* result = malloc(strlen(local) + strlen(name) + 1);  /* ask the heap for that many bytes; survives */
+    if (result == NULL) return NULL;         /* malloc returns NULL if no memory is left */
+    strcpy(result, local);                   /* copy "Hello, " into the new memory */
+    strcat(result, name);                    /* append the name after it */
     return result;                           /* fine; returning local would dangle */
 }
 
@@ -90,6 +90,12 @@ Expected output:
 ```
 Hello, Thomas
 ```
+
+**Reading it: strings in C.** C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, that marks where it stops; functions find the length by counting up to that byte.
+
+- `char local[16] = "Hello, ";` declares an array of 16 chars on the stack and fills it with the 7 characters of `"Hello, "`, then the terminating `'\0'`, then zeros for the rest.
+- A pointer has no length; it is only an address. The number passed to `malloc` is how many **bytes** to allocate: `strlen` counts the characters before the `'\0'` (7 for `"Hello, "`, 6 for `"Thomas"`), and the `+ 1` makes room for the terminator. `result` then points to the first of those 14 bytes, and remembering how many there are is the programmer's job.
+- `strcpy(dest, src)` copies the string `src`, terminator included, into the memory at `dest`; `strcat(dest, src)` appends `src` after the string already in `dest`. Neither checks that `dest` is big enough. Here the size was computed exactly; getting it wrong writes past the end of the allocation, a buffer overflow, which is undefined behaviour and a classic security hole.
 
 ### C++: the destructor does the freeing
 
