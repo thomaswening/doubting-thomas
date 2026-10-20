@@ -14,6 +14,7 @@ This file is the single rulebook for any AI that reads or writes this repository
 README.md                 for the human reader
 AGENTS.md                 this file
 CLAUDE.md                 points Claude to this file
+backlog.md                topics that could become notes (§8)
 topics/index.md           every area, with a link to its index
 topics/<area>/index.md    every note in that area, one line each
 topics/<area>/<note>.md   one note per concept
@@ -90,7 +91,7 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 
 - **Notes and everything outside `results/`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
 - **At most three notes per pull request**, counting new notes and notes with substantial changes.
-- **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch.
+- **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch. A topic that only *could* become a note goes into the backlog instead (§8).
 - **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
 - **Results** (`results/`) are the one exception: commit them directly to `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`. The scope is the area, or `results`, or `repo` for changes to the structure.
@@ -110,3 +111,13 @@ To find what Thomas should work on, read `results/` and the indexes:
 - **Weak spots:** claims whose most recent outcome is `wrong` or `partial`.
 - **Never tested:** notes in an area index that no results file mentions.
 - **Due for a refresh:** notes not tested for 60 days or more.
+
+## 8. Backlog
+
+[backlog.md](backlog.md) lists topics that came up and could become notes, so that none is lost and open pull requests stay the notes Thomas has chosen to read now.
+
+- **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
+- **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
+- An entry may be added in **any pull request**, including one under review: a backlog line is not a note, so the rules of §6 on notes per pull request do not count it. It still never goes directly to `main`.
+- **When proposing notes**, look in the backlog first, and say which candidates come from it.
+- **When a note is written from an entry**, remove the entry in the same pull request. The note's `## Sources` keeps where it came from.
