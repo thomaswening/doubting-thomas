@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax]
-related: [c/opaque-handles]
+related: [c/opaque-handles, c/strings, cpp/copy-and-move]
 tags: [c, cpp, memory, malloc, free, raii, destructor, garbage-collection]
 ---
 
@@ -91,7 +91,7 @@ Expected output:
 Hello, Thomas
 ```
 
-**Reading it: strings in C.** C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, that marks where it stops; functions find the length by counting up to that byte.
+**Reading it: strings in C.** C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, that marks where it stops; functions find the length by counting up to that byte. More in [strings in C](strings.md).
 
 - `char local[16] = "Hello, ";` declares an array of 16 chars on the stack and fills it with the 7 characters of `"Hello, "`, then the terminating `'\0'`, then zeros for the rest.
 - A pointer has no length; it is only an address. The number passed to `malloc` is how many **bytes** to allocate: `strlen` counts the characters before the `'\0'` (7 for `"Hello, "`, 6 for `"Thomas"`), and the `+ 1` makes room for the terminator. `result` then points to the first of those 14 bytes, and remembering how many there are is the programmer's job.
