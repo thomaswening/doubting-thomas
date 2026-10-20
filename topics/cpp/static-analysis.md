@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: []
 related: [cpp/sanitizers]
+projects: [tante]
 tags: [cpp, static-analysis, clang-tidy, sonarqube, ci, warnings, core-guidelines]
 ---
 
@@ -88,7 +89,7 @@ clang-tidy -p build src/term.cpp
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, on the static-analysis guardrail of [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) §3 and whether SonarQube could replace clang-tidy.
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, on the static-analysis guardrail of [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) §3 and whether SonarQube could replace clang-tidy.
 - [clang-tidy documentation](https://clang.llvm.org/extra/clang-tidy/) and [list of checks](https://clang.llvm.org/extra/clang-tidy/checks/list.html).
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines).
 - [SonarQube for IDE](https://www.sonarsource.com/products/sonarqube/ide/).

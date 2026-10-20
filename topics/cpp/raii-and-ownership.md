@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/stack-and-heap]
 related: [cpp/sanitizers, c/opaque-handles]
+projects: [tante]
 tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move]
 ---
 
@@ -60,7 +61,7 @@ C libraries hand out resources with an init function and expect a clear function
 
 ## Examples
 
-Wrapping a FLINT polynomial, as Tante's build spike did:
+Wrapping a FLINT polynomial, as [Tante](https://github.com/thomaswening/Tante)'s build spike did:
 
 ```cpp
 #include <flint/fmpz_mpoly.h>
@@ -120,6 +121,6 @@ std::unique_ptr<Big> make() {
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, explaining "ownership by RAII" in [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) §3, and the RAII classes of its [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, explaining "ownership by RAII" in [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) §3, and the RAII classes of its [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md).
 - [C++ Core Guidelines, R: Resource management](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource).
 - [cppreference: RAII](https://en.cppreference.com/w/cpp/language/raii), [`std::unique_ptr`](https://en.cppreference.com/w/cpp/memory/unique_ptr), [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr).

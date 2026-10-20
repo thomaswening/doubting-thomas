@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/stack-and-heap]
 related: [cpp/raii-and-ownership, cpp/static-analysis]
+projects: [tante]
 tags: [cpp, c, undefined-behaviour, asan, ubsan, tsan, testing, ci]
 ---
 
@@ -26,7 +27,7 @@ tags: [cpp, c, undefined-behaviour, asan, ubsan, tsan, testing, ci]
 - <a id="c4"></a>**C4.** AddressSanitizer (ASan) detects out-of-bounds accesses to heap, stack and global memory, use after free, and double free; on Linux it also reports memory leaks when the program exits.
 - <a id="c5"></a>**C5.** UndefinedBehaviorSanitizer (UBSan) detects errors such as signed integer overflow, shifts by an invalid amount and misaligned pointers; it is available with GCC and Clang but not with MSVC.
 - <a id="c6"></a>**C6.** ThreadSanitizer (TSan) detects data races, where two threads access the same memory without synchronisation and at least one of them writes; it cannot be combined with AddressSanitizer in one build.
-- <a id="c7"></a>**C7.** In C++, overflow of an unsigned integer is defined and wraps around modulo 2ⁿ, while overflow of a signed integer is undefined behaviour.
+- <a id="c7"></a>**C7.** In C++, overflow of an unsigned integer is defined and wraps around modulo $2^n$, where $n$ is its width in bits, while overflow of a signed integer is undefined behaviour.
 - <a id="c8"></a>**C8.** A sanitized build typically runs about twice as slowly as a normal one with AddressSanitizer, and several times more slowly with ThreadSanitizer, so sanitizers are used in tests and CI rather than in released programs.
 
 ## Explanation
@@ -102,6 +103,6 @@ target_link_options(app PRIVATE -fsanitize=address,undefined)
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, explaining the guardrails of [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) and its [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md), which ran all three systems under ASan and UBSan.
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, explaining the guardrails of [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) and its [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md), which ran all three systems under ASan and UBSan.
 - [Clang AddressSanitizer documentation](https://clang.llvm.org/docs/AddressSanitizer.html), [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html), [ThreadSanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html).
 - [AddressSanitizer in MSVC](https://learn.microsoft.com/en-us/cpp/sanitizers/asan).
