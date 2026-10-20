@@ -29,6 +29,7 @@ tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move]
 - <a id="c6"></a>**C6.** `std::unique_ptr<T>` owns one heap object and deletes it in its destructor; it cannot be copied, only moved with `std::move`, which transfers ownership and leaves the source empty. It is created with `std::make_unique<T>(args...)`.
 - <a id="c7"></a>**C7.** `std::shared_ptr<T>` keeps a reference count and deletes the object when the last `shared_ptr` to it is destroyed; two objects holding `shared_ptr`s to each other are never freed, a cycle that `std::weak_ptr` is used to break.
 - <a id="c8"></a>**C8.** If a class owning a resource can be copied with the default copy, both copies free the same resource; such a class deletes its copy constructor and copy assignment (`= delete`) or defines them to copy the resource itself.
+- <a id="c9"></a>**C9.** A function that returns a `std::unique_ptr<T>` or an owning value hands ownership to the caller, and the type says so; a function that returns a raw `T*` does not say whether the caller must free it, which only its documentation can tell.
 
 ## Explanation
 
@@ -53,6 +54,10 @@ So application code owns things in one of these ways instead:
 3. **Through `std::unique_ptr`** ([C6](#c6)), when an object must live on the heap, for example because its type is only known at run time or it must outlive the scope that made it. Copying is forbidden, because that would create two owners. Moving transfers ownership, as handing over a key does.
 4. **Through `std::shared_ptr`** ([C7](#c7)), only when ownership is truly shared and no single owner can be named. It costs a reference count and can leak through cycles.
 
+### Returning ownership
+
+Returning something does not transfer ownership by itself; the return type decides ([C9](#c9)). A returned `std::unique_ptr<T>` hands the object to the caller, who now owns it, and the compiler enforces that only one owner exists. A returned value (`Poly`, `std::vector<Term>`) is the caller's too. A returned raw `T*` can mean either "you own this now, free it" (as `malloc` does) or "look, but don't touch" (as a getter does), and nothing in the type tells them apart. That ambiguity is the reason to return `unique_ptr` when ownership moves, and to keep raw pointers and references for looking only.
+
 `new` and `delete` still happen, inside `std::vector`, `std::make_unique` and your own small owning classes. They are written once, reviewed and tested, and the rest of the code never repeats them.
 
 ### Wrapping a C library handle
@@ -71,8 +76,9 @@ public:
     explicit Poly(fmpz_mpoly_ctx_t ctx) : ctx_(ctx) { fmpz_mpoly_init(p_, ctx_); }
     ~Poly() { fmpz_mpoly_clear(p_, ctx_); }     // runs at end of scope, always
 
-    Poly(const Poly&) = delete;                 // no copies: two copies
-    Poly& operator=(const Poly&) = delete;      // would both clear p_
+    // No copies: two copies of a Poly would both clear the same p_.
+    Poly(const Poly&) = delete;                 // forbids  Poly b = a;  and  Poly b(a);
+    Poly& operator=(const Poly&) = delete;      // forbids  b = a;
 
 private:
     fmpz_mpoly_ctx_struct* ctx_;   // not owned: only used
@@ -85,6 +91,14 @@ void work(fmpz_mpoly_ctx_t ctx) {
     // ... may throw ...
 }   // b's destructor, then a's, run here, also after an exception
 ```
+
+Reading it, line by line:
+
+- `fmpz_mpoly_init` and `fmpz_mpoly_clear` are plain C functions, declared in the header `<flint/fmpz_mpoly.h>` and defined in the compiled FLINT library, which the linker connects ([ABI and shared libraries](abi-and-shared-libraries.md)). They belong to no class: C has no classes, so a library's functions are global **free functions**, and the `fmpz_mpoly_` prefix does the job a namespace or class name would do. The nearest C# picture is a static method of a static class, called after `using static`.
+- `explicit` stops this one-parameter constructor from acting as an implicit conversion. Without it, a function taking a `Poly` could be called with a bare `ctx`, and C++ would silently build a temporary `Poly` from it. `explicit` is not about constructors in general; it only matters for constructors callable with one argument (and for conversion operators).
+- `: ctx_(ctx)` is a member initialiser list: it sets the field before the constructor body runs, like `_ctx = ctx;` at the start of a C# constructor.
+- FLINT, like GMP, defines its `_t` types as **arrays of one struct**: `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];`. In C and C++, a parameter declared with an array type is really a pointer, so the constructor's `fmpz_mpoly_ctx_t ctx` is an `fmpz_mpoly_ctx_struct* ctx`, and storing it in a field of that pointer type copies only the address. The member `fmpz_mpoly_t p_` is the other side of the trick: as a member it is a real one-element array, so the polynomial's struct lives inside the `Poly` object, and passing `p_` to a function passes its address without writing `&`.
+- The two `= delete` lines remove the two ways of copying ([C8](#c8)). The **copy constructor** `Poly(const Poly&)` makes a *new* `Poly` from an existing one: `Poly b = a;` or `Poly b(a);`. The **copy assignment** `operator=(const Poly&)` overwrites an *existing* `Poly` with another: `b = a;`. Neither involves references being reassigned: in C++, `b = a` copies the object, as it would for a C# struct. The `Poly&` return type of `operator=` is a convention that lets `c = b = a;` chain.
 
 Raw ownership compared with `unique_ptr`:
 
@@ -111,12 +125,15 @@ std::unique_ptr<Big> make() {
 }
 ```
 
+In `make`, ownership passes to the caller because the return type is `std::unique_ptr` ([C9](#c9)), not because a heap object is returned. Returning the local `b` moves it automatically; `std::move` is not needed there.
+
 ## Pitfalls
 
 - Treating `shared_ptr` as "the C# reference": it costs a reference count on every copy and leaks on cycles ([C7](#c7)). Prefer values and `unique_ptr`.
 - Using a `unique_ptr` after `std::move` from it: it is empty, and dereferencing it is undefined behaviour ([C6](#c6)).
 - Forgetting `= delete` on the copy operations of a class that owns a C handle: the first copy that goes out of scope frees the handle the other still uses ([C8](#c8)).
 - An exception that is never caught ends the program through `std::terminate`, and whether destructors run on the way out is then up to the implementation. The guarantee of [C2](#c2) is for exceptions that are caught somewhere up the call stack.
+- Assuming that a function returning a raw pointer hands over ownership, or that it doesn't. Freeing what you don't own is a double free; not freeing what you do own is a leak. Read the documentation, and in your own code return `unique_ptr` when ownership moves ([C9](#c9)).
 - Keeping a reference or raw pointer to something after its owner is gone. RAII decides when things are freed; it does not stop you looking at them afterwards. AddressSanitizer finds this ([sanitizers](sanitizers.md)).
 
 ## Sources
