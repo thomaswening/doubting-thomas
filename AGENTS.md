@@ -89,12 +89,12 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 
 ## 6. Writing to this repository
 
-- **Notes and everything outside `results/`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
+- **Notes and everything outside `results/` and `backlog.md`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
 - **At most three notes per pull request**, counting new notes and notes with substantial changes.
 - **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch. A topic that only *could* become a note goes into the backlog instead (§8).
 - **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
-- **Results** (`results/`) are the one exception: commit them directly to `main`.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`. The scope is the area, or `results`, or `repo` for changes to the structure.
+- **Results** (`results/`) and **backlog lines** (`backlog.md`, §8) are the two exceptions: commit them directly to `main`.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`, `chore(backlog): add cpp/copy-elision`. The scope is the area, or `results`, or `backlog`, or `repo` for changes to the structure.
 - When changing a note, update its `updated` date. Keep existing claim IDs (§3).
 
 ## 7. Testing Thomas and logging results
@@ -118,6 +118,7 @@ To find what Thomas should work on, read `results/` and the indexes:
 
 - **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
 - **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
-- An entry may be added in **any pull request**, including one under review: a backlog line is not a note, so the rules of §6 on notes per pull request do not count it. It still never goes directly to `main`.
+- **Commit backlog changes directly to `main`** (§6), as `chore(backlog): …`, never inside a pull request. A backlog line is a pointer, not knowledge: nothing is quizzed from it, so it needs no review. Thomas weeds it when entries are proposed.
 - **When proposing notes**, read the backlog too, and list its entries in a group of their own, apart from the candidates of the current session, so that Thomas can tell what just came up from what has been waiting.
-- **When a note is written from an entry**, remove the entry in the same pull request. The note's `## Sources` keeps where it came from.
+- **When Thomas rejects an entry**, at a proposal or whenever he goes through the backlog, remove it on `main`.
+- **When a note is written from an entry**, remove the entry on `main` once the note's pull request is open, and name the entry in the pull request's description. The note's `## Sources` keeps where it came from. If Thomas closes the pull request without merging and wants the topic kept, put the entry back.
