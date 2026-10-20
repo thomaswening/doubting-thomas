@@ -107,6 +107,48 @@ struct Record {
 };
 ```
 
+A move-only wrapper for a C handle, completing the minimal one in [opaque handles](../c/opaque-handles.md):
+
+```cpp
+#include <utility>
+
+extern "C" {
+    typedef struct db db;
+    db*  db_open(const char* path);
+    void db_close(db* d);
+}
+
+class Database {
+    db* handle_;
+public:
+    explicit Database(const char* path) : handle_(db_open(path)) {}
+    ~Database() { if (handle_) db_close(handle_); }
+
+    Database(const Database&) = delete;                // no copies (rule of five: decided)
+    Database& operator=(const Database&) = delete;
+
+    Database(Database&& other) noexcept                // move: take over the handle
+        : handle_(std::exchange(other.handle_, nullptr)) {}
+    Database& operator=(Database&& other) noexcept {   // move assignment
+        if (this != &other) {
+            if (handle_) db_close(handle_);            // release what we held
+            handle_ = std::exchange(other.handle_, nullptr);
+        }
+        return *this;
+    }
+};
+
+Database open_default() { return Database("data.db"); }   // fine: returning moves (or elides)
+```
+
+Reading it:
+
+- `explicit` stops the one-parameter constructor from acting as an implicit conversion: without it, a function taking a `Database` could be called with `"data.db"` and would silently open a database. It is the opposite of C#'s `implicit operator`.
+- `: handle_(db_open(path))` is a member initialiser list: it sets the field before the constructor body runs, like `_handle = DbOpen(path);` at the start of a C# constructor.
+- `std::exchange(other.handle_, nullptr)` returns `other`'s handle and sets it to null in one step, so the moved-from object holds nothing ([C3](#c3)).
+- `if (handle_)` is false for a null pointer, so a moved-from object's destructor does nothing.
+- `noexcept` is good practice for every move. For this class it doesn't change what `std::vector` does, since copying is deleted and the vector has to move anyway; it decides between moving and copying only for types that can do both ([C7](#c7)). Without any move constructor, a `std::vector<Database>` couldn't grow at all.
+
 ## Pitfalls
 
 - Expecting `T b = a;` to share one object, as in C#: it makes an independent copy ([C1](#c1)).
