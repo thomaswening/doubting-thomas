@@ -13,3 +13,15 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## tools
 
 - `tools/yaml`: the YAML that configuration files use: block scalars (`>` and `|`), anchors and aliases (`&`, `*`), and when a value must be quoted. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (the `.clang-tidy` example).
+
+## cmake
+
+- `cmake/targets-and-usage-requirements`: targets and their include paths, compile definitions and dependencies; PRIVATE, PUBLIC and INTERFACE; private static-library dependencies needed for final linking. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `cmake/installing-and-exporting-targets`: installing artifacts versus exporting target definitions; install(TARGETS ... EXPORT ...) and install(EXPORT ...); preserving public usage requirements without bundling dependencies. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `cmake/cache-variables`: normal variables versus persistent cache entries; CACHE BOOL, FORCE, and setting dependency options before FetchContent_MakeAvailable. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `cmake/finding-and-fetching-dependencies`: find_package versus FetchContent; package-search prefixes, compatible versions and Git references. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `cmake/configure-build-install`: what configuration, compilation/linking and installation each do, and how failures in these phases differ. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+
+## testing
+
+- `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
