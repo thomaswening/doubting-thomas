@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/stack-and-heap]
 related: [c/opaque-handles]
+projects: [tante]
 tags: [cpp, copy-constructor, move-constructor, rvalue-reference, std-move, rule-of-five, value-semantics]
 ---
 
@@ -159,5 +160,5 @@ Reading it:
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, from Thomas's review of the [opaque handles note](https://github.com/thomaswening/doubting-thomas/pull/2), on the C++ wrapper of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, from Thomas's review of the [opaque handles note](https://github.com/thomaswening/doubting-thomas/pull/2), on the C++ wrapper of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - cppreference: [copy constructors](https://en.cppreference.com/w/cpp/language/copy_constructor), [move constructors](https://en.cppreference.com/w/cpp/language/move_constructor), [std::move](https://en.cppreference.com/w/cpp/utility/move), [rule of three/five/zero](https://en.cppreference.com/w/cpp/language/rule_of_three), [std::move_if_noexcept](https://en.cppreference.com/w/cpp/utility/move_if_noexcept).

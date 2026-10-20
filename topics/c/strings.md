@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
 related: []
+projects: [tante]
 tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
 ---
 
@@ -93,5 +94,5 @@ Hello-T 12
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, from Thomas's review of the [stack and heap note](https://github.com/thomaswening/doubting-thomas/pull/2).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, from Thomas's review of the [stack and heap note](https://github.com/thomaswening/doubting-thomas/pull/2).
 - cppreference: [null-terminated byte strings (C)](https://en.cppreference.com/w/c/string/byte), [strlen](https://en.cppreference.com/w/c/string/byte/strlen), [snprintf](https://en.cppreference.com/w/c/io/fprintf), [strncpy](https://en.cppreference.com/w/c/string/byte/strncpy), [string literals (C)](https://en.cppreference.com/w/c/language/string_literal), [array to pointer conversion](https://en.cppreference.com/w/c/language/conversion#Array_to_pointer_conversion).
