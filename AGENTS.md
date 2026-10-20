@@ -31,7 +31,7 @@ templates/results.md      copy this to start a results file
 
 Start from [templates/note.md](templates/note.md). The sections, in this order:
 
-1. **Front matter** (YAML): `title`, `area`, `created` and `updated` (ISO dates), `prerequisites` and `related` (lists of note ids, see §4; may be empty), `tags`.
+1. **Front matter** (YAML): `title`, `area`, `created` and `updated` (ISO dates), `prerequisites` and `related` (lists of note ids, see §4; may be empty), `projects` (the projects of §5 where the concept came up or matters, as lower-case names: `[tante]`; may be empty), `tags`.
 2. **`# Title`**
 3. **`## TL;DR`**: three to six bullets. Someone who reads only this should get the gist.
 4. **`## Key claims`**: the checkable core of the note (§3).
@@ -41,6 +41,15 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 8. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
+
+**Mathematics is written in LaTeX**, which GitHub and VS Code's Markdown preview render natively, and which an AI reads directly from the source:
+
+- Inline: `$\gcd(p, q) = x - y$`. If the expression contains characters Markdown would interpret, such as `*`, `_` or `\`, use the backtick form `` $`a_1 * b_1`$ ``.
+- Displayed: a ` ```math ` code block, or `$$ … $$` on lines of their own. Prefer the code block: it never collides with Markdown.
+- A literal dollar sign in prose is written `\$`.
+- Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
+- Write formulas in LaTeX everywhere a formula appears, key claims included. Code, identifiers and program output stay in backticks: `arb_t`, `x^2 - 1` as typed into a program.
+- Check that the note renders on GitHub before asking for review: in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
 
 **Snippets use only what Thomas already knows:** C#/.NET, basic C++20, and the note's prerequisites. Any other feature in a snippet is either explained right there or left out. This includes keywords such as `explicit`, member initialiser lists, move constructors and `std::exchange`. Keep each example to the smallest code that shows the concept. An advanced version belongs in the note whose topic it is, with a link to it.
 
@@ -60,7 +69,18 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - A **claim id** is the note id, `#`, and the claim anchor: `numerics/ball-arithmetic#c3`.
 - In Markdown, every reference to a note or claim is a real relative link: `[ball arithmetic](../numerics/ball-arithmetic.md)`, `[C3](../numerics/ball-arithmetic.md#c3)`. Ids in front matter and in results tables are plain ids, not links.
 
-## 5. Sources and confidentiality
+## 5. Projects, sources and confidentiality
+
+**Thomas's projects** and their repositories:
+
+| Name in `projects` | Repository |
+|---|---|
+| `tante` | [Tante](https://github.com/thomaswening/Tante): a symbolic math engine for physicists, successor to FORM |
+| `partonforge` | [PartonForge](https://github.com/thomaswening/PartonForge): a C++20 reimplementation of the Parton Branching TMD evolution Monte Carlo |
+| `crateedit` | [CrateEdit](https://github.com/thomaswening/CrateEdit): a tag editor for DJ music collections that never touches cue points |
+
+- In a note's text, the **first mention of a project in each section** links to its repository: `[Tante](https://github.com/thomaswening/Tante)`. Later mentions in the same section are plain text. A project not yet in the table is added to it in the same pull request.
+- `projects` records where a concept came up or matters; it is metadata, not organisation. Notes stay organised by concept (§1).
 
 - Under `## Sources`, link where the knowledge came from (a pull request or ADR in one of Thomas's repositories, a book, a paper, documentation) and where to read further. Name the session if it came from a conversation: `Claude session on Tante, 2026-10-19`.
 - **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms, and give no link to the confidential source.
