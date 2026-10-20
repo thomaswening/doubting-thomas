@@ -119,5 +119,5 @@ To find what Thomas should work on, read `results/` and the indexes:
 - **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
 - **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
 - An entry may be added in **any pull request**, including one under review: a backlog line is not a note, so the rules of §6 on notes per pull request do not count it. It still never goes directly to `main`.
-- **When proposing notes**, look in the backlog first, and say which candidates come from it.
+- **When proposing notes**, read the backlog too, and list its entries in a group of their own, apart from the candidates of the current session, so that Thomas can tell what just came up from what has been waiting.
 - **When a note is written from an entry**, remove the entry in the same pull request. The note's `## Sources` keeps where it came from.
