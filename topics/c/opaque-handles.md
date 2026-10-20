@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/struct-tags-and-typedef, c/stack-and-heap]
-related: [cpp/abi-and-shared-libraries, cpp/header-only-libraries, cpp/copy-and-move]
+related: [cpp/abi-and-shared-libraries, cpp/header-only-libraries]
 tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ---
 
@@ -118,7 +118,7 @@ db_close(d);            /* forget this, or call it twice, and the program is wro
 - **`explicit`.** A C++ constructor with one parameter also acts as an implicit conversion: without `explicit`, `Database d = "data.db";` would compile and silently open a database. `explicit` forbids that, much as not defining an `implicit operator` does in C#.
 - **`: handle_(db_open(path))`** is a member initialiser list. It sets the field `handle_` to the result of calling the free function `db_open(path)`, before the constructor body runs. In C# you would write `_handle = DbOpen(path);` in the constructor body.
 - **`if (handle_)`.** A pointer used as a condition is false when it is null and true otherwise, so this means `if (handle_ != nullptr)`. It matters after a move, which leaves the old object holding null.
-- **Copy constructor and copy assignment.** C# has nothing like them: assigning a class variable copies the reference, and both variables share one object. In C++, `Database b = a;` creates a second object by calling the **copy constructor** `Database(const Database&)`, and `b = a;` between existing objects calls the **copy assignment** `operator=`. By default both copy every field, which here would copy the handle and later close it twice. `= delete` removes them ([C7](#c7)): it deletes the function, not an object, so writing a copy becomes a compile error. More in [copy and move](../cpp/copy-and-move.md).
+- **Copy constructor and copy assignment.** C# has nothing like them: assigning a class variable copies the reference, and both variables share one object. In C++, `Database b = a;` creates a second object by calling the **copy constructor** `Database(const Database&)`, and `b = a;` between existing objects calls the **copy assignment** `operator=`. By default both copy every field, which here would copy the handle and later close it twice. `= delete` removes them ([C7](#c7)): it deletes the function, not an object, so writing a copy becomes a compile error.
 - **Move constructor**, `Database(Database&& other)`. `&&` marks a reference to an object that is about to be discarded, such as a temporary returned from a function. Instead of copying, the new object takes over `other`'s handle: `std::exchange(other.handle_, nullptr)` sets `other`'s handle to null and returns the old value in one step, so only the new object will close it. `noexcept` promises that this never throws, which lets standard containers move instead of copy. This is how a `Database` can still be returned from a function or stored in a `std::vector`.
 - **`int count() const`.** The trailing `const` promises that the method doesn't modify the object, so it can be called on a `const Database&`. C# has no direct equivalent; `readonly` members of a struct come closest.
 
