@@ -129,7 +129,7 @@ std::unique_ptr<Big> make() {
 }
 ```
 
-In `make`, ownership passes to the caller because the return type is `std::unique_ptr` ([C9](#c9)), not because a heap object is returned. Returning the local `b` moves it automatically; `std::move` is not needed there.
+In `make`, ownership passes to the caller because the return type is `std::unique_ptr` ([C9](#c9)), not because a heap object is returned. Returning the local `b` moves it automatically; `std::move` is not needed there. Concretely, a `unique_ptr` is little more than one pointer. Moving it copies that address into the caller's `unique_ptr` and sets `b`'s to null. `b`'s destructor still runs when `make` ends, but it finds null and deletes nothing, so only the caller's `unique_ptr` will delete the `Big` ([C6](#c6)). The `Big` itself never moves: it stays where `make_unique` put it on the heap. Often the compiler skips even this step and builds `b` directly in the caller's variable. Moving in general, and `std::move`, are explained in [copy and move](copy-and-move.md).
 
 ## Pitfalls
 
