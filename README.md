@@ -22,7 +22,7 @@ Or: "Look at my results and quiz me on my weak spots", or "What haven't I been t
 
 ## How notes get here
 
-Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results are the exception and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-sources-and-confidentiality).
+Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. Topics I'm not ready to read about yet go into [backlog.md](backlog.md); proposals show some of them separately, and I weed out what I don't need when they come up. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results and backlog lines are the exceptions and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-sources-and-confidentiality).
 
 ## Layout
 
@@ -30,5 +30,6 @@ Claude proposes notes at natural checkpoints in a working session, and I pick wh
 topics/<area>/<note>.md   the notes
 results/                  how I did when tested
 templates/                starting points for a note and a results file
+backlog.md                topics that could become notes later
 AGENTS.md                 the rules for any AI working here
 ```
