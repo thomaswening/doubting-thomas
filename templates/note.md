@@ -5,6 +5,7 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 prerequisites: []
 related: []
+projects: []
 tags: []
 ---
 
@@ -20,7 +21,11 @@ tags: []
 
 ## Explanation
 
-<Build the idea up from what the reader knows. Say why, not only what. Compare to .NET where it helps. Link claims as [C1](#c1).>
+<Build the idea up from what the reader knows. Say why, not only what. Compare to .NET where it helps. Link claims as [C1](#c1). Write formulas in LaTeX: inline $x^2 - 1$, displayed in a math block.>
+
+```math
+\frac{x^2 - 1}{x + 1} = x - 1
+```
 
 ## Examples
 

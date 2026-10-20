@@ -10,6 +10,8 @@ Start at [topics/index.md](topics/index.md). Each area has an index, and each no
 - **Key claims**: numbered statements (C1, C2, …) that are true on their own. These are what a quiz is built from and graded against.
 - **Explanation**, **Examples** with snippets, **Pitfalls** and **Sources**.
 
+Formulas are written in LaTeX and render on GitHub. The front matter's `projects` field says which of my projects a note came from or matters to, and the projects' names link to their repositories.
+
 ## Getting tested
 
 Point any AI with access to this repository (ChatGPT with the GitHub connector, Claude, Codex) at it and ask, for example:
