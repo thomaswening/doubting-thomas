@@ -28,12 +28,23 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 - <a id="c6"></a>**C6.** .NET's `SafeHandle` plays the same role for native handles: it wraps an `IntPtr` and calls a release function from `Dispose` or, failing that, its finaliser.
 - <a id="c7"></a>**C7.** In C++, `Database(const Database&) = delete;` removes the copy constructor, so any attempt to copy a `Database` is a compile-time error; `= delete` deletes a function from the class, not an object.
 - <a id="c8"></a>**C8.** A function declared next to an opaque type in a C header, such as `db* db_open(const char* path);`, is a stand-alone function of the library (a non-member function), not part of the struct: the hidden struct holds only the library's data, and the client calls the functions directly by name.
+- <a id="c9"></a>**C9.** An API uses a handle for an object the library manages: something with state that persists between calls, a lifetime that needs cleaning up, or contents the library keeps private; operations on plain values that keep no state, such as `sqrt(double)`, need no handle. Each function taking the handle acts as a method of that object, with the handle in the role of `this`.
+- <a id="c10"></a>**C10.** A handle need not be a memory address: Win32's `HANDLE` and `HWND` values are identifiers that Windows looks up in its own tables, which the program never dereferences.
+- <a id="c11"></a>**C11.** A plug-in that is not linked against its host typically receives both a table of function pointers, through which it calls the host, and opaque handles to the host's objects, which it passes back through that table; Tante's modules get `tante_host` (the table) and `tante_rational*` (handles to numbers).
 
 ## Explanation
 
 ### The problem a handle solves
 
 A library wants to give its users objects (a database connection, a big number) without letting them depend on what is inside. If the header exposed the struct, users would compile its size and field offsets into their own code; changing the struct would silently break every program built against the old version.
+
+### What a handle stands for
+
+A handle stands for **one object the library manages**: something with state that lives from one call to the next, a lifetime with a beginning and an end, and contents that are the library's business ([C9](#c9)). An open database, a window, a file, an arbitrary-size number. It is C's way of writing object-oriented code: the handle is the object reference, and each function that takes it is a method, with the handle as its first parameter playing the role of `this`. `db_count(d)` in C is `d.Count()` in C#.
+
+An API needs no handle for operations on plain values that keep no state: `sqrt(double)` takes a number and returns one. A handle appears as soon as the library has to remember something between calls on your behalf, or has to clean something up at the end.
+
+A handle need not even be a memory address ([C10](#c10)). Win32's `HANDLE` and `HWND` are identifiers that Windows looks up in its own tables; the program could not read anything at that "address", and isn't meant to. What makes it a handle is that the user only stores it and passes it back.
 
 ### How it is built
 
@@ -62,7 +73,7 @@ Tante's module interface uses both, for different jobs:
 - `tante_rational*` is an opaque handle to a number: data the module can't see into.
 - `tante_host` is a visible struct of function pointers, such as `rational_add`. Because modules don't link against the engine, the engine passes this table to each module when loading it.
 
-The handle never contains the functions, and the table never contains the numbers. In the `db` example above there is no table at all, because the user links against the library and calls `db_open` directly.
+This pairing is the standard shape of a plug-in interface ([C11](#c11)): the plug-in calls the host through the table it was given, and refers to the host's objects by handles it passes back through that table. SQLite's loadable extensions work the same way. The handle never contains the functions, and the table never contains the numbers. In the `db` example above there is no table at all, because the user links against the library and calls `db_open` directly.
 
 ### Ownership
 
