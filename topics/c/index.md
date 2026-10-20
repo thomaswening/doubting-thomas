@@ -5,3 +5,4 @@
 - [Where the * goes](pointer-declarator-syntax.md): `*` in declarations and expressions, `int* a, b;`, `->` and `const`.
 - [Stack, heap and who frees memory](stack-and-heap.md): what C frees for you, what it never does, and how C++ destructors close the gap.
 - [Opaque handles](opaque-handles.md): pointers to hidden types, their ownership rules, and wrapping them in C++.
+- [Array parameters and array decay](array-parameters.md): array parameters are pointers, arrays decay in expressions, and the GMP/FLINT `typedef S name_t[1];` idiom.
