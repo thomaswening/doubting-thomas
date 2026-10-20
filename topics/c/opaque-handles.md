@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/struct-tags-and-typedef, c/stack-and-heap]
-related: [cpp/abi-and-shared-libraries, cpp/header-only-libraries]
+related: [c/function-pointer-declarations, cpp/abi-and-shared-libraries, cpp/header-only-libraries]
 tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ---
 
@@ -14,9 +14,9 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 
 - An **opaque handle** is a pointer to a type whose definition the user never sees. The user can store it and pass it back, but not look inside, like an `IntPtr` from native code.
 - The library declares the type without a body in its header and defines it only in its own source, so it can change the layout without breaking users.
+- The hidden struct holds the library's **data**. The operations are ordinary functions of the library, declared next to it, which the user calls directly.
 - Every handle comes with a **create** function and a **release** function, and the user must call the release function exactly once.
-- A C++ wrapper class turns this into RAII: its destructor calls the release function, so release can't be forgotten.
-- The wrapper must also decide what copying means; the default copy would release the same handle twice.
+- A C++ wrapper class turns this into RAII: its destructor calls the release function. It must also forbid copying, or two copies would release the same handle twice.
 
 ## Key claims
 
@@ -27,7 +27,7 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 - <a id="c5"></a>**C5.** A C++ class that wraps a handle and calls the release function in its destructor makes release automatic (RAII); it must also disable copying, or implement copying by asking the library for a new handle, because the compiler-generated copy would copy the pointer and release it twice.
 - <a id="c6"></a>**C6.** .NET's `SafeHandle` plays the same role for native handles: it wraps an `IntPtr` and calls a release function from `Dispose` or, failing that, its finaliser.
 - <a id="c7"></a>**C7.** In C++, `Database(const Database&) = delete;` removes the copy constructor, so any attempt to copy a `Database` is a compile-time error; `= delete` deletes a function from the class, not an object.
-- <a id="c8"></a>**C8.** A function declared next to an opaque type in a C header, such as `db* db_open(const char* path);`, is a free function of the library, not a member of the struct: the struct has no visible members at all, and the client needs only the function declarations to call them.
+- <a id="c8"></a>**C8.** A function declared next to an opaque type in a C header, such as `db* db_open(const char* path);`, is a stand-alone function of the library (a non-member function), not part of the struct: the hidden struct holds only the library's data, and the client calls the functions directly by name.
 
 ## Explanation
 
@@ -46,7 +46,23 @@ int  db_count(const db* d);              /* use */
 void db_close(db* d);                    /* release: exactly once */
 ```
 
-The three functions are ordinary free functions of the library, declared next to the type, not members of it ([C8](#c8)): C structs can't contain functions, and this one has no visible members at all. Only the library's `.c` file says what `struct db` contains. Users pass the pointer back to the library's functions and that is all they can do with it ([C3](#c3)). The library is free to rearrange its struct in a new version ([C2](#c2)). SQLite's `sqlite3*`, Win32's `HANDLE` and Tante's `tante_rational*` work this way.
+Two different things are declared here, and they are easy to mix up:
+
+- **The struct `db`** holds the library's data for one database: perhaps a file, a cache, a count. Only the library's `.c` file says what it contains.
+- **The three functions** are separate, stand-alone functions of the library ([C8](#c8)), like `static` methods of a C# `static class`, but at the top level. They are not inside the struct: a C struct can't contain functions. The user's program calls them by name, and the linker connects those calls to the library's code, just as a C# project calls methods of a referenced assembly.
+
+So the user holds pointers to data it can't see, and passes them to functions it can call ([C3](#c3)). The library is free to rearrange its struct in a new version ([C2](#c2)). SQLite's `sqlite3*`, Win32's `HANDLE` and Tante's `tante_rational*` work this way.
+
+### Handles and function tables are different things
+
+A [struct of function pointers](function-pointer-declarations.md#c6) is a separate idea that often appears next to handles. It is needed only when the user's code is **not linked** against the library and so can't call its functions by name. A plug-in loaded at run time is the usual case. The host then passes the plug-in a table of function pointers, and the plug-in calls through the table.
+
+Tante's module interface uses both, for different jobs:
+
+- `tante_rational*` is an opaque handle to a number: data the module can't see into.
+- `tante_host` is a visible struct of function pointers, such as `rational_add`. Because modules don't link against the engine, the engine passes this table to each module when loading it.
+
+The handle never contains the functions, and the table never contains the numbers. In the `db` example above there is no table at all, because the user links against the library and calls `db_open` directly.
 
 ### Ownership
 
@@ -54,20 +70,18 @@ C has no garbage collector, so the API must say who frees what ([C3](#c3)). The 
 
 ### Making it safe in C++
 
-Calling `db_close` on every path, including early returns and errors, is exactly the bookkeeping that goes wrong in C. A C++ wrapper attaches it to scope ([C5](#c5)). The one trap is copying: by default C++ copies an object member by member, so two wrappers would hold the same pointer and both destructors would release it. The wrapper therefore forbids copying (and allows moving, which transfers ownership), or implements copy by asking the library for a duplicate.
+Calling `db_close` on every path, including early returns and errors, is exactly the bookkeeping that goes wrong in C. A C++ wrapper class attaches it to scope ([C5](#c5)): its constructor opens, its destructor closes, and the destructor runs automatically when the object goes out of scope.
+
+The one trap is copying. C# assigns references, so `var b = a;` gives two names for one object. C++ objects are values: `Database b = a;` makes a second `Database`, by default by copying every field. Both copies would then hold the same pointer, and both destructors would close it. So the wrapper forbids copying ([C7](#c7)).
 
 .NET solves the same problem with `SafeHandle` ([C6](#c6)), which wraps an `IntPtr` and releases it in `Dispose` or, if you forget, in its finaliser.
 
 ## Examples
 
-A C++ wrapper over the C API above:
+A minimal C++ wrapper over the C API above:
 
 ```cpp
-#include <utility>
-
-// The library's C header: one opaque type and three free functions (not members of db).
-// extern "C" tells the C++ compiler these are C functions, named the C way.
-extern "C" {
+extern "C" {                       // the library's C header, as above
     typedef struct db db;
     db*  db_open(const char* path);
     int  db_count(const db* d);
@@ -75,32 +89,31 @@ extern "C" {
 }
 
 class Database {
-    db* handle_;                                      // the only field: the handle
+    db* handle_;                                   // the only field: the handle
 public:
-    // Constructor. ": handle_(db_open(path))" initialises the field with the result of
-    // calling the free function db_open; "explicit" forbids implicit conversion from a string.
-    explicit Database(const char* path) : handle_(db_open(path)) {}
+    Database(const char* path) { handle_ = db_open(path); }   // constructor
+    ~Database() { db_close(handle_); }                         // destructor: runs at end of scope
 
-    // Destructor: runs automatically at the end of the owner's scope.
-    // "if (handle_)" is false for a null pointer, as after a move (below).
-    ~Database() { if (handle_) db_close(handle_); }
+    Database(const Database&) = delete;            // forbid  Database b = a;
+    Database& operator=(const Database&) = delete; // forbid  b = a;
 
-    // Copy constructor and copy assignment, removed: copying a Database is a compile error.
-    Database(const Database&) = delete;
-    Database& operator=(const Database&) = delete;
-
-    // Move constructor: takes over other's handle and leaves other holding null.
-    Database(Database&& other) noexcept : handle_(std::exchange(other.handle_, nullptr)) {}
-
-    int count() const { return db_count(handle_); }   // const: does not change the object
+    int count() { return db_count(handle_); }
 };
 
 int main()
 {
     Database d("data.db");
-    return d.count() >= 0 ? 0 : 1;
-}   // db_close runs here, even if count() had thrown
+    int n = d.count();
+    // Database e = d;   // would not compile: copying is deleted
+    return n >= 0 ? 0 : 1;
+}   // d's destructor runs here and calls db_close, even if count() had thrown
 ```
+
+Reading it:
+
+- `extern "C"` tells the C++ compiler that the functions inside are C functions, so it looks them up by their plain C names.
+- The constructor has the class's name and no return type, as in C#. The destructor is the same name with `~` in front; the compiler calls it automatically when `d` goes out of scope.
+- The two `= delete` lines remove the two ways of copying ([C7](#c7)): making a new object from an existing one (`Database e = d;`, the **copy constructor**) and overwriting an existing object with another (`e = d;`, the **copy assignment**). Writing either is now a compile error. Nothing is deleted at run time.
 
 The equivalent in plain C, with the release written by hand on every path:
 
@@ -113,26 +126,20 @@ db_close(d);            /* forget this, or call it twice, and the program is wro
 
 (These snippets need an implementation of `db_open` and friends to link; they illustrate the shape of the API.)
 
-### Reading the wrapper, for a C# developer
-
-- **`explicit`.** A C++ constructor with one parameter also acts as an implicit conversion: without `explicit`, `Database d = "data.db";` would compile and silently open a database. `explicit` forbids that, much as not defining an `implicit operator` does in C#.
-- **`: handle_(db_open(path))`** is a member initialiser list. It sets the field `handle_` to the result of calling the free function `db_open(path)`, before the constructor body runs. In C# you would write `_handle = DbOpen(path);` in the constructor body.
-- **`if (handle_)`.** A pointer used as a condition is false when it is null and true otherwise, so this means `if (handle_ != nullptr)`. It matters after a move, which leaves the old object holding null.
-- **Copy constructor and copy assignment.** C# has nothing like them: assigning a class variable copies the reference, and both variables share one object. In C++, `Database b = a;` creates a second object by calling the **copy constructor** `Database(const Database&)`, and `b = a;` between existing objects calls the **copy assignment** `operator=`. By default both copy every field, which here would copy the handle and later close it twice. `= delete` removes them ([C7](#c7)): it deletes the function, not an object, so writing a copy becomes a compile error.
-- **Move constructor**, `Database(Database&& other)`. `&&` marks a reference to an object that is about to be discarded, such as a temporary returned from a function. Instead of copying, the new object takes over `other`'s handle: `std::exchange(other.handle_, nullptr)` sets `other`'s handle to null and returns the old value in one step, so only the new object will close it. `noexcept` promises that this never throws, which lets standard containers move instead of copy. This is how a `Database` can still be returned from a function or stored in a `std::vector`.
-- **`int count() const`.** The trailing `const` promises that the method doesn't modify the object, so it can be called on a `const Database&`. C# has no direct equivalent; `readonly` members of a struct come closest.
+A wrapper this simple can't be returned from a function or stored in a `std::vector`, since both need to copy or **move** it. Production wrappers add a move constructor for that; moving is its own topic.
 
 ## Pitfalls
 
 - Copying a handle-wrapping C++ class without defining what a copy means: two destructors, one handle, a double release ([C5](#c5)).
 - Freeing a handle with `free` or `delete` instead of the library's release function ([C4](#c4)).
 - Reading `= delete` as "deletes the object": it removes a member function from the class ([C7](#c7)).
+- Thinking the hidden struct contains the library's functions, or a table of them: it holds data; the functions are separate ([C8](#c8)).
 - Using a handle after releasing it: the pointer value still looks valid, but the object behind it is gone.
 - Treating `FILE*` from `<stdio.h>` as a strictly opaque type: it is used as a handle, but most C libraries do define `FILE` in the header.
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, on why numbers cross the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) as handles.
+- Claude session on Tante, 2026-10-19, on why numbers cross the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) as handles; simplified after Thomas's review of [doubting-thomas#2](https://github.com/thomaswening/doubting-thomas/pull/2).
 - SQLite: [the database connection handle](https://www.sqlite.org/c3ref/sqlite3.html).
 - Microsoft Learn: [SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle).
 - cppreference: [rule of three/five/zero](https://en.cppreference.com/w/cpp/language/rule_of_three).
