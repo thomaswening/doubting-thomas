@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/function-pointer-declarations, c/opaque-handles]
 related: [cpp/abi-and-shared-libraries]
+projects: [tante]
 tags: [c, plugin, interface, vtable, com, abi, versioning, callbacks]
 ---
 
@@ -40,7 +41,7 @@ This is the C counterpart of programming against an interface. A C# class that r
 
 Something must be found by name, or nothing could start. That is the plug-in's single **entry function** ([C2](#c2)). The host loads the shared library, looks the entry function up with `GetProcAddress` or `dlsym`, and calls it with a pointer to its own table of services. The plug-in answers with a table describing what it provides: its name, its version, its functions. From then on all calls in both directions go through the two tables.
 
-Functions in the tables usually take a handle, so that they know which object they're working on ([C3](#c3)): Tante's `host->rational_add(a, b)` takes two `tante_rational*` handles, and a plug-in's `run` function might take the host's session handle. This is the [object-as-handle](opaque-handles.md#c9) pattern again, with the method found through a table instead of by name.
+Functions in the tables usually take a handle, so that they know which object they're working on ([C3](#c3)): [Tante](https://github.com/thomaswening/Tante)'s `host->rational_add(a, b)` takes two `tante_rational*` handles, and a plug-in's `run` function might take the host's session handle. This is the [object-as-handle](opaque-handles.md#c9) pattern again, with the method found through a table instead of by name.
 
 ### Growing a table safely
 
@@ -140,7 +141,7 @@ int square(const host_api* host, int x)
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, from Thomas's review of the [opaque handles note](https://github.com/thomaswening/doubting-thomas/pull/2), on the engine function table `tante_host` of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, from Thomas's review of the [opaque handles note](https://github.com/thomaswening/doubting-thomas/pull/2), on the engine function table `tante_host` of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - SQLite: [run-time loadable extensions](https://www.sqlite.org/loadext.html), whose extensions call SQLite through a table of function pointers.
 - Microsoft Learn: [COM interface pointers and interfaces](https://learn.microsoft.com/en-us/windows/win32/com/interface-pointers-and-interfaces), [GetProcAddress](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress).
 - cppreference: [offsetof](https://en.cppreference.com/w/c/types/offsetof).
