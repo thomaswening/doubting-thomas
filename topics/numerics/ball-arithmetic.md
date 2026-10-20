@@ -52,7 +52,7 @@ Since the true value is guaranteed to be inside the ball, $n$ digits are proven 
 
 ### The price
 
-- **Comparisons can be undecidable** ([C4](#c4)). Is $[1 \pm 0.1]$ less than $[1.15 \pm 0.1]$? The first ball covers $[0.9, 1.1]$ and the second $[1.05, 1.25]$. They overlap, so some pairs of points say yes and some say no. A ball library answers "not proven" to *both* `<` and `≥`. Code that reads `if (!(a < b))` as "$a \ge b$" is wrong.
+- **Comparisons can be undecidable** ([C4](#c4)). Is $[1 \pm 0.1]$ less than $[1.15 \pm 0.1]$? The first ball covers $[0.9, 1.1]$ and the second $[1.05, 1.25]$. They overlap, so some pairs of points say yes and some say no. A ball library answers "not proven" to *both* `<` and `≥`. Code that reads `if (!(a < b))` as meaning $a \ge b$ is wrong.
 - **The dependency problem** ([C5](#c5)). If $x = [1 \pm 0.1]$, then $x - x$ is mathematically $0$. But the subtraction only sees two balls, each covering $[0.9, 1.1]$, and the worst case of one minus the other is $\pm 0.2$. The answer is a correct but wasteful $[0 \pm 0.2]$. Rewriting an expression so a quantity appears once (`x * (1 − y)` instead of `x − x * y`) often gives tighter balls.
 
 ## Examples
