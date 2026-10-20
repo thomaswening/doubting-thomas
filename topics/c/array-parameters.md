@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax]
-related: [cpp/raii-and-ownership, cpp/constructors, c/opaque-handles]
+related: [cpp/raii-and-ownership, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
 projects: [tante]
 tags: [c, cpp, array, pointer, decay, parameter, gmp, flint, typedef]
 ---
@@ -17,6 +17,7 @@ tags: [c, cpp, array, pointer, decay, parameter, gmp, flint, typedef]
 - In most expressions, an array turns into a pointer to its first element. This is called **decay**. `sizeof arr` and `&arr` are the main exceptions.
 - So a C function never receives an array, only an address, and cannot know how long the array is. C# arrays carry their `Length`; C arrays do not.
 - GMP and FLINT exploit both rules with `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];`. A variable or member of that type holds the struct inline; a parameter of that type is a pointer, so you pass it without `&`.
+- A pointer typedef would also spare the `&`, but then the struct needs a separate `malloc`. The one-element array gives inline storage and pass-by-pointer together. `fmpz_mpoly_t` (a polynomial) and `fmpz_mpoly_ctx_t` (its context) are two different types built this way.
 
 ## Key claims
 
@@ -28,6 +29,8 @@ tags: [c, cpp, array, pointer, decay, parameter, gmp, flint, typedef]
 - <a id="c6"></a>**C6.** Only the outermost array level of a parameter is adjusted: a parameter declared `int m[3][4]` has type `int (*)[4]`, a pointer to arrays of four `int`.
 - <a id="c7"></a>**C7.** With `typedef S name_t[1];`, as GMP and FLINT define their `_t` types, a local variable or struct member of type `name_t` holds one `S` inline, with no heap allocation, while a parameter of type `name_t` is an `S*`; callers therefore pass such a variable without `&`, and the function works on the caller's object.
 - <a id="c8"></a>**C8.** Because a parameter of type `name_t` from [C7](#c7) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array cannot be initialised from a pointer.
+- <a id="c9"></a>**C9.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address, so the `S` would have to be allocated separately, typically with `malloc`, and freed later; the one-element array of [C7](#c7) gives inline storage for the `S` and pass-by-pointer together.
+- <a id="c10"></a>**C10.** In FLINT, `fmpz_mpoly_ctx_struct` and `fmpz_mpoly_struct` are typedef names for struct types and are written without the `struct` keyword; `fmpz_mpoly_ctx_t` (the context) and `fmpz_mpoly_t` (a polynomial) are two different types, each an array of one of its own struct, built by the same idiom.
 
 ## Explanation
 
@@ -57,31 +60,56 @@ The rule is applied once, at the outermost level ([C6](#c6)). A parameter `int m
 
 ### The GMP and FLINT idiom
 
-GMP and FLINT combine the two rules into a trick ([C7](#c7)):
+GMP and FLINT combine the two rules into a trick ([C7](#c7)). FLINT's header declares the context type like this:
 
 ```c
 typedef struct { /* fields */ } fmpz_mpoly_ctx_struct;
 typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];   /* an array of one struct */
 ```
 
-An `fmpz_mpoly_ctx_t` is an array of exactly one struct. That one element gives two behaviours, depending on where the type is used:
+The first line gives an unnamed struct the **typedef name** `fmpz_mpoly_ctx_struct` ([C10](#c10), [struct tags and typedef](struct-tags-and-typedef.md)). The word `struct` in that name is only part of the name. Code writes `fmpz_mpoly_ctx_struct`, never `struct fmpz_mpoly_ctx_struct`.
+
+The second line makes `fmpz_mpoly_ctx_t` an **array type**: an array of exactly one struct. It is not a pointer type. It only becomes a pointer where an array parameter is adjusted. That one element gives a different behaviour depending on where the type is used:
 
 - **As a local variable or struct member**, it is a real array. `fmpz_mpoly_ctx_t ctx;` reserves room for one struct right there, on the stack or inside the enclosing object. Nothing is allocated on the heap, and there is no separate pointer to go wrong.
 - **As a parameter**, it is adjusted to `fmpz_mpoly_ctx_struct*` ([C1](#c1)). The function receives the address of the caller's struct and can change it.
 - **At the call**, the caller writes `fmpz_mpoly_ctx_init(ctx, ...)`, not `&ctx`: `ctx` decays to exactly the pointer the parameter expects ([C3](#c3)).
 
-The [GMP manual](https://gmplib.org/manual/Parameter-Conventions) gives the reason: functions modify their arguments, and the idiom gives call by reference without making the caller write `&`. The effect resembles a C# parameter that is always `ref`, without the `ref` at the call. A `const fmpz_mpoly_ctx_t` parameter becomes `const fmpz_mpoly_ctx_struct*`, the read-only form.
+The polynomial type follows the same pattern: `typedef fmpz_mpoly_struct fmpz_mpoly_t[1];`. `fmpz_mpoly_t` and `fmpz_mpoly_ctx_t` are different types, one a polynomial and one the context that says how many variables it has and how they are ordered. Each is an array of one of its own struct ([C10](#c10)). GMP's `mpz_t` is built the same way.
+
+The [GMP manual](https://gmplib.org/manual/Parameter-Conventions) gives the reason for the idiom: functions modify their arguments, and the idiom gives call by reference without making the caller write `&`. The effect resembles a C# parameter that is always `ref`, without the `ref` at the call. A `const fmpz_mpoly_ctx_t` parameter becomes `const fmpz_mpoly_ctx_struct*`, the read-only form.
+
+### Why not a plain pointer?
+
+A library could write `typedef fmpz_mpoly_ctx_struct* fmpz_mpoly_ctx_t;` instead. Callers would still pass `ctx` without `&`. But a variable of a pointer type holds only an address ([C9](#c9)). The struct itself would have to live somewhere else. In practice the library would `malloc` it in an init function and `free` it in a clear function, and every object would cost an extra heap allocation and an extra indirection.
+
+The one-element array gives both at once: the storage sits inline where the variable is declared, and the parameter is still a pointer. The struct usually holds pointers to heap memory of its own, such as a polynomial's coefficients. Only the struct itself is saved a `malloc`.
 
 ### Storing such a parameter
 
-The same rule explains a line in the `Poly` wrapper of [RAII and ownership](../cpp/raii-and-ownership.md#examples) ([C8](#c8)):
+FLINT-style C++ wrappers, such as the one in [Tante](https://github.com/thomaswening/Tante)'s build spike, use both sides of the idiom:
 
 ```cpp
-explicit Poly(fmpz_mpoly_ctx_t ctx) : ctx_(ctx) { ... }
-fmpz_mpoly_ctx_struct* ctx_;
+#include <flint/fmpz_mpoly.h>
+
+class Poly {
+public:
+    // explicit and the ": ctx_(ctx)" initialiser list: see the constructors note
+    explicit Poly(fmpz_mpoly_ctx_t ctx) : ctx_(ctx) { fmpz_mpoly_init(p_, ctx_); }
+    ~Poly() { fmpz_mpoly_clear(p_, ctx_); }
+
+    Poly(const Poly&) = delete;              // no copies, see RAII and ownership
+    Poly& operator=(const Poly&) = delete;
+
+private:
+    fmpz_mpoly_ctx_struct* ctx_;   // a pointer: not owned, only used
+    fmpz_mpoly_t p_;               // a one-element array: the struct lives inside the Poly
+};
 ```
 
-The parameter `ctx` is a pointer, so initialising a pointer member from it copies an address. The `Poly` does not own the context and does not copy it; the context must outlive every `Poly` that uses it. Declaring the member as `fmpz_mpoly_ctx_t ctx_;` instead would not compile, because an array member cannot be initialised from a pointer. That is the right outcome: it would have meant a second copy of the context struct, which FLINT does not expect.
+The constructor's parameter `fmpz_mpoly_ctx_t ctx` is a pointer, so initialising the pointer member `ctx_` from it copies an address ([C8](#c8)). The `Poly` does not own the context and does not copy it. The context must outlive every `Poly` that uses it. Declaring the member as `fmpz_mpoly_ctx_t ctx_;` instead would not compile, because an array member cannot be initialised from a pointer. That is the right outcome: it would have meant a second copy of the context struct, which FLINT does not expect.
+
+The member `fmpz_mpoly_t p_` is the other side ([C7](#c7)). As a member it is a real array, so the polynomial's struct sits inside each `Poly` object, and passing `p_` to `fmpz_mpoly_init` passes its address without `&`. The [constructors note](../cpp/constructors.md) explains `explicit` and the initialiser list. [RAII and ownership](../cpp/raii-and-ownership.md) explains the destructor and the deleted copies, using a simpler library with plain pointer handles.
 
 ## Examples
 
@@ -160,7 +188,7 @@ Expected output on a platform with 8-byte `long`:
 
 ## Sources
 
-- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, answering why the `Poly` wrapper in [RAII and ownership](../cpp/raii-and-ownership.md) can store an `fmpz_mpoly_ctx_t` parameter in an `fmpz_mpoly_ctx_struct*` member ([doubting-thomas PR #3](https://github.com/thomaswening/doubting-thomas/pull/3)).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, answering Thomas's review questions on FLINT's `_t` types in the FLINT wrapper of [Tante](https://github.com/thomaswening/Tante)'s [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md) ([doubting-thomas PR #3](https://github.com/thomaswening/doubting-thomas/pull/3)).
 - cppreference: [arrays in C, with array-to-pointer conversion](https://en.cppreference.com/w/c/language/array), [function declarations in C](https://en.cppreference.com/w/c/language/function_declaration), [array-to-pointer conversion in C++](https://en.cppreference.com/w/cpp/language/implicit_conversion#Array-to-pointer_conversion).
 - [GMP manual: Parameter Conventions](https://gmplib.org/manual/Parameter-Conventions); [FLINT documentation: fmpz_mpoly](https://flintlib.org/doc/fmpz_mpoly.html).
 - [comp.lang.c FAQ, section 6: arrays and pointers](https://c-faq.com/aryptr/index.html).
