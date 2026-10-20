@@ -24,7 +24,7 @@ templates/results.md      copy this to start a results file
 ```
 
 - `<area>` and `<note>` are lower-case kebab-case: `topics/numerics/ball-arithmetic.md`, `topics/cpp/move-semantics.md`.
-- **One concept per note.** A note that needs two TL;DRs is two notes. Organise by concept, never by date, project or source.
+- **One concept per note.** A note that needs two TL;DRs is two notes. Split a note as soon as it starts on a second concept, and that includes during review. Organise by concept, never by date, project or source.
 - A new area gets its own `index.md` and a line in [topics/index.md](topics/index.md). A new note gets a line in its area's index: `- [Title](note.md): one-line summary.`
 
 ## 2. Notes
@@ -41,6 +41,8 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 8. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
+
+**Snippets use only what Thomas already knows:** C#/.NET, basic C++20, and the note's prerequisites. Any other feature in a snippet is either explained right there or left out. This includes keywords such as `explicit`, member initialiser lists, move constructors and `std::exchange`. Keep each example to the smallest code that shows the concept. An advanced version belongs in the note whose topic it is, with a link to it.
 
 ## 3. Key claims
 
@@ -67,6 +69,9 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 ## 6. Writing to this repository
 
 - **Notes and everything outside `results/`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
+- **At most three notes per pull request**, counting new notes and notes with substantial changes.
+- **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch.
+- **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
 - **Results** (`results/`) are the one exception: commit them directly to `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`. The scope is the area, or `results`, or `repo` for changes to the structure.
 - When changing a note, update its `updated` date. Keep existing claim IDs (§3).
