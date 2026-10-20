@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: []
 related: [c/opaque-handles, cpp/header-only-libraries]
+projects: [tante]
 tags: [cpp, c, abi, linking, dll, shared-library, static-library, extern-c, pinvoke]
 ---
 
@@ -102,7 +103,7 @@ __declspec(dllexport) std::string greet(const std::string& name);
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, on why the engine's C++ libraries are static and modules connect through C, in [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, on why the engine's C++ libraries are static and modules connect through C, in [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - Microsoft Learn: [C++ binary compatibility between Visual Studio versions](https://learn.microsoft.com/en-us/cpp/porting/binary-compat-2015-2017), [platform invoke](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke).
 - [Itanium C++ ABI](https://itanium-cxx-abi.github.io/cxx-abi/abi.html), followed by GCC and Clang.
 - cppreference: [language linkage](https://en.cppreference.com/w/cpp/language/language_linkage).

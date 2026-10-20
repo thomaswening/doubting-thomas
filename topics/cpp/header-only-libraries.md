@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [cpp/abi-and-shared-libraries]
 related: [c/opaque-handles]
+projects: [tante]
 tags: [cpp, header-only, inline, odr, templates, abi]
 ---
 
@@ -103,6 +104,6 @@ Remove `inline` from `square` and the link fails with an error such as `multiple
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, on why the C++ wrapper of the module interface in [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) ships as a header.
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, on why the C++ wrapper of the module interface in [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) ships as a header.
 - cppreference: [inline specifier](https://en.cppreference.com/w/cpp/language/inline), [definitions and the one-definition rule](https://en.cppreference.com/w/cpp/language/definition).
 - SQLite: [the amalgamation](https://www.sqlite.org/amalgamation.html).
