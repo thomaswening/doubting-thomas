@@ -65,7 +65,8 @@ Use after free that usually "works":
 int main() {
     std::vector<int> v = {1, 2, 3};
     int& first = v[0];   // a reference to the first element
-    v.push_back(4);      // the vector may move its elements to new memory
+    v.push_back(4);      // appends 4, like List<T>.Add; if the vector is full, it
+                         // moves its elements to a bigger block and frees the old one
     std::cout << first << '\n';   // reads the old, freed memory
 }
 ```
@@ -79,7 +80,7 @@ Signed overflow:
 #include <iostream>
 
 int main() {
-    int x = INT_MAX;
+    int x = INT_MAX;      // the largest int, like int.MaxValue; from <climits>
     x = x + 1;            // undefined behaviour
     std::cout << x << '\n';
 }

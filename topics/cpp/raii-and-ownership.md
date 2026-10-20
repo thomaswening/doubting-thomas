@@ -66,26 +66,31 @@ C libraries hand out resources with an init function and expect a clear function
 
 ## Examples
 
-Wrapping a FLINT polynomial, as [Tante](https://github.com/thomaswening/Tante)'s build spike did:
+Wrapping a polynomial from a C library. [Tante](https://github.com/thomaswening/Tante)'s build spike wraps FLINT this way; the C library here is made up, with plain pointer handles, so that the example shows only RAII:
 
 ```cpp
-#include <flint/fmpz_mpoly.h>
+// What the C library's header declares:
+extern "C" {
+    typedef struct poly_ctx poly_ctx;
+    typedef struct poly poly;
+    poly* poly_new(const poly_ctx* ctx);   // allocates a polynomial
+    void  poly_free(poly* p);              // releases it
+}
 
 class Poly {
 public:
-    explicit Poly(fmpz_mpoly_ctx_t ctx) : ctx_(ctx) { fmpz_mpoly_init(p_, ctx_); }
-    ~Poly() { fmpz_mpoly_clear(p_, ctx_); }     // runs at end of scope, always
+    explicit Poly(const poly_ctx* ctx) : p_(poly_new(ctx)) {}
+    ~Poly() { poly_free(p_); }                  // runs at end of scope, always
 
-    // No copies: two copies of a Poly would both clear the same p_.
+    // No copies: two copies of a Poly would both free the same p_.
     Poly(const Poly&) = delete;                 // forbids  Poly b = a;  and  Poly b(a);
     Poly& operator=(const Poly&) = delete;      // forbids  b = a;
 
 private:
-    fmpz_mpoly_ctx_struct* ctx_;   // not owned: only used
-    fmpz_mpoly_t p_;               // owned
+    poly* p_;   // owned
 };
 
-void work(fmpz_mpoly_ctx_t ctx) {
+void work(const poly_ctx* ctx) {
     Poly a(ctx);
     Poly b(ctx);
     // ... may throw ...
@@ -94,10 +99,9 @@ void work(fmpz_mpoly_ctx_t ctx) {
 
 Reading it, line by line:
 
-- `fmpz_mpoly_init` and `fmpz_mpoly_clear` are plain C functions, declared in the header `<flint/fmpz_mpoly.h>` and defined in the compiled FLINT library, which the linker connects ([ABI and shared libraries](abi-and-shared-libraries.md)). They belong to no class: C has no classes, so a library's functions are global **free functions**, and the `fmpz_mpoly_` prefix does the job a namespace or class name would do. The nearest C# picture is a static method of a static class, called after `using static`.
+- `poly_new` and `poly_free` are plain C functions. In real code their declarations come from the library's header, and their code from the compiled library, which the linker connects ([ABI and shared libraries](abi-and-shared-libraries.md)). `poly` is an opaque type: the C++ code only ever holds a pointer to it ([opaque handles](../c/opaque-handles.md)). The functions belong to no class: C has no classes, so a library's functions are global **free functions**, and the `poly_` prefix does the job a namespace or class name would do. The nearest C# picture is a static method of a static class, called after `using static`.
 - `explicit` stops this one-parameter constructor from acting as an implicit conversion. Without it, a function taking a `Poly` could be called with a bare `ctx`, and C++ would silently build a temporary `Poly` from it. `explicit` is not about constructors in general; it only matters for constructors callable with one argument (and for conversion operators).
-- `: ctx_(ctx)` is a member initialiser list: it sets the field before the constructor body runs, like `_ctx = ctx;` at the start of a C# constructor.
-- FLINT, like GMP, defines its `_t` types as **arrays of one struct**: `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];`. In C and C++, a parameter declared with an array type is really a pointer, so the constructor's `fmpz_mpoly_ctx_t ctx` is an `fmpz_mpoly_ctx_struct* ctx`, and storing it in a field of that pointer type copies only the address. The member `fmpz_mpoly_t p_` is the other side of the trick: as a member it is a real one-element array, so the polynomial's struct lives inside the `Poly` object, and passing `p_` to a function passes its address without writing `&`.
+- `: p_(poly_new(ctx))` is a member initialiser list: it sets the field before the constructor body runs, like `_p = PolyNew(ctx);` at the start of a C# constructor. This is the "acquisition is initialisation" of RAII: the `Poly` holds its polynomial from the moment it exists.
 - The two `= delete` lines remove the two ways of copying ([C8](#c8)). The **copy constructor** `Poly(const Poly&)` makes a *new* `Poly` from an existing one: `Poly b = a;` or `Poly b(a);`. The **copy assignment** `operator=(const Poly&)` overwrites an *existing* `Poly` with another: `b = a;`. Neither involves references being reassigned: in C++, `b = a` copies the object, as it would for a C# struct. The `Poly&` return type of `operator=` is a convention that lets `c = b = a;` chain.
 
 Raw ownership compared with `unique_ptr`:

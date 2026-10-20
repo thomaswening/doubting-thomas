@@ -62,7 +62,12 @@ Checks: >
 WarningsAsErrors: '*'
 ```
 
-The leading `-` disables one check that the project does not want.
+Reading it:
+
+- `>` is YAML for "join the indented lines below into one string, with spaces". `Checks` is therefore a single comma-separated string; the line breaks are only for reading.
+- `*` is a wildcard over check names: `bugprone-*` enables every check whose name starts with `bugprone-`.
+- The leading `-` disables one check that the project does not want.
+- `'*'` means "every enabled check". It is quoted because a bare `*` at the start of a YAML value means something else (a reference to another part of the file), and the file would not parse.
 
 Code that clang-tidy flags:
 
@@ -73,7 +78,7 @@ int* make() {
 }
 ```
 
-The fix is to return a `std::unique_ptr<int>`, which states the ownership in the type ([RAII and ownership](raii-and-ownership.md)).
+The fix is to return a `std::unique_ptr<int>`. The returned `int*` is only an address: when the caller's pointer goes out of scope, nothing happens, and the caller has to know from documentation that it must `delete` the `int`. A `std::unique_ptr<int>` says in its type that the caller now owns the `int`, and its destructor deletes the `int` when the caller's `unique_ptr` goes out of scope ([RAII and ownership, C9](raii-and-ownership.md#c9)).
 
 Running it on one file, with the compile commands that CMake generates (`CMAKE_EXPORT_COMPILE_COMMANDS=ON`):
 
