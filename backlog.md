@@ -20,8 +20,18 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 - `cmake/installing-and-exporting-targets`: installing artifacts versus exporting target definitions; install(TARGETS ... EXPORT ...) and install(EXPORT ...); preserving public usage requirements without bundling dependencies. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
 - `cmake/cache-variables`: normal variables versus persistent cache entries; CACHE BOOL, FORCE, and setting dependency options before FetchContent_MakeAvailable. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
 - `cmake/finding-and-fetching-dependencies`: find_package versus FetchContent; package-search prefixes, compatible versions and Git references. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
-- `cmake/configure-build-install`: what configuration, compilation/linking and installation each do, and how failures in these phases differ. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `cmake/configure-build-install`: what configuration, compilation/linking and installation each do, and how failures in these phases differ; source and build directories (-S/-B), Ninja's role as the generated build system's executor, and selecting C++ and Fortran compilers. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
 
 ## testing
 
 - `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+
+## github-actions
+
+- `github-actions/token-permissions`: GITHUB_TOKEN, workflow-level and job-level permissions, least privilege, and why token permissions do not control the runner's filesystem. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
+
+## bash
+
+- `bash/exit-status-and-conditional-execution`: success/failure exit statuses, command -v, and conditional execution with ||. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
+- `bash/streams-redirection-and-pipes`: standard input, output and error; discarding output with >/dev/null; passing output through a pipe. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
+- `bash/command-substitution`: how $(...) inserts a command's output into another command, including inside double quotes. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
