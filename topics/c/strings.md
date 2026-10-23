@@ -2,7 +2,7 @@
 title: Strings in C
 area: c
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-24
 prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
 related: []
 projects: [tante]
@@ -14,7 +14,7 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
 ## TL;DR
 
 - C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, and nothing records its length.
-- `strlen` finds the length by counting up to the zero, so a string of n characters needs n + 1 bytes.
+- `strlen` finds the length by counting up to the zero, so a string of $n$ characters needs $n + 1$ bytes.
 - An array passed to a function becomes a pointer, so the function can't tell how big the buffer is; the caller has to say.
 - `strcpy` and `strcat` never check sizes; writing past the end is a buffer overflow. `snprintf` is the portable safe choice.
 - `==` on two strings compares addresses; use `strcmp`.
@@ -22,11 +22,11 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A C string is a sequence of `char` ending in the first zero byte `'\0'`; the length is not stored anywhere, so functions find the end by searching for that byte.
-- <a id="c2"></a>**C2.** `strlen(s)` returns the number of bytes before the first `'\0'`, not counting it, and takes time proportional to that length; storing a string of length n takes n + 1 bytes.
+- <a id="c2"></a>**C2.** `strlen(s)` returns the number of bytes before the first `'\0'`, not counting it, and takes time proportional to that length; storing a string of length $n$ takes $n + 1$ bytes.
 - <a id="c3"></a>**C3.** A string literal such as `"abc"` is an array of 4 characters including the terminator (`char[4]` in C, `const char[4]` in C++); modifying a string literal is undefined behaviour.
 - <a id="c4"></a>**C4.** `sizeof` applied to an array gives the array's total size in bytes, but an array passed to a function is converted to a pointer to its first element, and `sizeof` of that parameter gives the size of a pointer, so a function cannot find out the size of a buffer it was given.
 - <a id="c5"></a>**C5.** `strcpy` and `strcat` write until the source's terminator without checking the destination's size; writing past the end of the destination is a buffer overflow and undefined behaviour.
-- <a id="c6"></a>**C6.** `snprintf(buf, size, fmt, ...)` writes at most `size − 1` characters plus a terminating `'\0'`, and returns the number of characters the full output would have had, so a return value of `size` or more means the output was truncated.
+- <a id="c6"></a>**C6.** `snprintf(buf, size, fmt, ...)` writes at most `size - 1` characters plus a terminating `'\0'`, and returns the number of characters the full output would have had, so a return value of `size` or more means the output was truncated.
 - <a id="c7"></a>**C7.** `strncpy(dest, src, n)` does not write a terminator when `src` has `n` or more characters, so its result may not be a valid string.
 - <a id="c8"></a>**C8.** `a == b` on two `char*` or `char` arrays compares their addresses, not their contents; `strcmp(a, b)` compares contents and returns 0 when they are equal.
 - <a id="c9"></a>**C9.** `strlen` counts bytes, not characters: "ö" encoded in UTF-8 takes two bytes, so `strlen` of that string is 2.
@@ -83,6 +83,13 @@ Hello-T 12
 ```
 
 `snprintf` had room for 7 characters plus the terminator, wrote `"Hello-T"`, and reports that the full text `"Hello-Thomas"` would have needed 12. Compilers warn about `sizeof` on an array parameter, which is the point of that line.
+
+Reading it:
+
+- `printf(format, ...)` prints its format string. It replaces each **conversion specification**, a `%` followed by a letter, with the next argument in turn. It is C's counterpart of C#'s `Console.Write("{0} {1}", a, b)`, except that the specification states the argument's type. Nothing checks that the argument has that type: a mismatch is undefined behaviour, which compilers warn about.
+- `%s` prints a string (a `char*`, up to its terminator), `%d` an `int`, and `%zu` a `size_t`, the unsigned type that `strlen` and `sizeof` return. `\n` is a newline.
+- `snprintf(buf, size, format, ...)` formats exactly like `printf` but writes into `buf` instead of the screen. `size` is the size of `buf` in bytes. Here it is `sizeof buf`, which is 8 because `buf` is a local array, not a parameter ([C4](#c4)). The return value is the length the full text would have had ([C6](#c6)).
+- `word == copy` and `strcmp(word, copy) == 0` are comparisons. In C a comparison has type `int` with the value 0 for false or 1 for true, so `%d` prints it.
 
 ## Pitfalls
 
