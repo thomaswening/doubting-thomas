@@ -14,6 +14,7 @@ This file is the single rulebook for any AI that reads or writes this repository
 README.md                 for the human reader
 AGENTS.md                 this file
 CLAUDE.md                 points Claude to this file
+backlog.md                topics that could become notes (§8)
 topics/index.md           every area, with a link to its index
 topics/<area>/index.md    every note in that area, one line each
 topics/<area>/<note>.md   one note per concept
@@ -24,14 +25,14 @@ templates/results.md      copy this to start a results file
 ```
 
 - `<area>` and `<note>` are lower-case kebab-case: `topics/numerics/ball-arithmetic.md`, `topics/cpp/move-semantics.md`.
-- **One concept per note.** A note that needs two TL;DRs is two notes. Organise by concept, never by date, project or source.
+- **One concept per note.** A note that needs two TL;DRs is two notes. Split a note as soon as it starts on a second concept, and that includes during review. Organise by concept, never by date, project or source.
 - A new area gets its own `index.md` and a line in [topics/index.md](topics/index.md). A new note gets a line in its area's index: `- [Title](note.md): one-line summary.`
 
 ## 2. Notes
 
 Start from [templates/note.md](templates/note.md). The sections, in this order:
 
-1. **Front matter** (YAML): `title`, `area`, `created` and `updated` (ISO dates), `prerequisites` and `related` (lists of note ids, see §4; may be empty), `tags`.
+1. **Front matter** (YAML): `title`, `area`, `created` and `updated` (ISO dates), `prerequisites` and `related` (lists of note ids, see §4; may be empty), `projects` (the projects of §5 where the concept came up or matters, as lower-case names: `[tante]`; may be empty), `tags`.
 2. **`# Title`**
 3. **`## TL;DR`**: three to six bullets. Someone who reads only this should get the gist.
 4. **`## Key claims`**: the checkable core of the note (§3).
@@ -41,6 +42,17 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 8. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
+
+**Mathematics is written in LaTeX**, which GitHub and VS Code's Markdown preview render natively, and which an AI reads directly from the source:
+
+- Inline: `$\gcd(p, q) = x - y$`. If the expression contains characters Markdown would interpret, such as `*`, `_` or `\`, use the backtick form `` $`a_1 * b_1`$ ``.
+- Displayed: a ` ```math ` code block, or `$$ … $$` on lines of their own. Prefer the code block: it never collides with Markdown.
+- A literal dollar sign in prose is written `\$`.
+- Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
+- Write formulas in LaTeX everywhere a formula appears, key claims included. Code, identifiers and program output stay in backticks: `arb_t`, `x^2 - 1` as typed into a program.
+- Check that the note renders on GitHub before asking for review: in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
+
+**Snippets use only what Thomas already knows:** C#/.NET, basic C++20, and the note's prerequisites. Any other feature in a snippet is either explained right there or left out. This includes keywords such as `explicit`, member initialiser lists, move constructors and `std::exchange`. Keep each example to the smallest code that shows the concept. An advanced version belongs in the note whose topic it is, with a link to it.
 
 ## 3. Key claims
 
@@ -58,7 +70,18 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - A **claim id** is the note id, `#`, and the claim anchor: `numerics/ball-arithmetic#c3`.
 - In Markdown, every reference to a note or claim is a real relative link: `[ball arithmetic](../numerics/ball-arithmetic.md)`, `[C3](../numerics/ball-arithmetic.md#c3)`. Ids in front matter and in results tables are plain ids, not links.
 
-## 5. Sources and confidentiality
+## 5. Projects, sources and confidentiality
+
+**Thomas's projects** and their repositories:
+
+| Name in `projects` | Repository |
+|---|---|
+| `tante` | [Tante](https://github.com/thomaswening/Tante): a symbolic math engine for physicists, successor to FORM |
+| `partonforge` | [PartonForge](https://github.com/thomaswening/PartonForge): a C++20 reimplementation of the Parton Branching TMD evolution Monte Carlo |
+| `crateedit` | [CrateEdit](https://github.com/thomaswening/CrateEdit): a tag editor for DJ music collections that never touches cue points |
+
+- In a note's text, the **first mention of a project in each section** links to its repository: `[Tante](https://github.com/thomaswening/Tante)`. Later mentions in the same section are plain text. A project not yet in the table is added to it in the same pull request.
+- `projects` records where a concept came up or matters; it is metadata, not organisation. Notes stay organised by concept (§1).
 
 - Under `## Sources`, link where the knowledge came from (a pull request or ADR in one of Thomas's repositories, a book, a paper, documentation) and where to read further. Name the session if it came from a conversation: `Claude session on Tante, 2026-10-19`.
 - **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms, and give no link to the confidential source.
@@ -66,9 +89,12 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 
 ## 6. Writing to this repository
 
-- **Notes and everything outside `results/`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
-- **Results** (`results/`) are the one exception: commit them directly to `main`.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`. The scope is the area, or `results`, or `repo` for changes to the structure.
+- **Notes and everything outside `results/` and `backlog.md`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
+- **At most three notes per pull request**, counting new notes and notes with substantial changes.
+- **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch. A topic that only *could* become a note goes into the backlog instead (§8).
+- **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
+- **Results** (`results/`) and **backlog lines** (`backlog.md`, §8) are the two exceptions: commit them directly to `main`.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`, `chore(backlog): add cpp/copy-elision`. The scope is the area, or `results`, or `backlog`, or `repo` for changes to the structure.
 - When changing a note, update its `updated` date. Keep existing claim IDs (§3).
 
 ## 7. Testing Thomas and logging results
@@ -85,3 +111,14 @@ To find what Thomas should work on, read `results/` and the indexes:
 - **Weak spots:** claims whose most recent outcome is `wrong` or `partial`.
 - **Never tested:** notes in an area index that no results file mentions.
 - **Due for a refresh:** notes not tested for 60 days or more.
+
+## 8. Backlog
+
+[backlog.md](backlog.md) lists topics that came up and could become notes, so that none is lost and open pull requests stay the notes Thomas has chosen to read now.
+
+- **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
+- **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
+- **Commit backlog changes directly to `main`** (§6), as `chore(backlog): …`, never inside a pull request. A backlog line is a pointer, not knowledge: nothing is quizzed from it, so it needs no review. Thomas weeds it when entries are proposed.
+- **When proposing notes**, read the backlog too, and list its entries in a group of their own, apart from the candidates of the current session, so that Thomas can tell what just came up from what has been waiting.
+- **When Thomas rejects an entry**, at a proposal or whenever he goes through the backlog, remove it on `main`.
+- **When a note is written from an entry**, remove the entry on `main` once the note's pull request is open, and name the entry in the pull request's description. The note's `## Sources` keeps where it came from. If Thomas closes the pull request without merging and wants the topic kept, put the entry back.
