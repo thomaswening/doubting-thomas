@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/struct-tags-and-typedef, c/stack-and-heap]
-related: [c/function-pointer-declarations, cpp/abi-and-shared-libraries, cpp/header-only-libraries]
+related: [c/function-pointer-declarations, cpp/abi-and-shared-libraries, cpp/header-only-libraries, cpp/copy-and-move]
 projects: [tante]
 tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ---
@@ -84,7 +84,7 @@ C has no garbage collector, so the API must say who frees what ([C3](#c3)). The 
 
 Calling `db_close` on every path, including early returns and errors, is exactly the bookkeeping that goes wrong in C. A C++ wrapper class attaches it to scope ([C5](#c5)): its constructor opens, its destructor closes, and the destructor runs automatically when the object goes out of scope.
 
-The one trap is copying. C# assigns references, so `var b = a;` gives two names for one object. C++ objects are values: `Database b = a;` makes a second `Database`, by default by copying every field. Both copies would then hold the same pointer, and both destructors would close it. So the wrapper forbids copying ([C7](#c7)).
+The one trap is copying. C# assigns references, so `var b = a;` gives two names for one object. C++ objects are values: `Database b = a;` makes a second `Database`, by default by copying every field. Both copies would then hold the same pointer, and both destructors would close it. So the wrapper forbids copying ([C7](#c7)). [Copy and move](../cpp/copy-and-move.md) explains C++'s value semantics in full.
 
 .NET solves the same problem with `SafeHandle` ([C6](#c6)), which wraps an `IntPtr` and releases it in `Dispose` or, if you forget, in its finaliser.
 
@@ -138,7 +138,7 @@ db_close(d);            /* forget this, or call it twice, and the program is wro
 
 (These snippets need an implementation of `db_open` and friends to link; they illustrate the shape of the API.)
 
-A wrapper this simple can't be returned from a function or stored in a `std::vector`, since both need to copy or **move** it. Production wrappers add a move constructor for that; moving is its own topic.
+A wrapper this simple can't be returned from a function or stored in a `std::vector`, since both need to copy or **move** it. Production wrappers add a move constructor for that; see [copy and move](../cpp/copy-and-move.md).
 
 ## Pitfalls
 
