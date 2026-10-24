@@ -2,7 +2,7 @@
 title: Irreducible over the rationals
 area: algebra
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-25
 prerequisites: [algebra/content-and-primitive-part]
 related: [algebra/rational-function-normal-form]
 projects: [tante]
@@ -20,7 +20,7 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 
 ## Key claims
 
-- <a id="c1"></a>**C1.** A non-constant polynomial $p$ is irreducible over a field $K$ if $p = a\,b$ with $a, b$ having coefficients in $K$ implies that $a$ or $b$ is a constant.
+- <a id="c1"></a>**C1.** A non-constant polynomial $p$ is irreducible over a field $K$ if $p = ab$ with $a, b$ having coefficients in $K$ implies that $a$ or $b$ is a constant.
 - <a id="c2"></a>**C2.** Irreducibility depends on the field: $x^2 - 2$ is irreducible over $\mathbb{Q}$ but equals $(x - \sqrt2)(x + \sqrt2)$ over $\mathbb{R}$; $x^2 + 1$ is irreducible over $\mathbb{R}$ but equals $(x - i)(x + i)$ over $\mathbb{C}$.
 - <a id="c3"></a>**C3.** Every non-constant polynomial in any number of variables with rational coefficients is a product of irreducible polynomials, and this factorisation is unique up to the order of the factors and multiplying factors by non-zero constants.
 - <a id="c4"></a>**C4.** Every polynomial of degree 1 is irreducible. A polynomial of degree 2 or 3 in one variable is reducible over $\mathbb{Q}$ if and only if it has a rational root.
@@ -33,13 +33,13 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 
 ### Like prime numbers, but relative to a choice
 
-Irreducible polynomials play the role prime numbers play for integers. $12 = 2^2 \cdot 3$, and $2$ and $3$ can't be split further. Likewise $x^3 - x = x\,(x - 1)(x + 1)$, and none of $x$, $x - 1$, $x + 1$ can be split into non-constant pieces ([C1](#c1)).
+Irreducible polynomials play the role prime numbers play for integers. $12 = 2^2 \cdot 3$, and $2$ and $3$ can't be split further. Likewise $x^3 - x = x(x - 1)(x + 1)$, and none of $x$, $x - 1$, $x + 1$ can be split into non-constant pieces ([C1](#c1)).
 
 The difference from primes: whether a polynomial splits depends on which coefficients you allow ([C2](#c2)). $x^2 - 2$ has roots $\pm\sqrt2$, so over the reals it factors as $(x - \sqrt2)(x + \sqrt2)$. Over the rationals those factors aren't allowed, because $\sqrt2$ is not a fraction, so $x^2 - 2$ is irreducible there. "Factorisation over the rationals" fixes the choice: coefficients must be fractions. That is the natural choice for exact symbolic computation, because the inputs have rational coefficients and no approximation is ever needed.
 
 ### Unique, up to the obvious
 
-Over the rationals, factorisation is unique ([C3](#c3)), with two exceptions that don't count as different: the order of the factors, and constants moved between them. $6\,(x - y)(x + y)$ and $(-3)(y - x)\cdot 2(x + y)$ are the same factorisation. The normalisation in [content and primitive part](content-and-primitive-part.md) removes even those two freedoms: make every factor primitive with a positive leading coefficient, collect all constants in front, and sort the factors in a fixed order. Then any correct algorithm prints the same result, character for character. This is why [Tante](https://github.com/thomaswening/Tante) can compare its output across library versions and implementations.
+Over the rationals, factorisation is unique ([C3](#c3)), with two exceptions that don't count as different: the order of the factors, and constants moved between them. $6(x - y)(x + y)$ and $(-3)(y - x)\cdot 2(x + y)$ are the same factorisation. The normalisation in [content and primitive part](content-and-primitive-part.md) removes even those two freedoms: make every factor primitive with a positive leading coefficient, collect all constants in front, and sort the factors in a fixed order. Then any correct algorithm prints the same result, character for character. This is why [Tante](https://github.com/thomaswening/Tante) can compare its output across library versions and implementations.
 
 Gauss's lemma ([C6](#c6)) is what lets a program factor over the rationals using only integers. Clear the denominators, take out the content, and factor the primitive integer polynomial. Any factorisation that works with fractions can be rescaled into one with integer coefficients.
 
@@ -80,7 +80,7 @@ No candidate is a root, so $x^3 - 2$ has no rational root, and by [C4](#c4) it i
 The build spike for Tante factorised
 
 ```math
-6\,(x^2 - y^2)\,(1 + x + y + z)^3\,(xyz + 1)\,(x + 2y + 3z - 5)^2 .
+6(x^2 - y^2)(1 + x + y + z)^3(xyz + 1)(x + 2y + 3z - 5)^2 .
 ```
 
 Into irreducibles over $\mathbb{Q}$, with every factor primitive and starting with a positive coefficient for $x > y > z$:
@@ -96,7 +96,7 @@ $x^2 - y^2$ splits ([C8](#c8)). The other factors were already irreducible. FLIN
 - **"Has no rational root" means irreducible only up to degree 3** ([C4](#c4)). $(x^2 + 1)^2$ and $(x^2 - 2)(x^2 - 3)$ have no rational roots and are reducible.
 - **Saying "irreducible" without saying over what.** $x^2 + 1$ is irreducible over $\mathbb{Q}$ and $\mathbb{R}$, not over $\mathbb{C}$ ([C2](#c2)).
 - **Treating multiplication back as a full check** ([C7](#c7)). It proves correctness, not irreducibility.
-- **Counting constants as factors.** $2x + 2 = 2\,(x + 1)$ is still "one irreducible factor" over $\mathbb{Q}$: the $2$ is a constant, a unit, and does not count ([C1](#c1)).
+- **Counting constants as factors.** $2x + 2 = 2(x + 1)$ is still "one irreducible factor" over $\mathbb{Q}$: the $2$ is a constant, a unit, and does not count ([C1](#c1)).
 
 ## Sources
 

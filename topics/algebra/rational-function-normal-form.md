@@ -2,7 +2,7 @@
 title: Normal form of rational functions
 area: algebra
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-25
 prerequisites: [algebra/content-and-primitive-part]
 related: [algebra/irreducible-over-the-rationals]
 projects: [tante]
@@ -20,7 +20,7 @@ tags: [rational-functions, gcd, canonical-form, computer-algebra]
 
 ## Key claims
 
-- <a id="c1"></a>**C1.** A rational function is a quotient $p/q$ of polynomials with $q \ne 0$. Two of them are equal, $p/q = r/s$, if and only if $p\,s = q\,r$ as polynomials.
+- <a id="c1"></a>**C1.** A rational function is a quotient $p/q$ of polynomials with $q \ne 0$. Two of them are equal, $p/q = r/s$, if and only if $ps = qr$ as polynomials.
 - <a id="c2"></a>**C2.** Multiplying numerator and denominator by the same non-zero polynomial gives the same rational function, so every rational function has infinitely many representations, and comparing representations character by character does not decide equality.
 - <a id="c3"></a>**C3.** Dividing $p$ and $q$ by $\gcd(p, q)$ gives a reduced fraction. Over the rationals, the reduced fraction is unique up to multiplying numerator and denominator by the same non-zero constant.
 - <a id="c4"></a>**C4.** Requiring, in addition, that the denominator be primitive with a positive leading coefficient in a fixed monomial order makes the representation unique: a normal form. The numerator then carries any rational constants, for example $\dfrac{2x + 2}{-4y} = \dfrac{-\tfrac12 x - \tfrac12}{y}$.
