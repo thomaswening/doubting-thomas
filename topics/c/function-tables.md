@@ -2,7 +2,7 @@
 title: Tables of function pointers
 area: c
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-24
 prerequisites: [c/function-pointer-declarations, c/opaque-handles]
 related: [cpp/abi-and-shared-libraries]
 projects: [tante]
@@ -28,6 +28,7 @@ tags: [c, plugin, interface, vtable, com, abi, versioning, callbacks]
 - <a id="c5"></a>**C5.** Calling a null function pointer is undefined behaviour, so a table with optional entries must document which may be null, and callers must check those entries before calling them.
 - <a id="c6"></a>**C6.** C++ compilers commonly implement virtual functions with a table of function pointers per class (the vtable) and a hidden pointer to it in each object; the C++ standard does not specify this layout, which is one reason C++ classes do not form a stable boundary between compilers, while a C struct of function pointers does.
 - <a id="c7"></a>**C7.** A COM interface pointer points to an object whose first field points to a table of function pointers with a fixed layout, beginning with `QueryInterface`, `AddRef` and `Release`; because that layout is defined at the binary level, COM objects can be used across compilers and languages, .NET included.
+- <a id="c8"></a>**C8.** A function that other code reaches only through a table of function pointers can be declared `static` (internal linkage), because the caller gets its address from the table, not by name; only the plug-in's entry function must be visible by name.
 
 ## Explanation
 
@@ -40,6 +41,22 @@ This is the C counterpart of programming against an interface. A C# class that r
 ### The handshake
 
 Something must be found by name, or nothing could start. That is the plug-in's single **entry function** ([C2](#c2)). The host loads the shared library, looks the entry function up with `GetProcAddress` or `dlsym`, and calls it with a pointer to its own table of services. The plug-in answers with a table describing what it provides: its name, its version, its functions. From then on all calls in both directions go through the two tables.
+
+The [example](#examples) below does exactly this, with a host that offers `log` and `add` and a plug-in called `doubler`. Solid arrows are calls, the dashed arrow is a return value:
+
+```mermaid
+sequenceDiagram
+    participant H as Host program
+    participant P as Plug-in (shared library)
+    H->>P: load the library (LoadLibrary or dlopen)
+    H->>P: find "plugin_entry" by name (GetProcAddress or dlsym)
+    H->>P: plugin_entry(&host), passing the host's table
+    P-->>H: returns &api, the plug-in's table
+    H->>P: plugin->run(&host, 21), through the plug-in's table
+    P->>H: host->log(...) and host->add(21, 21), through the host's table
+```
+
+Only the first two steps use a name. Every later call goes through a field of a table, so the functions behind the fields need no visible name at all: they can be `static` in their own source file ([C8](#c8)). `static` on a function at file scope gives it **internal linkage**: the name is known only inside that source file, much like a C# type declared with the `file` modifier. Other source files, and the linker, cannot refer to it by name.
 
 Functions in the tables usually take a handle, so that they know which object they're working on ([C3](#c3)): [Tante](https://github.com/thomaswening/Tante)'s `host->rational_add(a, b)` takes two `tante_rational*` handles, and a plug-in's `run` function might take the host's session handle. This is the [object-as-handle](opaque-handles.md#c9) pattern again, with the method found through a table instead of by name.
 
@@ -57,39 +74,52 @@ COM fixes such a table at the binary level ([C7](#c7)). A COM interface pointer 
 
 ## Examples
 
-A host and a plug-in in one file (in real use, the plug-in is a separate shared library and `plugin_entry` is found with `dlsym` or `GetProcAddress`):
+A host and a plug-in in one file, so that it runs as it stands. In real use the code comes from three places, marked in the comments:
+
+- **The shared header** declares the two struct types and nothing else. Both the host and the plug-in include it, so both agree on the layout of the tables. It is the only code they share.
+- **The plug-in's source** is compiled into the shared library. It defines `double_it` and `plugin_entry`.
+- **The host's source** is compiled into the program that loads the library. It defines `host_log`, `host_add` and `main`, which fills a `host_api` with the host's functions. Instead of calling `plugin_entry` directly, the real host finds it with `dlsym` or `GetProcAddress`.
 
 ```c
 #include <stdio.h>
 
-/* Shared header: what the host offers to plug-ins. */
+/* ==== shared header: included by both the host and the plug-in ==== */
+
+/* What the host offers to plug-ins. */
 typedef struct host_api {
     unsigned size;                       /* sizeof(host_api) as the host knew it */
     void (*log)(const char* message);
     int  (*add)(int a, int b);
 } host_api;
 
-/* Shared header: what a plug-in offers to the host. */
+/* What a plug-in offers to the host. */
 typedef struct plugin_api {
     const char* name;
     int (*run)(const host_api* host, int input);
 } plugin_api;
 
-/* ---- the plug-in ---- */
+/* ==== plug-in source: compiled into the shared library ==== */
+
+/* static: internal linkage, the name is private to this source file.
+   The host reaches double_it only through api.run. */
 static int double_it(const host_api* host, int input)
 {
     host->log("plugin: doubling");
     return host->add(input, input);      /* calls the host through its table */
 }
 
-const plugin_api* plugin_entry(const host_api* host)   /* the one function found by name */
+const plugin_api* plugin_entry(const host_api* host)   /* the one function found by name, so not static */
 {
+    /* static inside a function means something else: api lives as long as
+       the program, so returning its address is safe. */
     static const plugin_api api = { "doubler", double_it };
     host->log("plugin: loaded");
     return &api;
 }
 
-/* ---- the host ---- */
+/* ==== host source: compiled into the program that loads the library ==== */
+
+/* static: internal linkage again. The plug-in reaches these only through the host_api table. */
 static void host_log(const char* message) { printf("[log] %s\n", message); }
 static int  host_add(int a, int b) { return a + b; }
 
@@ -110,33 +140,40 @@ Expected output:
 doubler: 42
 ```
 
-Version 2 of the shared header appends a field ([C4](#c4)); a plug-in built against it checks before calling it:
+Version 2 of the shared header gives the host a new service, `multiply`, which multiplies two integers. Its function pointer is appended as the last field ([C4](#c4)). A plug-in built against version 2 may still be loaded by a host built against version 1, whose table ends after `add`. So before calling `multiply`, the plug-in checks that the host's table is long enough to contain it:
 
 ```c
-#include <stddef.h>
+#include <stddef.h>                      /* offsetof and NULL */
 
 typedef struct host_api {
     unsigned size;
     void (*log)(const char* message);
     int  (*add)(int a, int b);
-    int  (*mul)(int a, int b);           /* new in version 2: appended, never inserted */
+    int  (*multiply)(int a, int b);      /* new in version 2: appended, never inserted */
 } host_api;
 
 int square(const host_api* host, int x)
 {
-    if (host->size >= offsetof(host_api, mul) + sizeof host->mul && host->mul != NULL)
-        return host->mul(x, x);          /* the host is new enough */
+    /* offsetof(host_api, multiply): how many bytes from the start of the struct the field begins.
+       sizeof(host->multiply): the size of the field itself, one function pointer.
+       A version 1 host set size to sizeof of its shorter struct, which ends where multiply would begin. */
+    size_t needed = offsetof(host_api, multiply) + sizeof(host->multiply);
+    if (host->size >= needed && host->multiply != NULL)
+        return host->multiply(x, x);     /* the host is new enough */
     int result = 0;                      /* older host: fall back on add */
     for (int i = 0; i < x; ++i) result = host->add(result, x);
     return result;
 }
 ```
 
+With a version 2 host, `square(&host, 5)` calls `multiply(5, 5)`. With a version 1 host it adds 5 five times. Both return 25. `offsetof` is the C counterpart of .NET's `Marshal.OffsetOf`.
+
 ## Pitfalls
 
 - Inserting or reordering fields in a published table: every plug-in compiled against the old layout calls the wrong functions ([C4](#c4)).
 - Calling an optional entry without checking it for null ([C5](#c5)).
 - Assuming the plug-in can call host functions by name: it isn't linked against the host, so only the entry function is found by name and everything else must come through a table ([C2](#c2)).
+- Reading the two `static`s in the example as one thing: on a function at file scope, `static` means internal linkage ([C8](#c8)); on a variable inside a function, it means the variable lives as long as the program instead of being destroyed when the function returns ([stack and heap](stack-and-heap.md#c1)).
 - Confusing the table with the handles passed through it: the table holds functions, the handles stand for objects ([opaque handles](opaque-handles.md#c11)).
 
 ## Sources
