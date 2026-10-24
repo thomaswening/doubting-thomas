@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: []
 related: [c/opaque-handles]
+projects: [tante]
 tags: [c, struct, typedef, incomplete-type, forward-declaration]
 ---
 
@@ -101,5 +102,5 @@ size_t n = sizeof(secret);  /* error: invalid application of sizeof to incomplet
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, discussing the C module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, discussing the C module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - cppreference: [struct declaration (C)](https://en.cppreference.com/w/c/language/struct), [typedef (C)](https://en.cppreference.com/w/c/language/typedef), [lookup and name spaces (C)](https://en.cppreference.com/w/c/language/name_space).

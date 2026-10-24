@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax]
 related: [c/opaque-handles]
+projects: [tante]
 tags: [c, cpp, function-pointer, declarator, delegate]
 ---
 
@@ -50,7 +51,7 @@ The brackets around `*f` force step 2 to happen before step 3. Remove them and `
 
 ### A larger example
 
-The field from Tante's module interface:
+The field from [Tante](https://github.com/thomaswening/Tante)'s module interface:
 
 ```c
 tante_rational* (*rational_from_int64)(int64_t value);
@@ -114,5 +115,5 @@ More declarations to practise on:
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, explaining the engine function table of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, explaining the engine function table of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - cppreference: [pointer declaration (C), pointers to functions](https://en.cppreference.com/w/c/language/pointer), [function declaration (C)](https://en.cppreference.com/w/c/language/function_declaration).

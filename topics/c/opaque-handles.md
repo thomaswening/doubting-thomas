@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/struct-tags-and-typedef, c/stack-and-heap]
 related: [c/function-pointer-declarations, cpp/abi-and-shared-libraries, cpp/header-only-libraries, cpp/copy-and-move]
+projects: [tante]
 tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ---
 
@@ -30,7 +31,7 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 - <a id="c8"></a>**C8.** A function declared next to an opaque type in a C header, such as `db* db_open(const char* path);`, is a stand-alone function of the library (a non-member function), not part of the struct: the hidden struct holds only the library's data, and the client calls the functions directly by name.
 - <a id="c9"></a>**C9.** An API uses a handle for an object the library manages: something with state that persists between calls, a lifetime that needs cleaning up, or contents the library keeps private; operations on plain values that keep no state, such as `sqrt(double)`, need no handle. Each function taking the handle acts as a method of that object, with the handle in the role of `this`.
 - <a id="c10"></a>**C10.** A handle need not be a memory address: Win32's `HANDLE` and `HWND` values are identifiers that Windows looks up in its own tables, which the program never dereferences.
-- <a id="c11"></a>**C11.** A plug-in that is not linked against its host typically receives both a table of function pointers, through which it calls the host, and opaque handles to the host's objects, which it passes back through that table; Tante's modules get `tante_host` (the table) and `tante_rational*` (handles to numbers).
+- <a id="c11"></a>**C11.** A plug-in that is not linked against its host typically receives both a table of function pointers, through which it calls the host, and opaque handles to the host's objects, which it passes back through that table; [Tante](https://github.com/thomaswening/Tante)'s modules get `tante_host` (the table) and `tante_rational*` (handles to numbers).
 
 ## Explanation
 
@@ -62,13 +63,13 @@ Two different things are declared here, and they are easy to mix up:
 - **The struct `db`** holds the library's data for one database: perhaps a file, a cache, a count. Only the library's `.c` file says what it contains.
 - **The three functions** are separate, stand-alone functions of the library ([C8](#c8)), like `static` methods of a C# `static class`, but at the top level. They are not inside the struct: a C struct can't contain functions. The user's program calls them by name, and the linker connects those calls to the library's code, just as a C# project calls methods of a referenced assembly.
 
-So the user holds pointers to data it can't see, and passes them to functions it can call ([C3](#c3)). The library is free to rearrange its struct in a new version ([C2](#c2)). SQLite's `sqlite3*`, Win32's `HANDLE` and Tante's `tante_rational*` work this way.
+So the user holds pointers to data it can't see, and passes them to functions it can call ([C3](#c3)). The library is free to rearrange its struct in a new version ([C2](#c2)). SQLite's `sqlite3*`, Win32's `HANDLE` and [Tante](https://github.com/thomaswening/Tante)'s `tante_rational*` work this way.
 
 ### Handles and function tables are different things
 
 A [struct of function pointers](function-pointer-declarations.md#c6) is a separate idea that often appears next to handles. It is needed only when the user's code is **not linked** against the library and so can't call its functions by name. A plug-in loaded at run time is the usual case. The host then passes the plug-in a table of function pointers, and the plug-in calls through the table.
 
-Tante's module interface uses both, for different jobs:
+[Tante](https://github.com/thomaswening/Tante)'s module interface uses both, for different jobs:
 
 - `tante_rational*` is an opaque handle to a number: data the module can't see into.
 - `tante_host` is a visible struct of function pointers, such as `rational_add`. Because modules don't link against the engine, the engine passes this table to each module when loading it.
@@ -150,7 +151,7 @@ A wrapper this simple can't be returned from a function or stored in a `std::vec
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, on why numbers cross the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) as handles; simplified after Thomas's review of [doubting-thomas#2](https://github.com/thomaswening/doubting-thomas/pull/2).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, on why numbers cross the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) as handles; simplified after Thomas's review of [doubting-thomas#2](https://github.com/thomaswening/doubting-thomas/pull/2).
 - SQLite: [the database connection handle](https://www.sqlite.org/c3ref/sqlite3.html).
 - Microsoft Learn: [SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle).
 - cppreference: [rule of three/five/zero](https://en.cppreference.com/w/cpp/language/rule_of_three).

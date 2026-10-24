@@ -5,6 +5,7 @@ created: 2026-10-20
 updated: 2026-10-20
 prerequisites: []
 related: [c/function-pointer-declarations]
+projects: [tante]
 tags: [c, cpp, pointer, declarator, const, dereference]
 ---
 
@@ -103,6 +104,6 @@ Expected output:
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, discussing the C module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, discussing the C module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - cppreference: [pointer declaration (C)](https://en.cppreference.com/w/c/language/pointer), [member access operators (C)](https://en.cppreference.com/w/c/language/operator_member_access), [const type qualifier (C)](https://en.cppreference.com/w/c/language/const).
 - Microsoft Learn: [pointer types in C#](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/unsafe-code#pointer-types).
