@@ -28,12 +28,30 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 - <a id="c6"></a>**C6.** In several variables, the leading term is defined by a fixed monomial order. In lexicographic order with $x > y$, a term with a higher power of $x$ comes first, and powers of $y$ only break ties; so the leading term of $3xy^2 - 5x^2 + y$ is $-5x^2$.
 - <a id="c7"></a>**C7.** "Primitive, with a positive leading coefficient in a fixed monomial order" selects exactly one polynomial from each family $\{cg : c \ne 0\}$, so it turns "a GCD" into "the GCD". This is a canonical form.
 - <a id="c8"></a>**C8.** The sign convention depends on the variable order: with $x > y$ the normalised GCD of $x^2 - y^2$ and $x^2 - 2xy + y^2$ is $x - y$; with $y > x$ it is $y - x$.
+- <a id="c9"></a>**C9.** A greatest common divisor of $a$ and $b$ is a common divisor $g$ that every other common divisor divides. For integers this is the largest common divisor, unique up to sign: $\gcd(12, 18) = 6$, $\gcd(27, 9) = 9$, and $\gcd(0, n) = |n|$, because every integer divides $0$.
 
 ## Explanation
 
-### The integer case you already know
+### What a GCD is
 
-`BigInteger.GreatestCommonDivisor(-4, 6)` returns `2`, not `-2`. Both $2$ and $-2$ divide $-4$ and $6$, and every common divisor divides both. So mathematically both are "a greatest common divisor". .NET returns the non-negative one by convention. Polynomials have the same situation, only with more choices.
+A **common divisor** of two integers $a$ and $b$ is a number that divides both without remainder. The common divisors of $12$ and $18$ are $\pm1, \pm2, \pm3, \pm6$. The **greatest common divisor** is the largest of them, $6$. You use it whenever you reduce a fraction: $\frac{12}{18} = \frac{12/6}{18/6} = \frac23$. Dividing by the GCD is the biggest single cancellation, and the result is in lowest terms.
+
+A few cases ([C9](#c9)):
+
+| $a$, $b$ | Common divisors (positive) | GCD | Fraction $a/b$ in lowest terms |
+|---|---|---|---|
+| $4, 2$ | $1, 2$ | $2$ | $\frac21 = 2$ |
+| $27, 9$ | $1, 3, 9$ | $9$ | $\frac31 = 3$ |
+| $12, 18$ | $1, 2, 3, 6$ | $6$ | $\frac23$ |
+| $0, 5$ | $1, 5$ | $5$ | $\frac01 = 0$ |
+
+The last row looks odd at first. Every integer divides $0$, because $0 = 0 \cdot m$. So the common divisors of $0$ and $5$ are exactly the divisors of $5$, and the greatest is $5$. In general $\gcd(0, n) = |n|$.
+
+The formal definition doesn't say "largest". It says: $g$ is a GCD if it is a common divisor and **every other common divisor divides it**. For integers that comes to the same thing: $1$, $2$, $3$ and $6$ all divide $6$. The formal version is the one that carries over to polynomials, where "largest" has no meaning. There "every common divisor divides $g$" is exactly what lets $x - y$ and $2x - 2y$ both qualify, as the next sections show.
+
+### The integer convention you already know
+
+`BigInteger.GreatestCommonDivisor(-4, 6)` returns `2`, not `-2`. Both $2$ and $-2$ divide $-4$ and $6$. Every common divisor of $-4$ and $6$ ($\pm1$, $\pm2$) divides both of them. So by the formal definition both are "a greatest common divisor". .NET returns the non-negative one by convention. Polynomials have the same situation, only with more choices.
 
 ### Content and primitive part
 
