@@ -27,6 +27,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## testing
 
 - `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `testing/arrange-act-assert`: the arrange, act and assert structure of a unit test, and why one behaviour and one act per test makes a failure readable. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (the test style guide).
 
 ## documentation
 
@@ -64,3 +65,16 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 - `formats/preserving-unknown-data`: editing selected metadata while copying unfamiliar frames, chunks and audio unchanged; why parsing and reserializing everything can lose information. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
 - `formats/conservative-writing`: why a reader may display a file that an editor should refuse to modify; unsupported flags, ambiguous duplicates and incomplete parsing. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
+
+## regex
+
+- `regex/capturing-groups`: how capturing groups are numbered (by opening parenthesis, group 0 the whole match), and non-capturing groups `(?:...)`. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+
+## dotnet
+
+- `dotnet/linq-query-syntax`: LINQ query syntax read as nested loops; `from ... from ...` as `SelectMany`, and when it reads better than method syntax. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+- `dotnet/single-versus-first`: `Single` versus `First` as a stated assumption, and xUnit's `Assert.Single` as an assertion that also returns the element. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`AppCommandsTests`, `DiagnosticLogTests`).
+
+## github
+
+- `github/reviewing-existing-code`: GitHub's three-dot pull request diff, and reviewing code already on `main` through a draft PR against a base branch without it. Came up in [CrateEdit PR #22](https://github.com/thomaswening/CrateEdit/pull/22).
