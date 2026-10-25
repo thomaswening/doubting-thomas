@@ -6,8 +6,6 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 ## cpp
 
-- `cpp/linkage-and-storage-duration`: external versus internal linkage in C++, namespace-scope `static`, translation units, and how linkage differs from storage duration; why a `static` variable defined in a header produces a separate instance per translation unit. Came up in C++ Intermediate Quiz: Round 3, question 3 (2026-10-21).
-- `cpp/references`: what `T&` and `const T&` are, how a reference differs from a pointer, and how both compare to C#'s `ref` and `in`. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (`int& first`, `const Poly&`).
 - `cpp/copy-elision`: when the compiler builds a returned object directly in the caller's variable instead of moving or copying it (RVO, NRVO; guaranteed for temporaries since C++17). Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (returning a `unique_ptr`).
 - `cpp/vector-growth`: how `std::vector` grows (size, capacity, reallocation) and which references, pointers and iterators into it a `push_back` invalidates. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (the use-after-free example in `cpp/sanitizers`).
 
