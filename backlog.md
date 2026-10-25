@@ -13,6 +13,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 ## tools
 
+- `tools/suppression-scope`: why a check's exemption should cover as little as possible (one paragraph or line rather than a whole file or project), since a wide exemption hides later real findings; compare `#pragma warning disable` around one line with a project-wide `NoWarn`. Came up in Thomas's review of [claude-config PR #3](https://github.com/thomaswening/claude-config/pull/3) (the glossary exemption).
 - `tools/yaml`: the YAML that configuration files use: block scalars (`>` and `|`), anchors and aliases (`&`, `*`), and when a value must be quoted. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (the `.clang-tidy` example).
 
 ## cmake
@@ -26,6 +27,10 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## testing
 
 - `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+
+## documentation
+
+- `documentation/github-heading-anchors`: how GitHub turns a heading into a link anchor (rendered text, lower case, punctuation dropped, spaces to hyphens, `-1` for a duplicate), and when a stable `<a id>` is the better target. Came up in [claude-config PR #3](https://github.com/thomaswening/claude-config/pull/3) (`check_docs.py` resolving `requirements.md#requirement-conventions`).
 
 ## github-actions
 
