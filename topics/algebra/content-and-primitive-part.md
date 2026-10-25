@@ -107,7 +107,7 @@ using System.Numerics;
 
 BigInteger[] coeffs = [-6, 4, 10];   // -6x^2 + 4x + 10, highest power first
 
-BigInteger content = 0;
+BigInteger content = 0;              // gcd(0, c) = |c|, so 0 is a neutral start, like 0 for a sum
 foreach (var c in coeffs)
     content = BigInteger.GreatestCommonDivisor(content, c);   // never negative
 if (coeffs[0] < 0)
@@ -122,6 +122,8 @@ Output (run with `dotnet run content.cs`, .NET 10):
 ```text
 content -2, primitive part [3, -2, -5]
 ```
+
+The loop works like a running total. Every integer divides $0$, so the common divisors of $0$ and $c$ are just the divisors of $c$, and $\gcd(0, c) = |c|$. The first step therefore only copies $|{-6}| = 6$ into `content`. After that the loop takes $\gcd(6, 4) = 2$, then $\gcd(2, 10) = 2$. Starting from the first coefficient instead gives the same result. Starting from $0$ just keeps the loop free of a special first step.
 
 So $-6x^2 + 4x + 10 = -2(3x^2 - 2x - 5)$. The sign went into the content so that the primitive part starts positive.
 
