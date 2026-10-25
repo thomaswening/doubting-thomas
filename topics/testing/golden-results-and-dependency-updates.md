@@ -60,12 +60,17 @@ Where the expected result came from decides what a pass means ([C2](#c2)). In [T
 
 ### When an update changes the output
 
+Two terms first:
+
+- **Upstream** is the project you depend on and its maintainers. **Reporting upstream** means filing a bug report with them, for FLINT an issue on its GitHub repository, with a small input that reproduces the bug. **The upstream fix** is the change they made: a commit, or the release note that mentions it.
+- **The boundary** is the point where the library's result enters your own code. In Tante, that's the value the FLINT adapter returns, before Tante's own code sorts, normalises and prints it. The value at that point is the **raw result**. In .NET terms, it's what an `HttpClient` call actually returned, before your mapping code turns it into a view model. Checking it tells you whether the error came in with the library's answer or was made afterwards by your code.
+
 Suppose a new FLINT version prints a different factorisation of the same polynomial. After normalisation, a factorisation over the rationals has exactly one correct printed form ([C4](#c4)). So the old version or the new one is wrong. There are two ways to handle the failing test:
 
 - **Accept the snapshot** ([C3](#c3)). Quick, but blind: if the new version introduced a bug, you have just written the bug into the expected result, and the test will now defend it.
 - **Investigate** ([C5](#c5)). Check both outputs with something that doesn't use FLINT ([C6](#c6)): Tante's own polynomial implementation, multiplying the factors back, or the corpus entry's source. If the new output is right, the old version had a bug: correct the expected result, and record why in the commit, with a link to the upstream fix. If the new output is wrong, find out *where* before you blame the update ([C9](#c9)). Check the library's raw result at the boundary, before Tante's own code touches it. If that raw result is wrong, the new version has a bug: don't adopt it, and report it upstream. If it is right, the bug is in Tante's own code, and the update only exposed it ([C10](#c10)).
 
-The whole decision as a flowchart. Diamonds are questions, rounded boxes are what to do:
+The whole decision as a flowchart. Diamonds are questions, rounded boxes are what to do. Whenever the new output is wrong, whether the old one was right or not, the next question is the same: did the error come in with the library's answer, or did our code make it afterwards?
 
 ```mermaid
 flowchart TD
@@ -73,9 +78,10 @@ flowchart TD
     N -- yes --> FN(["Fix the normalisation.<br/>Golden result unchanged."])
     N -- no --> E{"Independent evidence:<br/>which output is right?"}
     E -- "the new one" --> C(["Correct the golden result,<br/>with the evidence and the upstream fix.<br/>Adopt the update."])
-    E -- "the old one" --> B{"Library's raw result,<br/>checked at the boundary:<br/>right?"}
-    E -- "neither" --> W(["Golden result was wrong all along:<br/>correct it to the verified value"])
-    W --> B
+    E -- "the old one" --> X["So the new output is wrong.<br/>Library or our code?"]
+    E -- "neither" --> W(["Golden result was wrong all along:<br/>correct it to the verified value.<br/>The new output is still wrong."])
+    W --> X
+    X --> B{"Library's raw result<br/>at the boundary:<br/>right?"}
     E -- "can't tell yet" --> H(["Don't adopt yet.<br/>Find independent evidence."])
     B -- no --> R(["Bug in the library:<br/>don't adopt, report upstream"])
     B -- yes --> O(["Bug in our own code, exposed by the update:<br/>fix it, then adopt"])
