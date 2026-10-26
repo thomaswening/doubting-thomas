@@ -39,7 +39,18 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 5. **`## Explanation`**: didactic prose that builds the idea up from what the reader already knows, in short paragraphs with subsections as needed. Say *why*, not only *what*. Link the claims it explains: `[C2](#c2)`.
 6. **`## Examples`**: worked examples and code snippets, each with its language tag and the expected output or result. Prefer small, runnable snippets.
 7. **`## Pitfalls`** (optional): common mistakes and misreadings. These make good quiz questions.
-8. **`## Sources`**: where this was learned and where to read more, as links (§5).
+8. **`## Exercises`** (optional): a few short tasks for active recall: predict what code does, interpret a declaration, explain a mechanism in your own words. Use it where the concept is a mechanism the reader must be able to rebuild, not for every note. Each exercise links the claims it practises. Its solution follows in a collapsed block, so that it is not read by accident:
+
+   ```html
+   <details><summary>Solution</summary>
+
+   The answer, with links to the claims.
+
+   </details>
+   ```
+
+   The empty lines inside `<details>` are needed for GitHub to render Markdown there.
+9. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
 

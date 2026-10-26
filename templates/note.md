@@ -39,6 +39,18 @@ tags: []
 
 - <Common mistakes and misreadings.>
 
+## Exercises
+
+<Optional. Delete this section if the note does not need it.>
+
+1. **Predict.** <A short task: predict, interpret or explain.>
+
+   <details><summary>Solution</summary>
+
+   <The answer, with links to the claims it practises, such as [C1](#c1).>
+
+   </details>
+
 ## Sources
 
 - <Where this was learned, as a link, and where to read further.>

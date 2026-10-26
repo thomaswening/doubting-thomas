@@ -9,6 +9,7 @@ Start at [topics/index.md](topics/index.md). Each area has an index, and each no
 - **TL;DR**: the gist in a few bullets.
 - **Key claims**: numbered statements (C1, C2, …) that are true on their own. These are what a quiz is built from and graded against.
 - **Explanation**, **Examples** with snippets, **Pitfalls** and **Sources**.
+- **Exercises** in some notes, with solutions folded away: try them before unfolding.
 
 Formulas are written in LaTeX and render on GitHub. The front matter's `projects` field says which of my projects a note came from or matters to, and the projects' names link to their repositories.
 
