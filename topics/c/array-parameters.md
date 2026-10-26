@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-27
 prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
-related: [cpp/raii-and-ownership, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
+related: [c/pointers-to-arrays, cpp/raii-and-ownership, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
 projects: [tante]
 tags: [c, cpp, array, pointer, decay, parameter, declarator, typedef, gmp, flint]
 ---
@@ -25,8 +25,8 @@ tags: [c, cpp, array, pointer, decay, parameter, declarator, typedef, gmp, flint
 - <a id="c2"></a>**C2.** In the scope that declares an array, `sizeof` applied to it gives the size of the whole array; inside a function, `sizeof` applied to a parameter declared as an array gives the size of a pointer, not of the caller's array, so the function cannot find out the array's length, which must be passed separately.
 - <a id="c3"></a>**C3.** An expression of array type is converted to a pointer to the array's first element (array-to-pointer conversion, or decay). In C17 the only exceptions are an array that is the operand of `sizeof` or unary `&`, and a string literal used to initialise an array. C23 adds the `typeof` operators; C++ adds a few more, such as binding the array to a reference.
 - <a id="c4"></a>**C4.** An array cannot be assigned to, passed by value or returned from a function: `a = b;` with two arrays does not compile. A struct that contains an array can be assigned, passed and returned, and the array is copied with it.
-- <a id="c5"></a>**C5.** For an array `int arr[4]`, `arr` used in an expression is an `int*` to the first element, while `&arr` is an `int (*)[4]`, a pointer to the whole array; both hold the same address but have different types.
-- <a id="c6"></a>**C6.** Only the outermost array level of a parameter is adjusted: a parameter declared `int m[3][4]` has type `int (*)[4]`, a pointer to arrays of four `int`.
+- <a id="c5"></a>**C5.** *(moved 2026-10-27 to [pointers to arrays, C1](pointers-to-arrays.md#c1), with the rest of the advanced material)*
+- <a id="c6"></a>**C6.** *(moved 2026-10-27 to [pointers to arrays, C4](pointers-to-arrays.md#c4))*
 - <a id="c7"></a>**C7.** With `typedef S name_t[1];`, as GMP and FLINT define their `_t` types, a variable or struct member of type `name_t` is an array object that holds one `S` inline, with no separate allocation, while a parameter of type `name_t` is an `S*`; callers therefore pass such a variable without `&`, and the function works on the caller's object.
 - <a id="c8"></a>**C8.** Because a parameter of type `name_t` from [C7](#c7) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array cannot be initialised from a pointer.
 - <a id="c9"></a>**C9.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address, so the `S` would have to be allocated separately, typically with `malloc`, and freed later; the one-element array of [C7](#c7) gives inline storage for the `S` and pass-by-pointer together.
@@ -37,7 +37,7 @@ tags: [c, cpp, array, pointer, decay, parameter, declarator, typedef, gmp, flint
 
 ## Explanation
 
-The explanation builds up to one question: what does `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];` in FLINT mean, and why is it written that way? The core sections use one small struct of our own throughout. The real FLINT types appear only at the end. A clearly marked advanced part follows; nothing in it is needed for the core.
+The explanation builds up to one question: what does `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];` in FLINT mean, and why is it written that way? The core sections use one small struct of our own throughout. The real FLINT types appear only at the end. A final section shows the idiom in a C++ class; it is not needed for the core. Pointers to whole arrays, multidimensional arrays and `const` array parameters have their own note, [pointers to arrays and multidimensional arrays](pointers-to-arrays.md).
 
 ### 1. Reading a declaration from the name outwards
 
@@ -51,7 +51,7 @@ frac_struct x;         x is a frac_struct
 frac_struct y[1];      y is an array of 1 frac_struct
 ```
 
-The `[4]` belongs to the name, just as the `*` does in `int *p` ([where the * goes, C2](pointer-declarator-syntax.md#c2)). Longer declarators, such as `int (*p)[4]`, follow the same rule; they come up in the advanced part and in [reading function-pointer declarations](function-pointer-declarations.md).
+The `[4]` belongs to the name, just as the `*` does in `int *p` ([where the * goes, C2](pointer-declarator-syntax.md#c2)). Longer declarators, such as `int (*p)[4]`, follow the same rule; they come up in [pointers to arrays](pointers-to-arrays.md#pointers-to-whole-arrays) and in [reading function-pointer declarations](function-pointer-declarations.md).
 
 ### 2. Declaring, defining, storing and initialising
 
@@ -102,7 +102,7 @@ Since an array cannot be copied as a value, C does something else whenever an ar
 - `a[2]` is defined as `*(a + 2)`: take the pointer to the first element, move two **elements** further, read the `int` there. Pointer arithmetic counts in elements, so `a + 2` lies `2 * sizeof(int)`, 8 bytes, past the start.
 - For the one-element array, `y` becomes `&y[0]`, a `frac_struct*`. So `y->num` means the same as `y[0].num`.
 
-A few operators need the array itself and are the exceptions. `sizeof a` gives the size of the whole array, 16 bytes, in the scope that defines it ([C2](#c2)). `&a` takes the address of the whole array, which has a different type from `&a[0]` (see the advanced part). `char s[] = "abc";` copies the string literal into `s`.
+A few operators need the array itself and are the exceptions. `sizeof a` gives the size of the whole array, 16 bytes, in the scope that defines it ([C2](#c2)). `&a` takes the address of the whole array, which has a different type from `&a[0]` ([pointers to arrays, C1](pointers-to-arrays.md#c1)). `char s[] = "abc";` copies the string literal into `s`.
 
 ### 5. Rule two: an array parameter is adjusted to a pointer
 
@@ -230,35 +230,7 @@ fmpz_mpoly_ctx_clear(ctx);
 
 **The core ends here.** The five questions from the top of this note can now be answered: what `typedef S T[1]` means (sections 2 and 7), what `T x;` creates (sections 3 and 7), why a parameter `T x` is an `S*` (section 5), why passing `x` modifies the original (section 6), and why not `typedef S* T` (section 8).
 
-### Advanced: pointers to whole arrays
-
-`&a`, for `int a[4]`, is one of the exceptions to decay ([C5](#c5)). `&` is the ordinary address-of operator ([where the * goes, C4](pointer-declarator-syntax.md#c4)). The result points to the whole array. Its type is written `int (*)[4]`. With a name, read from the name outwards: `int (*p)[4] = &a;` makes `p` a pointer (`*p`) to an array of four (`[4]`) `int`. The parentheses matter, because `[]` binds tighter than `*`: `int *q[4]` is an array of four pointers to `int`.
-
-`&a` and `a` decayed hold the same address. But `&a + 1` steps over all four elements, where `a + 1` steps over one. For a `frac_t z`, `&z` is a `frac_struct (*)[1]`, not a `frac_struct*`, which is why GMP and FLINT functions take `z`, not `&z`.
-
-### Advanced: multidimensional array parameters
-
-Adjustment applies once, to the outermost array level ([C6](#c6)). A two-dimensional array `int m[3][4]` is an array of three rows, each an array of four `int`, stored row after row:
-
-```
-int m[3][4]: twelve ints in a row, row after row (4-byte int)
-
-byte offset   0    4    8    12   16   20   24   28   32   36   40   44
-            [0,0][0,1][0,2][0,3][1,0][1,1][1,2][1,3][2,0][2,1][2,2][2,3]
-            └────── m[0] ──────┘└────── m[1] ──────┘└────── m[2] ──────┘
-            ▲                   ▲
-            m decays to &m[0]   m + 1 points to m[1], 16 bytes on
-
-m[1][2] = *(*(m + 1) + 2) is at byte 1*16 + 2*4 = 24
-```
-
-A parameter `int m[3][4]` becomes `int (*m)[4]`: a pointer to the first row. The row length stays part of the type, because one step of `m + 1` must skip a whole row. The number of rows, 3, is lost like any outermost length, so it must be passed separately. A pointer to the whole array, `int (*m)[3][4]`, would keep both lengths. But then the function would accept only arrays of exactly 3 by 4, which is why C APIs rarely use it.
-
-### Advanced: const array parameters
-
-A `const` on an array type applies to its elements. So a parameter `const frac_t a` is adjusted to `const frac_struct *a`: the function may read the caller's struct but not change it through `a` ([where the * goes, C6](pointer-declarator-syntax.md#c6)). This is how GMP and FLINT mark inputs, as in `frac_mul(frac_t r, const frac_t a, const frac_t b)` in the examples below. Passing a non-const `frac_t` there is fine: the decayed `frac_struct*` converts to `const frac_struct*` implicitly.
-
-### Advanced: storing such a parameter in C++
+### Beyond the core: storing such a parameter in C++
 
 FLINT-style C++ wrappers, such as the one in [Tante](https://github.com/thomaswening/Tante)'s build spike, use both sides of the idiom:
 
@@ -357,7 +329,7 @@ Expected output on a platform with 8-byte `long`:
 - Writing `x = y;` with two `mpz_t` or `fmpz_mpoly_t` variables. It does not compile, because they are arrays ([C4](#c4)). The library's set function (`mpz_set`, `fmpz_mpoly_set`) does the copy.
 - Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
 - Returning an `fmpz_mpoly_t` from a function. Arrays cannot be returned ([C4](#c4)). The library convention is to pass the result as the first parameter, as `frac_mul` does.
-- Taking `&ctx` of an `fmpz_mpoly_ctx_t` local and passing it where an `fmpz_mpoly_ctx_struct*` is expected. `&ctx` is a pointer to an array of one struct, which has a different type ([C5](#c5)). Pass `ctx`.
+- Taking `&ctx` of an `fmpz_mpoly_ctx_t` local and passing it where an `fmpz_mpoly_ctx_struct*` is expected. `&ctx` is a pointer to an array of one struct, which has a different type ([pointers to arrays, C1](pointers-to-arrays.md#c1)). Pass `ctx`.
 - Storing the parameter's pointer and letting the caller's struct die first: the stored pointer dangles ([C8](#c8)).
 
 ## Exercises
@@ -421,7 +393,7 @@ Try each one before opening its solution.
 ## Sources
 
 - Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, answering Thomas's review questions on FLINT's `_t` types in the FLINT wrapper of [Tante](https://github.com/thomaswening/Tante)'s [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md) ([doubting-thomas PR #3](https://github.com/thomaswening/doubting-thomas/pull/3)).
-- Didactic review of this note by Thomas with ChatGPT, 2026-10-27, which asked for the progressive structure, the separation of the two rules, and the exercises.
+- Didactic review of this note by Thomas with ChatGPT, 2026-10-27, which asked for the progressive structure, the separation of the two rules, and the exercises. The advanced material moved to [pointers to arrays and multidimensional arrays](pointers-to-arrays.md) the same day.
 - cppreference: [arrays in C, with array-to-pointer conversion](https://en.cppreference.com/w/c/language/array), [function declarations in C](https://en.cppreference.com/w/c/language/function_declaration), [declarations in C](https://en.cppreference.com/w/c/language/declarations), [storage duration in C](https://en.cppreference.com/w/c/language/storage_duration), [array-to-pointer conversion in C++](https://en.cppreference.com/w/cpp/language/implicit_conversion#Array-to-pointer_conversion).
 - [GMP manual: Parameter Conventions](https://gmplib.org/manual/Parameter-Conventions); [FLINT documentation: fmpz_mpoly](https://flintlib.org/doc/fmpz_mpoly.html).
 - [comp.lang.c FAQ, section 6: arrays and pointers](https://c-faq.com/aryptr/index.html).

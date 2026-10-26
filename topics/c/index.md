@@ -8,3 +8,4 @@
 - [Strings in C](strings.md): zero-terminated char arrays, `strlen`, buffer sizes, and the unsafe and safe copy functions.
 - [Opaque handles](opaque-handles.md): pointers to hidden types, their ownership rules, and wrapping them in C++.
 - [Array parameters and array decay](array-parameters.md): array parameters are pointers, arrays decay in expressions, and the GMP/FLINT `typedef S name_t[1];` idiom.
+- [Pointers to arrays and multidimensional arrays](pointers-to-arrays.md): `int (*p)[4]` against `int *p[4]`, row-major layout, two-dimensional parameters, `const` on array types.
