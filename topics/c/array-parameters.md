@@ -3,7 +3,7 @@ title: Array parameters and array decay
 area: c
 created: 2026-10-20
 updated: 2026-10-26
-prerequisites: [c/pointer-declarator-syntax]
+prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
 related: [cpp/raii-and-ownership, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
 projects: [tante]
 tags: [c, cpp, array, pointer, decay, parameter, gmp, flint, typedef]
@@ -16,8 +16,8 @@ tags: [c, cpp, array, pointer, decay, parameter, gmp, flint, typedef]
 - A function parameter declared as an array, `void f(int a[10])`, is really a pointer, `void f(int* a)`. The size is ignored.
 - In most expressions, an array turns into a pointer to its first element. This is called **decay**. `sizeof arr` and `&arr` are the main exceptions.
 - So a C function never receives an array, only an address, and cannot know how long the array is. C# arrays carry their `Length`; C arrays do not.
-- GMP and FLINT exploit both rules with `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];`. A variable or member of that type holds the struct inline; a parameter of that type is a pointer, so you pass it without `&`.
-- A pointer typedef would also spare the `&`, but then the struct needs a separate `malloc`. The one-element array gives inline storage and pass-by-pointer together. `fmpz_mpoly_t` (a polynomial) and `fmpz_mpoly_ctx_t` (its context) are two different types built this way.
+- GMP and FLINT exploit both rules with `typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];`. A variable or member of that type holds the struct **inline**: the struct's bytes sit inside the variable itself, because an array stores its elements where it is declared. A parameter of that type is a pointer, so you pass it without `&`.
+- A pointer typedef would also spare the `&`. But a pointer variable holds only an address, so the struct would need memory of its own on the heap, from `malloc`, C's counterpart of `new`. The one-element array gives inline storage and pass-by-pointer together. `fmpz_mpoly_t` (a polynomial) and `fmpz_mpoly_ctx_t` (its context) are two different types built this way.
 
 ## Key claims
 
@@ -110,7 +110,7 @@ The [GMP manual](https://gmplib.org/manual/Parameter-Conventions) gives the reas
 
 ### Why not a plain pointer?
 
-A library could write `typedef fmpz_mpoly_ctx_struct* fmpz_mpoly_ctx_t;` instead. Callers would still pass `ctx` without `&`. But a variable of a pointer type holds only an address ([C9](#c9)). The struct itself would have to live somewhere else. In practice the library would `malloc` it in an init function and `free` it in a clear function, and every object would cost an extra heap allocation and an extra indirection.
+A library could write `typedef fmpz_mpoly_ctx_struct* fmpz_mpoly_ctx_t;` instead. Callers would still pass `ctx` without `&`. But a variable of a pointer type holds only an address ([C9](#c9)). The struct itself would have to live somewhere else. It cannot be a local variable of the init function, because a local is destroyed when its function returns ([stack and heap, C5](stack-and-heap.md#c5)). So the library would request heap memory for it in an init function with `malloc` ("memory allocate": C's counterpart of `new`, which returns the address of a fresh block of the requested size). A clear function would hand the memory back with `free`, because C never frees heap memory on its own ([stack and heap, C2](stack-and-heap.md#c2)). Every object would cost an extra heap allocation and an extra indirection.
 
 ```
 typedef S name_t[1];   name_t ctx;          one-element array: the struct is inline
