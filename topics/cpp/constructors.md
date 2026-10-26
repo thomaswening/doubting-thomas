@@ -2,9 +2,9 @@
 title: Constructors in C++
 area: cpp
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-27
 prerequisites: []
-related: [cpp/raii-and-ownership, c/array-parameters]
+related: [cpp/raii-and-ownership, cpp/copy-and-move, c/array-parameters]
 projects: [tante]
 tags: [cpp, constructor, explicit, conversion, initialiser-list, default, delete, delegating-constructor]
 ---
@@ -71,7 +71,7 @@ Writing `name = n;` in the body instead looks the same but is two steps: `name` 
 
 C# draws the line elsewhere: a `readonly` field may be assigned anywhere in the constructor body. In C++, the body is already too late; the list is where members are born.
 
-The same distinction appears outside constructors ([C10](#c10)). `Poly b = a;` creates `b`, so it calls the copy constructor even though it is written with `=`. `b = a;` on an existing `b` calls `operator=`. The two `= delete` lines in [RAII and ownership](raii-and-ownership.md#examples) forbid exactly these two.
+The same distinction appears outside constructors ([C10](#c10)). `Poly b = a;` creates `b`, so it calls the copy constructor even though it is written with `=`. `b = a;` on an existing `b` calls `operator=`. The two `= delete` lines in [RAII and ownership](raii-and-ownership.md#examples) forbid exactly these two. [Copy and move](copy-and-move.md#c1) explains both operations and their move counterparts.
 
 ### Why declaration order wins
 

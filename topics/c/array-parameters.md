@@ -4,7 +4,7 @@ area: c
 created: 2026-10-20
 updated: 2026-10-27
 prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
-related: [c/pointers-to-arrays, cpp/raii-and-ownership, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
+related: [c/pointers-to-arrays, cpp/raii-and-ownership, cpp/copy-and-move, cpp/constructors, c/opaque-handles, c/struct-tags-and-typedef]
 projects: [tante]
 tags: [c, cpp, array, pointer, decay, parameter, declarator, typedef, gmp, flint]
 ---
@@ -327,7 +327,7 @@ Expected output on a platform with 8-byte `long`:
 - Using `sizeof a / sizeof a[0]` to count the elements of an array parameter. It divides the size of a pointer by the size of an element ([C2](#c2)).
 - Using an `mpz_t` or `fmpz_mpoly_t` before its init function has run. The definition reserved storage but initialised nothing ([C12](#c12)).
 - Writing `x = y;` with two `mpz_t` or `fmpz_mpoly_t` variables. It does not compile, because they are arrays ([C4](#c4)). The library's set function (`mpz_set`, `fmpz_mpoly_set`) does the copy.
-- Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
+- Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([copy and move, C2](../cpp/copy-and-move.md#c2); [RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
 - Returning an `fmpz_mpoly_t` from a function. Arrays cannot be returned ([C4](#c4)). The library convention is to pass the result as the first parameter, as `frac_mul` does.
 - Taking `&ctx` of an `fmpz_mpoly_ctx_t` local and passing it where an `fmpz_mpoly_ctx_struct*` is expected. `&ctx` is a pointer to an array of one struct, which has a different type ([pointers to arrays, C1](pointers-to-arrays.md#c1)). Pass `ctx`.
 - Storing the parameter's pointer and letting the caller's struct die first: the stored pointer dangles ([C8](#c8)).
