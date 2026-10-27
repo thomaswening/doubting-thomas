@@ -5,7 +5,8 @@
 - [Tables of function pointers](function-tables.md): C's interfaces for plug-ins: the entry function, host and plug-in tables, growing a table safely, vtables and COM.
 - [Where the * goes](pointer-declarator-syntax.md): `*` in declarations and expressions, `int* a, b;`, `->` and `const`.
 - [Stack, heap and who frees memory](stack-and-heap.md): what C frees for you, what it never does, and how C++ destructors close the gap.
-- [Strings in C](strings.md): zero-terminated char arrays, `strlen`, buffer sizes, and the unsafe and safe copy functions.
+- [Strings in C](strings.md): zero-terminated char arrays, `strlen`, buffer sizes, the unsafe and safe copy functions, and pointers into the middle of a string.
+- [printf format strings](format-strings.md): the `printf` family, the parts of a placeholder such as `%016llX`, precision against width.
 - [Opaque handles](opaque-handles.md): pointers to hidden types, their ownership rules, and wrapping them in C++.
 - [Declarations, objects and initialisation](declarations-and-objects.md): reading declarators, typedef, storage duration, objects against pointers, and brace lists.
 - [Array parameters and array decay](array-parameters.md): array parameters are pointers, arrays decay in expressions, `a[i]` is `*(a + i)`, and arrays cannot be copied.

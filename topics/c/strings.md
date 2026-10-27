@@ -2,11 +2,11 @@
 title: Strings in C
 area: c
 created: 2026-10-20
-updated: 2026-10-24
+updated: 2026-10-27
 prerequisites: [c/pointer-declarator-syntax, c/stack-and-heap]
-related: []
-projects: [tante]
-tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
+related: [c/array-parameters, c/format-strings]
+projects: [tante, partonforge]
+tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8, pointer-arithmetic, suffix]
 ---
 
 # Strings in C
@@ -18,6 +18,7 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
 - An array passed to a function becomes a pointer, so the function can't tell how big the buffer is; the caller has to say.
 - `strcpy` and `strcat` never check sizes; writing past the end is a buffer overflow. `snprintf` is the portable safe choice.
 - `==` on two strings compares addresses; use `strcmp`.
+- A pointer into the middle of a string is a string too: the rest of it, without a copy. That is why `"abc" + 'E'` moves a pointer instead of appending.
 
 ## Key claims
 
@@ -30,6 +31,8 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8]
 - <a id="c7"></a>**C7.** `strncpy(dest, src, n)` does not write a terminator when `src` has `n` or more characters, so its result may not be a valid string.
 - <a id="c8"></a>**C8.** `a == b` on two `char*` or `char` arrays compares their addresses, not their contents; `strcmp(a, b)` compares contents and returns 0 when they are equal.
 - <a id="c9"></a>**C9.** `strlen` counts bytes, not characters: "ö" encoded in UTF-8 takes two bytes, so `strlen` of that string is 2.
+- <a id="c10"></a>**C10.** If `p` points to the first character of a string, `p + k` points to its character at index `k`, and any function given `p + k` sees the rest of the string from there up to the same terminator; no characters are copied. In C++, `s.c_str() + k` does the same for a `std::string s`.
+- <a id="c11"></a>**C11.** Adding a `char` to a string literal or a `char*` does not append: `"1.25" + 'E'` converts `'E'` to its code, 69, and moves the pointer 69 characters forward, past the end of the literal, which is undefined behaviour. The expression compiles; Clang warns, GCC 13 does not. `std::string("1.25") + 'E'` appends, because `std::string` defines `+`.
 
 ## Explanation
 
@@ -50,6 +53,12 @@ When an array is passed to a function, C passes a pointer to its first element i
 ### Comparing and counting
 
 Comparing with `==` compares the addresses of two arrays, so two equal strings in different places compare unequal ([C8](#c8)). `strcmp` compares character by character and returns 0 for equality (negative or positive for ordering, like C#'s `string.CompareOrdinal`). Finally, `char` is a byte. Text in UTF-8 uses several bytes for characters beyond ASCII, so `strlen` gives the number of bytes, not of characters ([C9](#c9)).
+
+### Pointing into the middle
+
+Because a string is just "characters up to the next zero" ([C1](#c1)), any pointer to one of its characters is the start of a string: the rest of it ([C10](#c10)). Adding `k` to a pointer moves it `k` characters forward, as `a[i]` means `*(a + i)` ([array parameters](array-parameters.md)). So `p + 4` is the text from index 4 to the end, and passing it to `printf` or `atoi` reads only that part. Nothing is copied. Both pointers share the same characters and the same terminator. C# needs `Substring`, which copies, or `AsSpan(4)`, which doesn't and so is the closer match.
+
+The same rule makes `+` with a character a trap ([C11](#c11)). A `char` is a small integer, so `"1.25" + 'E'` is pointer arithmetic, not concatenation. The pointer lands 69 characters past the start of a five-byte array. In C++ the left side decides: if it is a `std::string`, `+` appends, and if it is a literal or a `char*`, `+` moves a pointer.
 
 ## Examples
 
@@ -91,6 +100,60 @@ Reading it:
 - `snprintf(buf, size, format, ...)` formats exactly like `printf` but writes into `buf` instead of the screen. `size` is the size of `buf` in bytes. Here it is `sizeof buf`, which is 8 because `buf` is a local array, not a parameter ([C4](#c4)). The return value is the length the full text would have had ([C6](#c6)).
 - `word == copy` and `strcmp(word, copy) == 0` are comparisons. In C a comparison has type `int` with the value 0 for false or 1 for true, so `%d` prints it.
 
+Reading the exponent of a number written in exponent notation, by pointing past the `E` ([C10](#c10)):
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(void)
+{
+    const char text[] = "1.25E+03";
+    const char* exponent = strchr(text, 'E');   /* pointer to the 'E', or NULL */
+    printf("%s\n", exponent);
+    printf("%s\n", exponent + 1);
+    printf("%d\n", atoi(exponent + 1));
+    printf("%d\n", (int)(exponent - text));
+    return 0;
+}
+```
+
+Expected output:
+
+```
+E+03
++03
+3
+4
+```
+
+- `strchr(text, 'E')` returns a pointer to the first `'E'` in `text`.
+- `exponent` and `exponent + 1` are strings that start inside `text` and end at its terminator.
+- `atoi` ("ASCII to integer") reads an optional sign and digits from the start of its string and stops at the first other character.
+- Subtracting two pointers into the same array gives the distance between them, here the index of the `'E'`.
+
+In C++, `std::string` appends with `+`, a literal doesn't ([C11](#c11)):
+
+```cpp
+#include <iostream>
+#include <string>
+
+int main() {
+    const std::string significand = "1.25";
+    std::cout << significand + 'E' << '\n';
+    // const char* p = "1.25" + 'E';   // compiles, but points 69 characters past the start
+}
+```
+
+Expected output:
+
+```
+1.25E
+```
+
+With the last line uncommented, it still compiles. Clang warns that adding a `char` to a string does not append (`-Wstring-plus-char`), GCC 13 gives no warning.
+
 ## Pitfalls
 
 - Allocating `strlen(s)` bytes for a copy and forgetting the `+ 1` for the terminator ([C2](#c2)).
@@ -98,8 +161,11 @@ Reading it:
 - Treating `strncpy` as a safe `strcpy` ([C7](#c7)).
 - Comparing strings with `==` ([C8](#c8)).
 - Modifying a string literal through a `char*` that points to it ([C3](#c3)): `char* s = "abc"; s[0] = 'x';` is undefined behaviour, whereas `char s[] = "abc";` makes a modifiable copy.
+- Writing `"text" + 'x'` or `ptr + 'x'` to append a character. It moves a pointer ([C11](#c11)); append to a `std::string` instead.
+- Keeping a pointer into a `std::string`'s `c_str()` after the string is changed or destroyed. The pointer shares the string's characters ([C10](#c10)), so it dangles.
 
 ## Sources
 
 - Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, from Thomas's review of the [stack and heap note](https://github.com/thomaswening/doubting-thomas/pull/2).
+- Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-10-27: Thomas's walkthrough of `decimal_exponent` and `exponential_form` in `src/fortran_io.cpp` ([PR 1](https://github.com/thomaswening/PartonForge/pull/1)), which read an exponent with `std::atoi(s.c_str() + epos + 1)`. Source of [C10](#c10) and [C11](#c11).
 - cppreference: [null-terminated byte strings (C)](https://en.cppreference.com/w/c/string/byte), [strlen](https://en.cppreference.com/w/c/string/byte/strlen), [snprintf](https://en.cppreference.com/w/c/io/fprintf), [strncpy](https://en.cppreference.com/w/c/string/byte/strncpy), [string literals (C)](https://en.cppreference.com/w/c/language/string_literal), [array to pointer conversion](https://en.cppreference.com/w/c/language/conversion#Array_to_pointer_conversion).
