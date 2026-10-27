@@ -7,3 +7,4 @@
 - [RAII and ownership](raii-and-ownership.md): every resource has one owner whose destructor frees it, so code avoids raw `new` and `delete`.
 - [Constructors in C++](constructors.md): `explicit` and implicit conversions, member initialiser lists, declaration order, `= default`, `= delete` and delegation.
 - [Static analysis for C++](static-analysis.md): compiler warnings, clang-tidy and IDE plugins such as SonarQube for IDE.
+- [Initialisation forms](initialisation-forms.md): `=`, `( )` and `{ }`, narrowing, zero-initialisation and the `std::vector{3}` trap.
