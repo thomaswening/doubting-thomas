@@ -77,7 +77,7 @@ The same distinction appears outside constructors ([C10](#c10)). `Poly b = a;` c
 
 Members are initialised in the order the class declares them, not the order the list names them ([C5](#c5)). There are two reasons. A class can have several constructors with lists in different orders, but the destructor is one function that must destroy members in the reverse of *one* order. And one member's initialiser may read another member, which only works if the order is fixed.
 
-The trap is a list that reads one member while initialising an earlier-declared one. It looks fine in the list, but the member being read does not exist yet. GCC and Clang warn about a list whose order differs from the declaration order (`-Wreorder`, part of `-Wall`). The habit that avoids the problem: write the list in declaration order.
+The trap is a list that reads one member while initialising an earlier-declared one. It looks fine in the list, but the member being read does not exist yet. GCC and Clang warn about a list whose order differs from the declaration order (`-Wreorder`, which Clang calls `-Wreorder-ctor`; both are part of `-Wall`). The habit that avoids the problem: write the list in declaration order.
 
 ### Default constructors, `= default` and `= delete`
 
@@ -160,7 +160,7 @@ struct Buffer {
 };
 ```
 
-`capacity` is initialised first, from `size`, which is still garbage. The result is undefined behaviour. `-Wall` catches it: GCC reports both `-Wreorder` and `-Wuninitialized` here. Declaring `size` before `capacity`, or writing `capacity(n * 2)`, fixes it.
+`capacity` is initialised first, from `size`, which is still garbage. The result is undefined behaviour. `-Wall` catches it: GCC and Clang report both the reorder warning and `-Wuninitialized` here. Declaring `size` before `capacity`, or writing `capacity(n * 2)`, fixes it.
 
 Default, defaulted, deleted and delegating constructors together:
 
