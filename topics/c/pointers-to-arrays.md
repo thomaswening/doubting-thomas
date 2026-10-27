@@ -135,7 +135,7 @@ Expected output:
 
 ## Pitfalls
 
-- Passing an `int m[3][4]` to a function that takes `int**`. C++ and GCC 14 or later reject it. GCC 13 compiles it with only a warning, as it does any code that adds a cast. The function then reads `int` values as addresses ([C7](#c7)).
+- Passing an `int m[3][4]` to a function that takes `int**`. C++ and GCC 14 or later reject it. GCC 13 compiles it with only a warning. A cast silences even that. The function then reads `int` values as addresses ([C7](#c7)).
 - Writing `int *p[4]` when a pointer to an array was meant. That is an array of four pointers ([C2](#c2)).
 - Taking `&z` of a GMP or FLINT `_t` variable. It has type pointer-to-array, not pointer-to-struct ([C1](#c1)). Pass `z`.
 - Expecting a function taking `int (*m)[4]` to know how many rows there are ([C6](#c6)).
