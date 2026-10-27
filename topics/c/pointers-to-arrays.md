@@ -3,7 +3,7 @@ title: Pointers to arrays and multidimensional arrays
 area: c
 created: 2026-10-27
 updated: 2026-10-28
-prerequisites: [c/array-parameters, c/pointer-declarator-syntax]
+prerequisites: [c/array-parameters, c/one-element-array-typedef, c/pointer-declarator-syntax]
 related: [c/function-pointer-declarations]
 projects: [tante]
 tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
@@ -32,7 +32,7 @@ tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
 
 ## Explanation
 
-This note continues [array parameters and array decay](array-parameters.md), which explains decay, parameter adjustment and the GMP `typedef S T[1]` idiom. Everything here builds on those two rules.
+This note continues [array parameters and array decay](array-parameters.md), which explains decay and parameter adjustment. Everything here builds on those two rules. The examples with `frac_t` come from [the one-element array typedef](one-element-array-typedef.md), GMP's `typedef S T[1]` idiom.
 
 ### Pointers to whole arrays
 
@@ -89,7 +89,7 @@ The number of rows, 3, is lost like any outermost length, so it must be passed s
 
 ### const on array types
 
-A `const` on an array type applies to its elements ([C8](#c8)). So with `typedef frac_struct frac_t[1];`, a parameter `const frac_t a` means "array of one `const frac_struct`", which is adjusted to `const frac_struct *a`. The function may read the caller's struct but not change it through `a` ([where the * goes, C6](pointer-declarator-syntax.md#c6)). This is how GMP and FLINT mark inputs, as in `frac_mul(frac_t r, const frac_t a, const frac_t b)` in [array parameters](array-parameters.md#examples). Passing a non-const `frac_t` there is fine: the decayed `frac_struct*` converts to `const frac_struct*` implicitly.
+A `const` on an array type applies to its elements ([C8](#c8)). So with `typedef frac_struct frac_t[1];`, a parameter `const frac_t a` means "array of one `const frac_struct`", which is adjusted to `const frac_struct *a`. The function may read the caller's struct but not change it through `a` ([where the * goes, C6](pointer-declarator-syntax.md#c6)). This is how GMP and FLINT mark inputs, as in `frac_mul(frac_t r, const frac_t a, const frac_t b)` in [the one-element array typedef](one-element-array-typedef.md#examples). Passing a non-const `frac_t` there is fine: the decayed `frac_struct*` converts to `const frac_struct*` implicitly.
 
 ## Examples
 

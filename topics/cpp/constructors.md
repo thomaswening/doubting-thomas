@@ -4,7 +4,7 @@ area: cpp
 created: 2026-10-20
 updated: 2026-10-28
 prerequisites: []
-related: [cpp/raii-and-ownership, cpp/copy-and-move, c/array-parameters]
+related: [cpp/raii-and-ownership, cpp/copy-and-move, c/one-element-array-typedef]
 projects: [tante]
 tags: [cpp, constructor, explicit, conversion, initialiser-list, default, delete, delegating-constructor]
 ---
