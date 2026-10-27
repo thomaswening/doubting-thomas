@@ -129,7 +129,7 @@ To find what Thomas should work on, read `results/` and the indexes:
 
 [backlog.md](backlog.md) lists topics that came up and could become notes, so that none is lost and open pull requests stay the notes Thomas has chosen to read now.
 
-- **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
+- **Add an entry only when Thomas asks for it** ("put X into the backlog"), for example for a review question that goes beyond the note under review or for a checkpoint candidate he wants kept for later. Candidates he doesn't mention are left alone. Before adding, check the area indexes and the open pull requests.
 - **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
 - **Commit backlog changes directly to `main`** (§6), as `chore(backlog): …`, never inside a pull request. A backlog line is a pointer, not knowledge: nothing is quizzed from it, so it needs no review. Thomas weeds it when entries are proposed.
 - **When proposing notes**, read the backlog too, and list its entries in a group of their own, apart from the candidates of the current session, so that Thomas can tell what just came up from what has been waiting.
