@@ -2,7 +2,7 @@
 title: Pointers to arrays and multidimensional arrays
 area: c
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-28
 prerequisites: [c/array-parameters, c/pointer-declarator-syntax]
 related: [c/function-pointer-declarations]
 projects: [tante]
@@ -15,7 +15,7 @@ tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
 
 - `&a`, for an array `int a[4]`, is a pointer to the whole array. Its type is `int (*)[4]`. It holds the same address as `a` decayed, but `+ 1` on it skips all four elements.
 - `int (*p)[4]` is a pointer to an array of four `int`. `int *q[4]` is an array of four pointers. The parentheses decide, because `[]` binds tighter than `*`.
-- `int m[3][4]` is three rows of four `int`, stored row after row with no pointers in between. It is not an array of pointers, so it cannot be passed as an `int**`.
+- `int m[3][4]` is three rows of four `int`, stored row after row with no pointers in between. It is not an array of pointers, so passing it as an `int**` is wrong.
 - As a parameter, only the outermost level is adjusted: `int m[3][4]` becomes `int (*m)[4]`. The row length stays in the type; the row count must be passed separately.
 - `const` on an array type applies to its elements, so a parameter `const frac_t a` becomes `const frac_struct *a`.
 
@@ -27,7 +27,7 @@ tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
 - <a id="c4"></a>**C4.** Only the outermost array level of a parameter is adjusted: a parameter declared `int m[3][4]` has type `int (*)[4]`, a pointer to arrays of four `int`.
 - <a id="c5"></a>**C5.** A multidimensional array such as `int m[3][4]` is an array of three arrays of four `int`, stored contiguously row after row (row-major order), so `m[i][j]` lies `(i * 4 + j) * sizeof(int)` bytes from the start.
 - <a id="c6"></a>**C6.** A function taking `int (*m)[4]` knows the row length but not the number of rows, which must be passed separately; a parameter of type `int (*m)[3][4]` keeps both lengths but accepts only arrays of exactly three rows of four.
-- <a id="c7"></a>**C7.** An `int m[3][4]` cannot be passed as an `int**`: it contains no pointers, and the decayed `int (*)[4]` is a different type from `int**`.
+- <a id="c7"></a>**C7.** Passing an `int m[3][4]` where an `int**` is expected is a constraint violation in C and an error in C++: `m` contains no pointers, and the decayed `int (*)[4]` is a different type from `int**`. GCC 14 and later reject it in C by default; GCC 13 only warns, and the resulting program reads `int` values as addresses.
 - <a id="c8"></a>**C8.** A `const` qualifier applied to an array type qualifies its elements, so with `typedef S name_t[1];` a parameter declared `const name_t a` is adjusted to `const S *a`, a pointer through which the caller's `S` can be read but not changed.
 
 ## Explanation
@@ -79,7 +79,7 @@ m[1][2] = *(*(m + 1) + 2) is at byte (1*4 + 2)*4 = 24
 
 `m` decays to `&m[0]`, a pointer to the first row, of type `int (*)[4]`. `m + 1` skips one whole row. `*(m + 1)` is the row `m[1]`, which decays in turn to a pointer to its first `int`. Adding 2 and dereferencing gives `m[1][2]`.
 
-This is unlike C#'s jagged array `int[][]`, an array of references to separate arrays. It is the layout of C#'s rectangular `int[,]`, minus the object header and the stored lengths. Since there are no pointers inside `m`, it cannot be passed where an `int**` is expected ([C7](#c7)). An `int**` would expect an array of pointers to follow, which does not exist.
+This is unlike C#'s jagged array `int[][]`, an array of references to separate arrays. It is the layout of C#'s rectangular `int[,]`, minus the object header and the stored lengths. Since there are no pointers inside `m`, passing it where an `int**` is expected is wrong ([C7](#c7)). An `int**` would expect an array of pointers to follow, which does not exist. The C standard requires a diagnostic. Some C compilers, such as GCC 13, give only a warning and build the program anyway, so treat that warning as an error.
 
 ### Multidimensional array parameters
 
@@ -135,7 +135,7 @@ Expected output:
 
 ## Pitfalls
 
-- Passing an `int m[3][4]` to a function that takes `int**`. It does not compile without a cast. With a cast, the function reads `int` values as addresses ([C7](#c7)).
+- Passing an `int m[3][4]` to a function that takes `int**`. C++ and GCC 14 or later reject it. GCC 13 compiles it with only a warning, as it does any code that adds a cast. The function then reads `int` values as addresses ([C7](#c7)).
 - Writing `int *p[4]` when a pointer to an array was meant. That is an array of four pointers ([C2](#c2)).
 - Taking `&z` of a GMP or FLINT `_t` variable. It has type pointer-to-array, not pointer-to-struct ([C1](#c1)). Pass `z`.
 - Expecting a function taking `int (*m)[4]` to know how many rows there are ([C6](#c6)).

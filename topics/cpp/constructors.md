@@ -2,7 +2,7 @@
 title: Constructors in C++
 area: cpp
 created: 2026-10-20
-updated: 2026-10-27
+updated: 2026-10-28
 prerequisites: []
 related: [cpp/raii-and-ownership, cpp/copy-and-move, c/array-parameters]
 projects: [tante]
@@ -160,7 +160,7 @@ struct Buffer {
 };
 ```
 
-`capacity` is initialised first, from `size`, which is still garbage. The result is undefined behaviour. Declaring `size` before `capacity`, or writing `capacity(n * 2)`, fixes it.
+`capacity` is initialised first, from `size`, which is still garbage. The result is undefined behaviour. `-Wall` catches it: GCC reports both `-Wreorder` and `-Wuninitialized` here. Declaring `size` before `capacity`, or writing `capacity(n * 2)`, fixes it.
 
 Default, defaulted, deleted and delegating constructors together:
 
