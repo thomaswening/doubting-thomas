@@ -17,23 +17,24 @@ tags: [c, cpp, array, pointer, decay, parameter, declarator, typedef, gmp, flint
 - `T x;` defines an array object that holds one whole `S` inline, inside `x`'s own storage. It reserves the storage but does not initialise it.
 - Two separate rules turn arrays into pointers. A parameter declared as an array is *adjusted* to a pointer: a rule about declarations. An array used in an expression *decays* to a pointer to its first element: a rule about expressions.
 - Together they make `f(x)` pass the address of the caller's struct. `f` can therefore modify that struct. The caller writes no `&`.
-- `typedef S* T;` would also spare the `&`. But a pointer variable holds only an address, so each struct would need storage of its own, usually from `malloc`. GMP's `mpz_t` and FLINT's `fmpz_mpoly_t` use the array form instead.
+- A plain `S x;` also holds the struct inline, but needs `&x` at every call. `typedef S* T;` spares the `&`, but a pointer creates no `S`: the struct needs storage provided separately. The array form combines inline storage with calls without `&`. GMP's `mpz_t` and FLINT's `fmpz_mpoly_t` use it.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C and C++, a function parameter declared with type "array of `T`" is adjusted to "pointer to `T`", and any size written in the brackets is ignored: `void f(int a[10]);`, `void f(int a[]);` and `void f(int* a);` declare the same function.
 - <a id="c2"></a>**C2.** In the scope that declares an array, `sizeof` applied to it gives the size of the whole array; inside a function, `sizeof` applied to a parameter declared as an array gives the size of a pointer, not of the caller's array, so the function cannot find out the array's length, which must be passed separately.
 - <a id="c3"></a>**C3.** An expression of array type is converted to a pointer to the array's first element (array-to-pointer conversion, or decay). In C17 the only exceptions are an array that is the operand of `sizeof` or unary `&`, and a string literal used to initialise an array. C23 adds the `typeof` operators; C++ adds a few more, such as binding the array to a reference.
-- <a id="c4"></a>**C4.** An array cannot be assigned to, passed by value or returned from a function: `a = b;` with two arrays does not compile. A struct that contains an array can be assigned, passed and returned, and the array is copied with it.
+- <a id="c4"></a>**C4.** An array cannot be initialised from another array, assigned to, passed by value or returned from a function: with two arrays, `int b[3] = a;` and `b = a;` do not compile. A struct that contains an array can be initialised from another struct of its type, assigned, passed and returned; the array is copied with it.
 - <a id="c5"></a>**C5.** *(moved 2026-10-27 to [pointers to arrays, C1](pointers-to-arrays.md#c1), with the rest of the advanced material)*
 - <a id="c6"></a>**C6.** *(moved 2026-10-27 to [pointers to arrays, C4](pointers-to-arrays.md#c4))*
 - <a id="c7"></a>**C7.** With `typedef S name_t[1];`, as GMP and FLINT define their `_t` types, a variable or struct member of type `name_t` is an array object that holds one `S` inline, with no separate allocation, while a parameter of type `name_t` is an `S*`; callers therefore pass such a variable without `&`, and the function works on the caller's object.
-- <a id="c8"></a>**C8.** Because a parameter of type `name_t` from [C7](#c7) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array cannot be initialised from a pointer.
-- <a id="c9"></a>**C9.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address, so the `S` would have to be allocated separately, typically with `malloc`, and freed later; the one-element array of [C7](#c7) gives inline storage for the `S` and pass-by-pointer together.
+- <a id="c8"></a>**C8.** Because a parameter of type `name_t` from [C7](#c7) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array can only be initialised from a brace-enclosed list (or, for a character array, a string literal). C does not dereference the pointer to copy the `S` implicitly either.
+- <a id="c9"></a>**C9.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address and creates no `S`; before it is dereferenced it must point to an `S` with storage of its own, which may be automatic, static or allocated (for instance from `malloc`). The one-element array of [C7](#c7) gives the `S` its storage in the variable itself, and still passes a pointer at every call.
 - <a id="c10"></a>**C10.** In FLINT, `fmpz_mpoly_ctx_struct` and `fmpz_mpoly_struct` are typedef names for struct types and are written without the `struct` keyword; `fmpz_mpoly_ctx_t` (the context) and `fmpz_mpoly_t` (a polynomial) are two different types, each an array of one of its own struct, built by the same idiom.
 - <a id="c11"></a>**C11.** A `typedef` declaration has the form of a variable declaration with `typedef` in front, and makes the would-be variable name an alias for the would-be variable's type: `typedef S name_t[1];` declares no object and makes `name_t` mean "array of one `S`".
-- <a id="c12"></a>**C12.** A declaration such as `name_t x;` or `int a[4];` inside a block, without `static`, defines an object with automatic storage duration: it reserves storage for the whole object, which lives until the block ends, but leaves its contents indeterminate unless an initialiser is given. An object defined at file scope or with `static` is zero-initialised instead. The C standard does not mention a stack; putting automatic objects on the stack is what implementations typically do.
+- <a id="c12"></a>**C12.** A declaration such as `name_t x;` or `int a[4];` inside a block, without `static`, defines an object with automatic storage duration: it reserves storage for the whole object, which lives until the block ends, but leaves its contents indeterminate unless an initialiser is given. Without an initialiser, an object defined at file scope or with `static` is zero-initialised instead. Neither kind of definition calls `malloc`: the implementation provides the storage itself. The C standard does not mention a stack; putting automatic objects on the stack is what implementations typically do.
 - <a id="c13"></a>**C13.** Parameter adjustment ([C1](#c1)) is a rule about declarations, applied once to the function's declared type, while array-to-pointer conversion ([C3](#c3)) is a rule about expressions, applied wherever an array is used as a value; passing an array to an array parameter involves both, and the decayed argument then has exactly the adjusted parameter's type.
+- <a id="c14"></a>**C14.** An object of a one-element array-of-struct type is initialised with two levels of braces, as in `frac_t z = {{1, 2}};`: the outer pair initialises the array, the inner pair its single struct element, whose members receive the values in declaration order. C allows the inner braces to be omitted (brace elision). Members left out of a brace list are zero-initialised.
 
 ## Explanation
 
@@ -59,7 +60,7 @@ Four words describe what a line of C does. They are easy to blur, so here they a
 
 - A **declaration** introduces a name and its type. `extern int a[4];` is only a declaration: it says that an array `a` exists somewhere else, and reserves nothing.
 - A **definition** is a declaration that also creates the object, which reserves its storage. `int a[4];` inside a function is a definition: sixteen bytes (with 4-byte `int`) now belong to `a`.
-- The object's **storage duration** says how long that storage lives ([C12](#c12)). Inside a block, without `static`, it is *automatic*: from the start of the block to its end. Implementations typically put such objects on the stack, but the C standard only speaks of automatic storage ([stack and heap, C1](stack-and-heap.md#c1)). At file scope, or with `static`, the object lives as long as the program.
+- The object's **storage duration** says how long that storage lives ([C12](#c12)). Inside a block, without `static`, it is *automatic*: from the start of the block to its end. Implementations typically put such objects on the stack, but the C standard only speaks of automatic storage ([stack and heap, C1](stack-and-heap.md#c1)). At file scope, or with `static`, the object lives as long as the program. No `malloc` is involved in either case: the implementation provides automatic and static storage itself ([C12](#c12)). Only *allocated* storage comes from `malloc`, which section 3 contrasts.
 - **Initialisation** gives the object a value as it is created: `int a[4] = {1, 2, 3, 4};`. Without an initialiser an automatic object's contents are indeterminate. Using them is a bug. A static object starts as zero. C# zeroes fields and array elements. It refuses to compile a read of an unassigned local.
 
 A **typedef** declares a *type name* instead of an object. It reserves no storage ([C11](#c11)). It reuses ordinary declaration syntax. Write a variable declaration and put `typedef` in front. The would-be variable name then becomes a name for the would-be variable's type:
@@ -80,19 +81,52 @@ typedef struct { long num, den; } frac_struct;
 
 Without `typedef`, this would define a variable `frac_struct` of an unnamed struct type. With it, `frac_struct` is the struct's **typedef name**, and its only name, because the struct has no tag ([struct tags and typedef, C2](struct-tags-and-typedef.md#c2)).
 
-### 3. Arrays store their elements inline
+A struct is initialised with a brace list. The values go to the members in the order in which the members are declared:
 
-In C#, an `int[]` is an object on the heap. A variable holds a reference to it. The object knows its `Length`. A C array is nothing but its elements, one after the other, stored **inline**: directly in the array object's own storage, not somewhere else behind a pointer. There is no length, no header and no reference.
-
-```
-int a[4];            a:  [ a[0] | a[1] | a[2] | a[3] ]      16 bytes, no length stored
-frac_struct x;       x:  [ num  | den  ]                    16 bytes (8-byte long)
-frac_struct y[1];    y:  [ y[0].num | y[0].den ]            16 bytes: the array is its one element
+```c
+frac_struct h = {1, 2};      /* the first value to num, the second to den */
 ```
 
-The last two lines are the heart of this note. A one-element array of a struct occupies exactly the storage of the struct.
+Members left out of the list are set to zero. C99 also lets you name the members, `{.num = 1, .den = 2}`, which is clearer when a struct has many.
 
-C never copies such a block implicitly. An array cannot be assigned, passed by value or returned ([C4](#c4)). A struct that contains an array is different: its elements are part of the struct's own bytes, so copying the struct copies them. C# has the same idea in a `fixed` buffer inside a struct, or an `[InlineArray]` struct.
+### 3. Objects, arrays and pointers
+
+In C#, an `int[]` is an object on the heap. A variable holds a reference to it. The object knows its `Length`. A C array is nothing but its elements, one after the other, stored **inline**: directly in the array object's own storage, not somewhere else behind a pointer. There is no length, no header and no reference. C# has the same idea in a `fixed` buffer inside a struct, or an `[InlineArray]` struct.
+
+Three definitions show the difference between holding an object and pointing to one:
+
+```c
+frac_struct x;          /* a frac_struct */
+frac_struct y[1];       /* an array of one frac_struct */
+frac_struct *p = &x;    /* a pointer, initialised with the address of x */
+```
+
+```
+x:  [ num | den ]               16 bytes: a frac_struct object (8-byte long)
+y:  [ y[0].num | y[0].den ]     16 bytes: an array whose one element is a frac_struct object
+p:  [ address ] ──▶ x           8 bytes: a separate pointer object holding the address of x
+```
+
+- `x` is a `frac_struct` object. Its definition reserves the storage for one.
+- `y` is an array that contains one `frac_struct` object. A one-element array of a struct occupies exactly the storage of the struct. This is the heart of this note.
+- `p` is a third, separate object: a pointer. Its storage holds an address, typically 8 bytes, and nothing more. Defining `p` creates no `frac_struct`. It only lets you reach `x`.
+- Neither `x` nor `y` needs `malloc`. Defined in a block, both have automatic storage ([C12](#c12)).
+
+So a pointer always involves two pieces of storage: the pointer's own, and that of the object it points to, the **pointee**. Defining the pointer provides only the first ([C9](#c9)). Before `*p` or `p->num` may be used, `p` must point to a live object. That object can have any storage duration:
+
+- automatic, like `x` above, so `frac_struct *p = &x;` needs no `malloc`;
+- static, such as a variable defined at file scope;
+- **allocated**, from `malloc`.
+
+```c
+frac_struct *q = malloc(sizeof *q);   /* room for one frac_struct, or NULL on failure */
+/* ... use q->num ... */
+free(q);
+```
+
+`malloc` ("memory allocate", from `<stdlib.h>`) is C's counterpart of `new`: it returns the address of a fresh, uninitialised block of the requested size. The pointer `q` itself is still an automatic local. The block it points to has allocated storage duration: it lives until it is passed to `free`. The code must do that exactly once, because C never frees such memory on its own ([stack and heap, C2](stack-and-heap.md#c2)).
+
+Dynamic allocation pays off when an object must outlive the block that creates it, or when its size or number is known only at run time. Very large objects are a practical reason too, because implementations limit the stack. None of that applies to a small struct used within one function. A pointer does not imply the heap. An ordinary definition never implies `malloc`.
 
 ### 4. Rule one: an array used as a value decays to a pointer
 
@@ -103,6 +137,25 @@ Since an array cannot be copied as a value, C does something else whenever an ar
 - For the one-element array, `y` becomes `&y[0]`, a `frac_struct*`. So `y->num` means the same as `y[0].num`.
 
 A few operators need the array itself and are the exceptions. `sizeof a` gives the size of the whole array, 16 bytes, in the scope that defines it ([C2](#c2)). `&a` takes the address of the whole array, which has a different type from `&a[0]` ([pointers to arrays, C1](pointers-to-arrays.md#c1)). `char s[] = "abc";` copies the string literal into `s`.
+
+**Arrays cannot be copied; structs can.** Decay also explains why C has no array copy ([C4](#c4)):
+
+```c
+int a[3] = {1, 2, 3};
+int b[3] = a;      /* error: an array needs a brace list as its initialiser */
+b = a;             /* error: an array cannot be assigned */
+```
+
+In `int b[3] = a;`, `a` is an expression, so it has already decayed to an `int*`. An array can only be initialised from a brace-enclosed list, or a character array from a string literal. An address is neither. Assignment is ruled out separately: an array is not something C lets you assign to. To copy one array into another, call `memcpy(b, a, sizeof a)` from `<string.h>`.
+
+A struct is different. Initialising or assigning a struct from another struct of the same type copies all its members. An array inside the struct is one of those members, so it is copied along:
+
+```c
+typedef struct { int values[3]; } triple;
+
+triple s = {{1, 2, 3}};   /* outer braces: the struct; inner braces: its array member */
+triple t = s;             /* valid: copies all three ints */
+```
 
 ### 5. Rule two: an array parameter is adjusted to a pointer
 
@@ -173,6 +226,14 @@ Read the `typedef` as in section 2: without `typedef`, the line would define a v
 
 `frac_t z;` reserves storage but initialises nothing ([C12](#c12)). That is why GMP and FLINT require an init function before first use, such as `mpz_init(x)`. The matching clear function afterwards releases the heap memory the library attached to the struct.
 
+Our own `frac_t` can instead be given an initialiser, like any array. It needs two levels of braces ([C14](#c14)):
+
+```c
+frac_t z = {{1, 2}};      /* outer braces: the array; inner braces: its one frac_struct */
+```
+
+The outer braces initialise the array, whose only element is `z[0]`. The inner braces initialise that element, a `frac_struct`, member by member as in section 2. This is the `triple` example of section 4 turned inside out: there a struct contained an array, here an array contains a struct. C allows the inner braces to be left out (*brace elision*). `frac_t z = {1, 2};` means the same, although GCC and Clang may warn about missing braces. GMP and FLINT objects are never initialised this way: their structs point to memory the library manages, so they must go through the init functions.
+
 ```
                 declaration          storage of the variable     call
 step 1          frac_struct x;       one frac_struct, inline     frac_set(&x, 1, 2)
@@ -180,23 +241,68 @@ step 2          frac_struct y[1];    one frac_struct, inline     frac_set(y, 1, 
 step 3          frac_t z;            one frac_struct, inline     frac_set(z, 1, 2)
 ```
 
-### 8. Why not a pointer typedef?
+**Inside the function: what the parameter can initialise.** The same spelling, `frac_t`, means a pointer in one place and an array in another. That matters as soon as a function wants to keep or copy its parameter:
 
-A library could write `typedef frac_struct *frac_p;` instead ([C9](#c9)). Callers would still pass a `frac_p` without `&`. But `frac_p w;` defines only a pointer, with an indeterminate value. No `frac_struct` exists yet:
-
-```
-typedef frac_struct frac_t[1];   frac_t z;    the array: the struct itself is inline
-
-  z:  [ num | den ]
-
-typedef frac_struct *frac_p;     frac_p w;    the pointer: only an address is inline
-
-  w:  [ address ] ───▶ heap:  [ num | den ]   allocated by an init function, freed by a clear function
+```c
+void frac_keep(frac_t r)
+{
+    frac_struct *ptr = r;    /* valid */
+    frac_t copy = r;         /* error */
+}
 ```
 
-The struct must then live somewhere else. It cannot be a local variable of the init function, because a local is destroyed when its function returns ([stack and heap, C5](stack-and-heap.md#c5)). So the init function would request heap memory with `malloc` ("memory allocate": C's counterpart of `new`, which returns the address of a fresh block of the requested size). A clear function would hand it back with `free`, because C never frees heap memory on its own ([stack and heap, C2](stack-and-heap.md#c2)). Every object would cost an allocation, an extra indirection and a `free` to forget.
+Expand the typedefs to see why:
 
-The one-element array gives both at once: storage inline where the variable is defined, and a pointer wherever it is passed. The struct may still hold pointers to heap memory of its own, such as a polynomial's coefficients; only the struct itself is spared a `malloc`. The [GMP manual](https://gmplib.org/manual/Parameter-Conventions) gives the reason for the idiom: functions modify their arguments in place, and the array type gives call by reference without making the caller write `&`. It resembles a C# parameter that is always `ref`, without the `ref` at the call.
+```c
+void frac_keep(frac_struct *r)       /* the parameter was adjusted (rule two) */
+{
+    frac_struct *ptr = r;            /* a pointer initialised from a pointer: copies the address */
+    frac_struct copy[1] = r;         /* an array initialised from an address */
+}
+```
+
+`r` is a parameter, so it is a `frac_struct*`, although it is spelled `frac_t`. `copy` is a local variable, so the same spelling makes it a real array ([C7](#c7)). The first line copies an address into a pointer ([C8](#c8)). The second asks for an array to be initialised from an address. C does not allow that, for the reason of section 4: an array's initialiser must be a brace list.
+
+C also does not quietly follow `r` and copy the struct it points to. It dereferences a pointer only where the code writes `*`, `->` or `[]`. Copying the struct has to be written out:
+
+```c
+frac_t copy;
+copy[0] = r[0];        /* struct assignment: copies num and den */
+```
+
+`r[0]` is the caller's struct, `copy[0]` the local one. For `frac_t` this is a complete copy. For a GMP or FLINT type it is legal C but wrong. Their structs hold pointers to memory the library manages, such as a polynomial's coefficients. After the assignment both structs point to the same memory. Both would later free it ([copy and move, C2](../cpp/copy-and-move.md#c2) shows the same problem in C++). The libraries' own copy functions, such as `mpz_set` or `fmpz_mpoly_set`, copy that memory too.
+
+### 8. Why not a plain struct, or a pointer typedef?
+
+Compare three ways to give a function access to a `frac_struct`:
+
+```c
+frac_struct x;      frac_set(&x, 1, 2);     /* the struct, inline; the caller writes & */
+frac_struct y[1];   frac_set(y, 1, 2);      /* the struct, inline; no &, thanks to decay */
+frac_struct *w;                             /* only a pointer: no frac_struct exists yet */
+```
+
+`x` and `y` both contain a `frac_struct` (section 3). Neither needs `malloc`. So the one-element array does not save an allocation that the plain struct would need: there is none to save. Its only advantage over `x` is the missing `&`, which decay supplies at every call.
+
+A library could also write `typedef frac_struct *frac_p;` ([C9](#c9)). Callers would then pass a `frac_p` without `&` as well. But `frac_p w;` defines only a pointer, with an indeterminate value. Before anything is done through it, it must point to a `frac_struct` with storage of its own. That storage need not come from `malloc`:
+
+```c
+frac_struct storage;          /* automatic storage for the struct */
+frac_p w = &storage;          /* a pointer to it */
+```
+
+But now each object needs two variables. The typedef saves nothing over step 1. Libraries that hand out pointers therefore usually allocate the struct inside their init function. It cannot be a local variable of that function, because a local is destroyed when its function returns ([stack and heap, C5](stack-and-heap.md#c5)). So the init function calls `malloc`. A clear function calls `free`. Each object then costs an allocation, an extra indirection and a `free` to forget. [Opaque handles](opaque-handles.md) work this way on purpose, because there the caller must not know the struct's size.
+
+```
+frac_t z;                  z:  [ num | den ]                             the struct itself, inline
+
+frac_p w = &storage;       w:  [ address ] ──▶ storage:  [ num | den ]   automatic, static or allocated
+
+frac_p w = <init call>;    w:  [ address ] ──▶ heap:     [ num | den ]   from malloc in an init function,
+                                                                          freed by a clear function
+```
+
+The GMP idiom combines the two conveniences. The storage comes with the variable, as for `x`. The call needs no `&`, as for `w`. The struct may still point to heap memory of its own, such as a polynomial's coefficients; the idiom only decides where the struct itself lives. The [GMP manual](https://gmplib.org/manual/Parameter-Conventions) gives the reason for it: functions modify their arguments in place. The array type gives call by reference without making the caller write `&`. It resembles a C# parameter that is always `ref`, without the `ref` at the call.
 
 ### 9. The real types in GMP and FLINT
 
@@ -228,7 +334,14 @@ fmpz_mpoly_clear(p, ctx);              /* frees the coefficients the library all
 fmpz_mpoly_ctx_clear(ctx);
 ```
 
-**The core ends here.** The five questions from the top of this note can now be answered: what `typedef S T[1]` means (sections 2 and 7), what `T x;` creates (sections 3 and 7), why a parameter `T x` is an `S*` (section 5), why passing `x` modifies the original (section 6), and why not `typedef S* T` (section 8).
+**The core ends here.** It answers these questions:
+
+- What `typedef S T[1]` means (sections 2 and 7).
+- Why `S a;` and `S a[1];` create storage for an `S` without `malloc`, while `S *p;` creates no `S` (sections 2 and 3).
+- What `T x;` creates, and why `T x = {{...}};` has two levels of braces (section 7).
+- Why a parameter `T x` is an `S*` (section 5), and why passing `x` lets the function modify the original (section 6).
+- Why a struct can be copied but an array cannot (section 4), and why `T copy = x;` fails inside a function (section 7).
+- Why GMP prefers `typedef S T[1]` to both a plain struct and `typedef S* T` (section 8).
 
 ### Beyond the core: storing such a parameter in C++
 
@@ -326,6 +439,7 @@ Expected output on a platform with 8-byte `long`:
 
 - Using `sizeof a / sizeof a[0]` to count the elements of an array parameter. It divides the size of a pointer by the size of an element ([C2](#c2)).
 - Using an `mpz_t` or `fmpz_mpoly_t` before its init function has run. The definition reserved storage but initialised nothing ([C12](#c12)).
+- Expecting a pointer to come with an object: after `frac_p w;`, `w->num = 1;` writes through an indeterminate address ([C9](#c9)).
 - Writing `x = y;` with two `mpz_t` or `fmpz_mpoly_t` variables. It does not compile, because they are arrays ([C4](#c4)). The library's set function (`mpz_set`, `fmpz_mpoly_set`) does the copy.
 - Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([copy and move, C2](../cpp/copy-and-move.md#c2); [RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
 - Returning an `fmpz_mpoly_t` from a function. Arrays cannot be returned ([C4](#c4)). The library convention is to pass the result as the first parameter, as `frac_mul` does.
@@ -362,7 +476,7 @@ Try each one before opening its solution.
 
    <details><summary>Solution</summary>
 
-   Only a pointer, with an indeterminate value. No `frac_struct` exists. The call compiles but writes through a garbage address, which is undefined behaviour. `w` must first point to a real struct, for example one from `malloc` ([C9](#c9)).
+   Only a pointer, with an indeterminate value. No `frac_struct` exists. The call compiles but writes through a garbage address, which is undefined behaviour. `w` must first point to a real struct: `&s` for some `frac_struct s`, or a block from `malloc` ([C9](#c9)).
 
    </details>
 
@@ -386,14 +500,30 @@ Try each one before opening its solution.
 
    <details><summary>Solution</summary>
 
-   An array of one struct gives the struct's storage inline in the variable, with no `malloc` and no `free` for the struct itself. It also gives pass-by-pointer at every call without `&`, because a parameter of that type is adjusted to a pointer and the argument decays to one. A pointer typedef gives only the second: the struct would need storage of its own ([C7](#c7), [C9](#c9)).
+   A plain struct variable would give inline storage, but every call would need `&x`. A pointer typedef would spare the `&`, but it creates no struct: each object would need storage provided separately, in practice allocated by an init function. An array of one struct gives both. The storage comes with the variable. A call passes a pointer without `&`, because the parameter is adjusted and the argument decays ([C7](#c7), [C9](#c9)).
+
+   </details>
+
+7. **Explain.** Inside `void f(frac_t r)`, why does `frac_struct *ptr = r;` compile while `frac_t copy = r;` does not? How would you copy the struct?
+
+   <details><summary>Solution</summary>
+
+   `r` is a parameter, so it was adjusted to `frac_struct*`. `ptr` is a pointer, so initialising it from `r` copies an address. `copy` is a local, so it is a real array. An array can only be initialised from a brace list ([C4](#c4), [C8](#c8)). C does not follow the pointer on its own. Write `frac_t copy; copy[0] = r[0];`, a struct assignment, or for GMP and FLINT types use their set function.
+
+   </details>
+
+8. **Interpret.** What do the two pairs of braces in `frac_t z = {{1, 2}};` initialise? What are `z[0].num` and `z[0].den` after `frac_t z = {{2}};`?
+
+   <details><summary>Solution</summary>
+
+   The outer pair initialises the array, the inner pair its one `frac_struct`, member by member ([C14](#c14)). After `{{2}}`, `num` is 2 and `den` is 0, because members left out of a brace list are zero-initialised.
 
    </details>
 
 ## Sources
 
 - Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, answering Thomas's review questions on FLINT's `_t` types in the FLINT wrapper of [Tante](https://github.com/thomaswening/Tante)'s [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md) ([doubting-thomas PR #3](https://github.com/thomaswening/doubting-thomas/pull/3)).
-- Didactic review of this note by Thomas with ChatGPT, 2026-10-27, which asked for the progressive structure, the separation of the two rules, and the exercises. The advanced material moved to [pointers to arrays and multidimensional arrays](pointers-to-arrays.md) the same day.
+- Didactic review of this note by Thomas with ChatGPT, 2026-10-27, which asked for the progressive structure, the separation of the two rules, and the exercises. The advanced material moved to [pointers to arrays and multidimensional arrays](pointers-to-arrays.md) the same day. A second review, after a tutoring session, added objects against pointers, allocation, copying and brace initialisation.
 - cppreference: [arrays in C, with array-to-pointer conversion](https://en.cppreference.com/w/c/language/array), [function declarations in C](https://en.cppreference.com/w/c/language/function_declaration), [declarations in C](https://en.cppreference.com/w/c/language/declarations), [storage duration in C](https://en.cppreference.com/w/c/language/storage_duration), [array-to-pointer conversion in C++](https://en.cppreference.com/w/cpp/language/implicit_conversion#Array-to-pointer_conversion).
 - [GMP manual: Parameter Conventions](https://gmplib.org/manual/Parameter-Conventions); [FLINT documentation: fmpz_mpoly](https://flintlib.org/doc/fmpz_mpoly.html).
 - [comp.lang.c FAQ, section 6: arrays and pointers](https://c-faq.com/aryptr/index.html).
