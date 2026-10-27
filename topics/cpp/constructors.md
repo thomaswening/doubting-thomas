@@ -41,7 +41,7 @@ In C#, `new Meters(3.0)` is the only way to get a `Meters` from a `double`, unle
 
 That is sometimes what you want. `std::string` has a constructor taking a `const char*`, so a function taking a `std::string` accepts `"hello"` directly. More often it is a surprise: a `Poly` built from a context pointer, or a `Buffer` built from a size, should never appear just because an `int` was passed where a `Buffer` was expected.
 
-`explicit` switches the conversion off ([C2](#c2)). The constructor still works when you call it by name; it just never runs behind your back. The [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-explicit) make `explicit` the default for one-argument constructors, and leave it off only where the conversion is meant, as for `std::string`.
+`explicit` switches the conversion off ([C2](#c2)). The constructor still works when you call it by name; it just never runs behind your back. The [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-explicit) make `explicit` the default for one-argument constructors, and leave it off only where the conversion is meant, as for `std::string`.
 
 "Callable with one argument" includes constructors with more parameters that all but one have defaults: `Buffer(int size, int fill = 0)` converts from `int` too.
 
@@ -216,11 +216,21 @@ struct Fixed {
 };
 ```
 
+## Good habits
+
+- Mark every constructor that can be called with one argument `explicit`. Leave it off only where the conversion is the point, as for `std::string` from `"hello"` ([C1](#c1), [C2](#c2); [Core Guidelines C.46](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-explicit)).
+- Give every member of built-in type a default member initialiser, `int count = 0;`, so that no constructor can leave it indeterminate ([C4](#c4); [C.48](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-in-class-initializer)).
+- Initialise members in the member initialiser list, not by assignment in the body ([C4](#c4), [C6](#c6); [C.49](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-initialize)).
+- Write the list in declaration order. Initialise each member from the parameters, not from other members ([C5](#c5); [C.47](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-order)).
+- Build with `-Wall -Wextra` (GCC, Clang) or `/W4` (MSVC). Turn warnings into errors with `-Werror` or `/WX`. The `Buffer` bug above then stops the build ([C5](#c5)).
+- Forbid what must not happen with `= delete`: copies that would share a resource, or an overload such as `set(double)` that would convert silently ([C8](#c8); [C.81](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delete)).
+- Put shared initialisation in one constructor and delegate to it, instead of repeating the list or calling an `init()` member from every body ([C9](#c9); [C.51](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delegating)).
+
 ## Pitfalls
 
 - Leaving `explicit` off a one-argument constructor, then finding that an `int` was silently turned into a `Buffer` somewhere ([C1](#c1), [C2](#c2)).
 - Believing `explicit` has nothing to do with constructors of two or more parameters: it still blocks `Point p = {1, 2};` ([C2](#c2)).
-- Expecting members to be initialised in the order of the list ([C5](#c5)). Keep the list in declaration order and turn on `-Wall`.
+- Expecting members to be initialised in the order of the list ([C5](#c5)).
 - Expecting an `int` member to start at `0`, as in C#. Without a default member initialiser or an entry in the list, its value is indeterminate ([C4](#c4)).
 - Adding a constructor with parameters and finding that `T x;` or `std::vector<T>(10)` no longer compiles: the implicit default constructor is gone ([C7](#c7)).
 - Writing `Point p();` to mean "a default-constructed `Point`". It declares a function named `p` that returns a `Point`. Write `Point p;` or `Point p{};`.
@@ -230,5 +240,5 @@ struct Fixed {
 
 - Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, answering review questions on `explicit` and the member initialiser list in the `Poly` wrapper of [RAII and ownership](raii-and-ownership.md#examples) ([doubting-thomas PR #3](https://github.com/thomaswening/doubting-thomas/pull/3)).
 - cppreference: [converting constructor](https://en.cppreference.com/w/cpp/language/converting_constructor), [`explicit` specifier](https://en.cppreference.com/w/cpp/language/explicit), [constructors and member initialiser lists](https://en.cppreference.com/w/cpp/language/constructor), [default constructors](https://en.cppreference.com/w/cpp/language/default_constructor), [deleted functions](https://en.cppreference.com/w/cpp/language/function#Deleted_functions), [copy-initialisation](https://en.cppreference.com/w/cpp/language/copy_initialization).
-- C++ Core Guidelines: [C.46 explicit single-argument constructors](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-explicit), [C.47 initialise in declaration order](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-order), [C.49 prefer initialisation to assignment](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-initialize), [C.51 delegating constructors](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-delegating).
+- C++ Core Guidelines: [C.46 explicit single-argument constructors](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-explicit), [C.47 initialise in declaration order](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-order), [C.49 prefer initialisation to assignment](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-initialize), [C.51 delegating constructors](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delegating), [C.48 default member initialisers](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-in-class-initializer), [C.81 `= delete`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delete).
 - Microsoft Learn: [user-defined conversion operators in C#](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators).

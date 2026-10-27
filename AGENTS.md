@@ -38,8 +38,9 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 4. **`## Key claims`**: the checkable core of the note (§3).
 5. **`## Explanation`**: didactic prose that builds the idea up from what the reader already knows, in short paragraphs with subsections as needed. Say *why*, not only *what*. Link the claims it explains: `[C2](#c2)`.
 6. **`## Examples`**: worked examples and code snippets, each with its language tag and the expected output or result. Prefer small, runnable snippets.
-7. **`## Pitfalls`** (optional): common mistakes and misreadings. These make good quiz questions.
-8. **`## Exercises`** (optional): a few short tasks for active recall: predict what code does, interpret a declaration, explain a mechanism in your own words. Use it where the concept is a mechanism the reader must be able to rebuild, not for every note. Each exercise links the claims it practises. Its solution follows in a collapsed block, so that it is not read by accident:
+7. **`## Good habits`** (optional): what to write by default, for notes about writing code, such as constructors or error handling. Each habit is one imperative line that links the claim explaining why. It comes from an established source, such as the C++ Core Guidelines or a compiler's recommended warnings, not from taste. Pitfalls say what goes wrong; good habits say what to write instead. Leave the section out where the topic is understanding a mechanism, as for array decay.
+8. **`## Pitfalls`** (optional): common mistakes and misreadings. These make good quiz questions.
+9. **`## Exercises`** (optional): a few short tasks for active recall: predict what code does, interpret a declaration, explain a mechanism in your own words. Use it where the concept is a mechanism the reader must be able to rebuild, not for every note. Each exercise links the claims it practises. Its solution follows in a collapsed block, so that it is not read by accident:
 
    ```html
    <details><summary>Solution</summary>
@@ -50,7 +51,7 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
    ```
 
    The empty lines inside `<details>` are needed for GitHub to render Markdown there.
-9. **`## Sources`**: where this was learned and where to read more, as links (§5).
+10. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
 
@@ -101,7 +102,8 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 ## 6. Writing to this repository
 
 - **Notes and everything outside `results/` and `backlog.md`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
-- **At most three notes per pull request**, counting new notes and notes with substantial changes.
+- **At most three notes per pull request**, counting new notes and notes with substantial changes. A note split during review counts with all its parts. If the parts exceed the limit, they go into pull requests stacked on this one.
+- **Prerequisites first.** Before writing a note, list what its explanation relies on. Each item must be something Thomas already knows (§2) or an existing note. A missing item is a note of its own: write it first, in its own pull request. Stack the note that needs it on that branch. A note whose explanation has to stop for background is a sign that this step was skipped.
 - **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch. A topic that only *could* become a note goes into the backlog instead (§8).
 - **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
 - **Results** (`results/`) and **backlog lines** (`backlog.md`, §8) are the two exceptions: commit them directly to `main`.

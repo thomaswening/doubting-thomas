@@ -35,6 +35,12 @@ tags: []
 // snippet
 ```
 
+## Good habits
+
+<Optional, for notes about writing code. Delete this section otherwise.>
+
+- <Do this by default ([C1](#c1); source).>
+
 ## Pitfalls
 
 - <Common mistakes and misreadings.>
