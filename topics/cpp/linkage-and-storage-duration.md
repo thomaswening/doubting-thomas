@@ -2,7 +2,7 @@
 title: Linkage and storage duration
 area: cpp
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-27
 prerequisites: [cpp/header-only-libraries]
 related: [cpp/const-and-constexpr, c/stack-and-heap, cpp/abi-and-shared-libraries]
 projects: [partonforge]
@@ -16,6 +16,7 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 - A **translation unit** is one `.cpp` file with its `#include`s pasted in. Each is compiled on its own, and the linker joins them.
 - **Linkage** says whether a name in one translation unit means the same thing as that name in another. **External** linkage: shared by the whole program. **Internal** linkage: private to its file.
 - An **unnamed namespace**, `namespace { … }`, gives everything in it internal linkage. It is the C++ way to write file-local helpers, like a `file class` in C#.
+- An unnamed namespace usually sits **inside** the project's namespace. Linkage is the same either way, but code in that namespace then finds the helpers first, and the helpers can use the namespace's names without a prefix.
 - **Storage duration** says when an object is created and destroyed. Locals have automatic duration; globals and `static` locals live for the whole program.
 - The keyword `static` means three different things: internal linkage at namespace scope, static duration on a local, and "shared by all objects" on a class member.
 - A `static` variable defined in a header gives every file that includes it a copy of its own. An `inline` variable gives one, shared.
@@ -30,6 +31,7 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 - <a id="c6"></a>**C6.** A local variable declared `static` has static storage duration: it is initialised the first time control passes through its declaration, keeps its value between calls, and is destroyed when the program ends. Since C++11 that initialisation is thread-safe.
 - <a id="c7"></a>**C7.** Linkage and storage duration are independent: a `static` local has static storage duration but no linkage, a variable in an unnamed namespace has static storage duration and internal linkage, and an ordinary local has automatic storage duration and no linkage.
 - <a id="c8"></a>**C8.** A `static` data member or member function of a class belongs to the class, not to any object, like a `static` member in C#.
+- <a id="c9"></a>**C9.** An unnamed namespace behaves like a namespace with a unique name plus a `using` directive for it in the enclosing namespace. So an unnamed namespace inside `namespace pf` gives the same internal linkage as one at global scope, but its names are found as if declared in `pf`: code in `pf` finds them before any global function of the same name, and the helpers use `pf`'s names without `pf::`. At global scope, a helper with the same name and parameters as a global function makes an unqualified call ambiguous.
 
 ## Explanation
 
@@ -44,6 +46,12 @@ For that to work, a name must mean the same thing in every file that uses it. Th
 Helpers that only one file needs should not be visible to the linker at all. Two files might each have a helper called `trimmed`, and with external linkage the link would fail. **Internal linkage** makes a name private to its translation unit ([C3](#c3)).
 
 C++ offers two ways to get it. The modern one is an unnamed namespace: everything inside `namespace { … }` is file-local, types included. The older one is `static` in front of a function or variable at namespace scope. It cannot be applied to a class, which is one reason the unnamed namespace is preferred. The nearest C# feature is the `file` access modifier of C# 11, which makes a type visible only in its source file.
+
+### Inside or outside the project's namespace
+
+Where should the unnamed namespace go: at the top of the file, or inside the project's namespace, as in `namespace pf { namespace { … } }`? For linkage it doesn't matter. Both make the helpers file-local ([C9](#c9)).
+
+It matters for **name lookup**, the compiler's search for what an unqualified name like `trimmed(x)` refers to. The compiler treats an unnamed namespace as if it had a unique name and the enclosing namespace said `using namespace` for it. Inside `pf`, the helpers are therefore found as if they were declared in `pf`. A function in `pf` searches `pf` first and stops there, so a global function `trimmed` from some header never competes. And the helpers can name `pf`'s types and constants without the `pf::` prefix. At global scope, the helpers compete with every global function of the same name, and an identical one makes the call ambiguous. So the convention is to put the unnamed namespace inside the project's namespace. It is a convention, not a rule: a file whose helpers use only `std` names and clash with nothing works either way.
 
 `const` and `constexpr` globals are file-local by default in C++ ([C4](#c4)). That is why a header can define `const int kColumns = 26;` without a link error. C differs here.
 
@@ -133,15 +141,53 @@ GridDiff diff_grid_files(/* ... */) { /* uses trimmed */ }   // external: part o
 }  // namespace pf
 ```
 
+Why inside `pf` ([C9](#c9)): a function in `pf` finds the file-local helper before a global one of the same name.
+
+```cpp
+#include <iostream>
+
+int helper() { return 1; }   // a global function, say from some header
+
+namespace pf {
+namespace {
+int helper() { return 2; }   // file-local, inside pf
+}  // namespace
+
+int answer() { return helper(); }
+}  // namespace pf
+
+int main() { std::cout << pf::answer() << '\n'; }
+```
+
+Output:
+
+```text
+2
+```
+
+The same helper in an unnamed namespace at global scope clashes:
+
+```cpp
+int helper() { return 1; }
+
+namespace {
+int helper() { return 2; }
+}  // namespace
+
+int main() { return helper(); }   // error: call of overloaded 'helper()' is ambiguous
+```
+
 ## Pitfalls
 
 - Putting `static int counter;` in a header to share it. Every file gets its own ([C5](#c5)). Use `inline int counter;`.
 - Reading `static` on a local as "compile-time constant". It is about lifetime ([C6](#c6)); a compile-time constant is `constexpr` ([const and constexpr](const-and-constexpr.md)).
 - Giving file-local helpers external linkage. It works until another file has a helper with the same name, then the link fails ([C2](#c2), [C3](#c3)).
 - Assuming C's rule for `const` globals in C++, or the reverse ([C4](#c4)).
+- Thinking an unnamed namespace inside `pf` makes its helpers visible to other files that use `pf`. It doesn't: linkage stays internal, and only lookup within this file changes ([C9](#c9)).
 
 ## Sources
 
 - Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-10-25: Thomas's review of [PR 1](https://github.com/thomaswening/PartonForge/pull/1), on the unnamed namespace in `grid_diff.cpp` and on `static const char* two[]`.
+- Claude session on PartonForge, 2026-10-27: Thomas's question why `src/fortran_io.cpp` puts its unnamed namespace inside `namespace pf`. Source of [C9](#c9).
 - Backlog entry `cpp/linkage-and-storage-duration`, from C++ Intermediate Quiz: Round 3, question 3 (2026-10-21).
 - [cppreference: storage class specifiers](https://en.cppreference.com/w/cpp/language/storage_duration) (linkage and storage duration), [namespaces](https://en.cppreference.com/w/cpp/language/namespace#Unnamed_namespaces), [`inline` specifier](https://en.cppreference.com/w/cpp/language/inline).
