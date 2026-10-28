@@ -9,6 +9,8 @@ Start at [topics/index.md](topics/index.md). Each area has an index, and each no
 - **TL;DR**: the gist in a few bullets.
 - **Key claims**: numbered statements (C1, C2, …) that are true on their own. These are what a quiz is built from and graded against.
 - **Explanation**, **Examples** with snippets, **Pitfalls** and **Sources**.
+- **Good habits** in notes about writing code: what to write by default, and why.
+- **Exercises** in some notes, with solutions folded away: try them before unfolding.
 
 Formulas are written in LaTeX and render on GitHub. The front matter's `projects` field says which of my projects a note came from or matters to, and the projects' names link to their repositories.
 
@@ -22,7 +24,7 @@ Or: "Look at my results and quiz me on my weak spots", or "What haven't I been t
 
 ## How notes get here
 
-Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. A note is a general concept I could be quizzed on, such as greatest common divisors or how a GitHub Actions workflow runs. How I work and what a project decided live elsewhere ([AGENTS.md](AGENTS.md#what-makes-a-note)). Topics I'm not ready to read about yet go into [backlog.md](backlog.md); proposals show some of them separately, and I weed out what I don't need when they come up. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results and backlog lines are the exceptions and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-sources-and-confidentiality).
+Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. A note is a general concept I could be quizzed on, such as greatest common divisors or how a GitHub Actions workflow runs. How I work and what a project decided live elsewhere ([AGENTS.md](AGENTS.md#what-makes-a-note)). Topics I'm not ready to read about yet go into [backlog.md](backlog.md); proposals show some of them separately, and I weed out what I don't need when they come up. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results and backlog lines are the exceptions and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-projects-sources-and-confidentiality).
 
 ## Layout
 
@@ -32,4 +34,5 @@ results/                  how I did when tested
 templates/                starting points for a note and a results file
 backlog.md                topics that could become notes later
 AGENTS.md                 the rules for any AI working here
+tools/check_docs.py       the link check every pull request runs (AGENTS.md §9)
 ```

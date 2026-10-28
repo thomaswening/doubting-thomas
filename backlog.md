@@ -6,10 +6,10 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 ## cpp
 
-- `cpp/linkage-and-storage-duration`: external versus internal linkage in C++, namespace-scope `static`, translation units, and how linkage differs from storage duration; why a `static` variable defined in a header produces a separate instance per translation unit. Came up in C++ Intermediate Quiz: Round 3, question 3 (2026-10-21).
-- `cpp/references`: what `T&` and `const T&` are, how a reference differs from a pointer, and how both compare to C#'s `ref` and `in`. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (`int& first`, `const Poly&`).
 - `cpp/copy-elision`: when the compiler builds a returned object directly in the caller's variable instead of moving or copying it (RVO, NRVO; guaranteed for temporaries since C++17). Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (returning a `unique_ptr`).
 - `cpp/vector-growth`: how `std::vector` grows (size, capacity, reallocation) and which references, pointers and iterators into it a `push_back` invalidates. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (the use-after-free example in `cpp/sanitizers`).
+- `cpp/static-analysis` (update): the four parts of a `.clang-tidy` file (`Checks`, `WarningsAsErrors`, `HeaderFilterRegex`, `CheckOptions`) and their .NET counterparts (enabled analyser rules, `TreatWarningsAsErrors`, `.editorconfig` settings). Came up in the review of [claude-config PR #10](https://github.com/thomaswening/claude-config/pull/10) (the clang-tidy template of the `coding-guideline` skill).
+- `cpp/static-analysis` (update): why clang-tidy needs `compile_commands.json`: it parses each file like the compiler, so it needs the same include paths, defines and language standard. Came up in the review of [claude-config PR #10](https://github.com/thomaswening/claude-config/pull/10) (the clang-tidy template of the `coding-guideline` skill).
 
 ## tools
 
@@ -27,6 +27,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## testing
 
 - `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `testing/arrange-act-assert`: the arrange, act and assert structure of a unit test, and why one behaviour and one act per test makes a failure readable. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (the test style guide).
 
 ## documentation
 
@@ -64,3 +65,16 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 - `formats/preserving-unknown-data`: editing selected metadata while copying unfamiliar frames, chunks and audio unchanged; why parsing and reserializing everything can lose information. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
 - `formats/conservative-writing`: why a reader may display a file that an editor should refuse to modify; unsupported flags, ambiguous duplicates and incomplete parsing. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
+
+## regex
+
+- `regex/capturing-groups`: how capturing groups are numbered (by opening parenthesis, group 0 the whole match), and non-capturing groups `(?:...)`. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+
+## dotnet
+
+- `dotnet/linq-query-syntax`: LINQ query syntax read as nested loops; `from ... from ...` as `SelectMany`, and when it reads better than method syntax. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+- `dotnet/single-versus-first`: `Single` versus `First` as a stated assumption, and xUnit's `Assert.Single` as an assertion that also returns the element. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`AppCommandsTests`, `DiagnosticLogTests`).
+
+## github
+
+- `github/reviewing-existing-code`: GitHub's three-dot pull request diff, and reviewing code already on `main` through a draft PR against a base branch without it. Came up in [CrateEdit PR #22](https://github.com/thomaswening/CrateEdit/pull/22).
