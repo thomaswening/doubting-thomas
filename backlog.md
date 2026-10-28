@@ -40,7 +40,6 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## bash
 
 - `bash/exit-status-and-conditional-execution`: success/failure exit statuses, command -v, and conditional execution with ||. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
-- `bash/streams-redirection-and-pipes`: standard input, output and error; discarding output with >/dev/null; passing output through a pipe. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
 - `bash/command-substitution`: how $(...) inserts a command's output into another command, including inside double quotes. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
 
 ## python
