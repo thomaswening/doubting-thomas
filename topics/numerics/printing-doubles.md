@@ -2,7 +2,7 @@
 title: Printing a double as decimal text
 area: numerics
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-28
 prerequisites: [c/format-strings]
 related: [numerics/ball-arithmetic, testing/golden-results-and-dependency-updates]
 projects: [partonforge]
@@ -38,7 +38,19 @@ A `double` stores a number as a sign, a binary exponent and a 53-bit binary sign
 
 ### How many digits
 
-53 bits correspond to just under 16 decimal digits. That is too few to tell every pair of neighbouring `double`s apart in decimal, because the spacing of binary and decimal numbers doesn't line up. 17 digits are always enough: two different `double`s never print as the same 17 digits, so the text identifies its `double` uniquely ([C2](#c2)). 15 digits are not. `0.1 + 0.2` is a `double` just above 0.3, and 15 digits round it to `0.3`, which is the text for a different `double`. That is the same reason `0.1 + 0.2 == 0.3` is false.
+53 bits correspond to just under 16 decimal digits ($53 \log_{10} 2 \approx 15.95$). Whether a digit count is enough depends on two gaps: the gap between neighbouring `double`s, and the step between neighbouring decimal texts of that length. If the decimal step is smaller than the `double` gap, every `double` gets a text of its own. If it is larger, two neighbouring `double`s can round to the same text. Neither is constant along the number line. The `double` gap doubles at every power of two. The decimal step grows tenfold at every power of ten. So whether 16 digits are enough depends on where the value lies:
+
+| Neighbouring `double`s | Their gap | 16 digits | 17 digits |
+|---|---|---|---|
+| 1.0 and the next `double` | $2^{-52} \approx 2.2 \times 10^{-16}$ | both `1.000000000000000` | `1.0000000000000000`, `1.0000000000000002` |
+| 8.0 and the next `double` | $2^{-49} \approx 1.8 \times 10^{-15}$ | `8.000000000000000`, `8.000000000000002` | `8.0000000000000000`, `8.0000000000000018` |
+| `0.3` and `0.1 + 0.2` | $2^{-54} \approx 5.6 \times 10^{-17}$ | both `0.3000000000000000` | `0.29999999999999999`, `0.30000000000000004` |
+
+- **Near 1, 16 digits fail.** Their step is $10^{-15}$, more than four times the `double` gap, so 1.0 and its neighbour print the same.
+- **Near 8, 16 digits happen to work.** The `double` gap there is wider than the step of $10^{-15}$.
+- **17 digits always work.** Their step is $10^{-16}$ near 1 and $10^{-17}$ near 0.3, smaller than the `double` gap in each row. That holds for every `double`, so two different `double`s never print as the same 17 digits, and the text identifies its `double` uniquely ([C2](#c2)).
+
+The third row is the well-known case. The literal `0.3` gives the `double` just below 0.3, and `0.1 + 0.2` gives its neighbour just above. 15 and 16 digits both print the second one as `0.3`, which is the text of the first. That is the same reason `0.1 + 0.2 == 0.3` is false.
 
 17 digits are enough for the round trip but often more than needed. The shortest text that reads back exactly is often much shorter ([C4](#c4)). Since .NET Core 3.0, `double.ToString()` prints exactly that, so C# shows `0.1`. C's `printf` has no such mode. A program that must print a fixed number of digits, as a file format may require, uses 17.
 
@@ -93,6 +105,37 @@ Expected output:
 - Lines 2 and 3: 15 digits hide the difference that 17 digits show ([C2](#c2)).
 - Lines 4 and 5: the `double` `1e23` is below $10^{23}$, but its `log10` is exactly 23 ([C6](#c6)).
 - Lines 6 and 7: `-0.0` equals zero, isn't less than zero, has its sign bit set and prints with a minus ([C7](#c7)). A comparison or `std::signbit` passed to `printf` is promoted to `int`, so `%d` prints 0 or 1.
+
+The table in [How many digits](#how-many-digits), printed. `std::nextafter(x, y)` returns the next `double` after `x` in the direction of `y`:
+
+```cpp
+#include <cmath>
+#include <cstdio>
+
+int main() {
+    const double after_one = std::nextafter(1.0, 2.0);
+    const double after_eight = std::nextafter(8.0, 16.0);
+    // From 1 to 10, %.15f shows 16 significant digits and %.16f shows 17.
+    std::printf("%.15f %.15f\n", 1.0, after_one);
+    std::printf("%.16f %.16f\n", 1.0, after_one);
+    std::printf("%.15f %.15f\n", 8.0, after_eight);
+    std::printf("%.16f %.16f\n", 8.0, after_eight);
+    // From 0.1 to 1, the first decimal is the first significant digit.
+    std::printf("%.16f %.16f\n", 0.3, 0.1 + 0.2);
+    std::printf("%.17f %.17f\n", 0.3, 0.1 + 0.2);
+}
+```
+
+Expected output:
+
+```text
+1.000000000000000 1.000000000000000
+1.0000000000000000 1.0000000000000002
+8.000000000000000 8.000000000000002
+8.0000000000000000 8.0000000000000018
+0.3000000000000000 0.3000000000000000
+0.29999999999999999 0.30000000000000004
+```
 
 The decimal exponent of 13.354993539365465, read from text as PartonForge's `decimal_exponent` does ([C5](#c5)):
 
