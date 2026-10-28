@@ -34,7 +34,11 @@ tags: [ieee-754, double, round-trip, significant-digits, decimal-exponent, signe
 
 ### Binary numbers, decimal text
 
-A `double` stores a number as a sign, a binary exponent and a 53-bit binary significand ([C1](#c1)). Only fractions whose denominator is a power of two are exact. 0.5 is, 0.1 is not: the literal `0.1` gives the nearest `double`, which is a little above 0.1 ([C3](#c3)). So printing a `double` in decimal is always a choice of how many digits to show, and the question is how many are needed.
+A `double` stores a number as a sign, a binary exponent and a 53-bit binary significand ([C1](#c1)). Only fractions whose denominator is a power of two are exact.
+
+This is the binary version of something familiar from decimal. A fraction in lowest terms has a finite expansion in base $b$ only if every prime factor of its denominator divides $b$. In base 10 = 2 · 5, 1/4 = 0.25 and 1/5 = 0.2 end, but 1/3 = 0.333… repeats forever, because 3 doesn't divide 10. In base 2 only the factor 2 is allowed. So 1/2 = 0.1₂ ends, but 1/10 = 1/(2 · 5) repeats forever: 0.000110011001100…₂.
+
+A `double` cuts that repetition off after 53 significant bits and rounds. So the literal `0.1` gives the nearest `double`, which is a little above 0.1 ([C3](#c3)). Printing a `double` in decimal is therefore always a choice of how many digits to show. The question is how many are needed.
 
 ### How many digits
 
