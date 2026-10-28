@@ -4,6 +4,8 @@ This file is the single rulebook for any AI that reads or writes this repository
 
 **What this repository is.** Thomas's personal knowledge base. Every note records something he has learned, written so that he can read it as a reference and so that an AI can build exercises and quizzes from it. The `results/` folder logs how he did when tested, so that weak spots and topics to refresh can be found later.
 
+<a id="what-makes-a-note"></a>**What makes a note.** A general concept Thomas learned, one he could be quizzed on outside the project where he met it: a piece of mathematics (greatest common divisor), a tool and how it works (what a GitHub Actions workflow is, and how its trigger, jobs and steps fit together). Not a working rule or a decision about how he works ("document every CI check as a rule with a table of cases"): that belongs in his Claude configuration or in the project's documents. Not a project fact either ("Tante pins FLINT 3.6.0"). Decided by Thomas, 25 October 2026.
+
 **Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour. Where a concept has a .NET counterpart, compare to it.
 
 **Language.** Always English.

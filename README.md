@@ -24,7 +24,7 @@ Or: "Look at my results and quiz me on my weak spots", or "What haven't I been t
 
 ## How notes get here
 
-Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. Topics I'm not ready to read about yet go into [backlog.md](backlog.md); proposals show some of them separately, and I weed out what I don't need when they come up. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results and backlog lines are the exceptions and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-projects-sources-and-confidentiality).
+Claude proposes notes at natural checkpoints in a working session, and I pick which ones to keep. A note is a general concept I could be quizzed on, such as greatest common divisors or how a GitHub Actions workflow runs. How I work and what a project decided live elsewhere ([AGENTS.md](AGENTS.md#what-makes-a-note)). Topics I'm not ready to read about yet go into [backlog.md](backlog.md); proposals show some of them separately, and I weed out what I don't need when they come up. Notes arrive as pull requests, and merging one is my review: everything on `main` I have read. Quiz results and backlog lines are the exceptions and go straight to `main`. Nothing from an employer's or client's code goes in; see [AGENTS.md §5](AGENTS.md#5-projects-sources-and-confidentiality).
 
 ## Layout
 
