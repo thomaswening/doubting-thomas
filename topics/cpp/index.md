@@ -10,3 +10,5 @@
 - [const and constexpr](const-and-constexpr.md): `const` is C#'s `readonly`, `constexpr` is C#'s `const`, and `const` member functions.
 - [References and pointers](references.md): `T&` and `const T&` against `T*`, compared with C#'s `ref` and `in`, and why `auto` copies.
 - [Linkage and storage duration](linkage-and-storage-duration.md): translation units, unnamed namespaces, the three meanings of `static`, and `inline` variables.
+- [Arrays, std::array, std::vector and std::span](arrays-and-containers.md): built-in arrays against `std::array`, `std::vector` as `List<T>`, and `std::span` as `Span<T>`.
+- [main, its arguments and exit codes](program-entry-and-exit-codes.md): `argc` and `argv` against C#'s `args`, the exit status, and the 0 / 1 / 2 convention.
