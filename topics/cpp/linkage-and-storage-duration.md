@@ -2,7 +2,7 @@
 title: Linkage and storage duration
 area: cpp
 created: 2026-10-25
-updated: 2026-10-27
+updated: 2026-10-29
 prerequisites: [cpp/header-only-libraries]
 related: [cpp/const-and-constexpr, c/stack-and-heap, cpp/abi-and-shared-libraries]
 projects: [partonforge]
@@ -14,11 +14,11 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 ## TL;DR
 
 - A **translation unit** is one `.cpp` file with its `#include`s pasted in. Each is compiled on its own, and the linker joins them.
-- **Linkage** says whether a name in one translation unit means the same thing as that name in another. **External** linkage: shared by the whole program. **Internal** linkage: private to its file.
+- **Linkage** says whether a name in one translation unit means the same thing as that name in another. **External** linkage: shared by the whole program. **Internal** linkage: private to its translation unit.
 - An **unnamed namespace**, `namespace { … }`, gives everything in it internal linkage. It is the C++ way to write file-local helpers, like a `file class` in C#.
 - An unnamed namespace usually sits **inside** the project's namespace. Linkage is the same either way, but code in that namespace then finds the helpers first, and the helpers can use the namespace's names without a prefix.
 - **Storage duration** says when an object is created and destroyed. Locals have automatic duration; globals and `static` locals live for the whole program.
-- The keyword `static` means three different things: internal linkage at namespace scope, static duration on a local, and "shared by all objects" on a class member.
+- The keyword `static` means three different things: internal linkage at namespace scope (outside any function or class, including the global scope outside every namespace), static duration on a local, and "shared by all objects" on a class member.
 - A `static` variable defined in a header gives every file that includes it a copy of its own. An `inline` variable gives one, shared.
 
 ## Key claims
@@ -43,9 +43,11 @@ For that to work, a name must mean the same thing in every file that uses it. Th
 
 ### File-local code
 
+A **named** namespace such as `pf` does not change linkage. It only adds a prefix to the name: `pf::diff_grid_files` is one function for the whole program, just as a global `diff_grid_files` would be. *Namespace scope* means anywhere outside a function or class, in a named namespace or in the global scope.
+
 Helpers that only one file needs should not be visible to the linker at all. Two files might each have a helper called `trimmed`, and with external linkage the link would fail. **Internal linkage** makes a name private to its translation unit ([C3](#c3)).
 
-C++ offers two ways to get it. The modern one is an unnamed namespace: everything inside `namespace { … }` is file-local, types included. The older one is `static` in front of a function or variable at namespace scope. It cannot be applied to a class, which is one reason the unnamed namespace is preferred. The nearest C# feature is the `file` access modifier of C# 11, which makes a type visible only in its source file.
+C++ offers two ways to get it. The modern one is an unnamed namespace: everything inside `namespace { … }` is file-local, types included. It works because the compiler gives each unnamed namespace a hidden name that is different in every translation unit. A helper in it is then, say, `__unique_a::trimmed` in one file and `__unique_b::trimmed` in another, so no other file can name it. The older one is `static` in front of a function or variable at namespace scope. It cannot be applied to a class, which is one reason the unnamed namespace is preferred. The nearest C# feature is the `file` access modifier of C# 11, which makes a type visible only in its source file.
 
 ### Inside or outside the project's namespace
 
@@ -54,6 +56,8 @@ Where should the unnamed namespace go: at the top of the file, or inside the pro
 It matters for **name lookup**, the compiler's search for what an unqualified name like `trimmed(x)` refers to. The compiler treats an unnamed namespace as if it had a unique name and the enclosing namespace said `using namespace` for it. Inside `pf`, the helpers are therefore found as if they were declared in `pf`. A function in `pf` searches `pf` first and stops there, so a global function `trimmed` from some header never competes. And the helpers can name `pf`'s types and constants without the `pf::` prefix. At global scope, the helpers compete with every global function of the same name, and an identical one makes the call ambiguous. So the convention is to put the unnamed namespace inside the project's namespace. It is a convention, not a rule: a file whose helpers use only `std` names and clash with nothing works either way.
 
 `const` and `constexpr` globals are file-local by default in C++ ([C4](#c4)). That is why a header can define `const int kColumns = 26;` without a link error. C differs here.
+
+To remember it, picture C++ writing an invisible `static` in front of every namespace-scope `const`. C++ made that choice so that a constant could move into a header and replace a `#define`, with every file getting its own copy and no clash at link time. C is older and kept the ordinary rule. To share one `const` object across files in C++, write `inline const` (C++17) or `extern const`.
 
 ### static in a header
 
