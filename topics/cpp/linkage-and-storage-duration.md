@@ -2,7 +2,7 @@
 title: Linkage and storage duration
 area: cpp
 created: 2026-10-25
-updated: 2026-10-29
+updated: 2026-10-30
 prerequisites: [cpp/header-only-libraries]
 related: [cpp/const-and-constexpr, c/stack-and-heap, cpp/abi-and-shared-libraries]
 projects: [partonforge]
@@ -180,6 +180,15 @@ int helper() { return 2; }
 
 int main() { return helper(); }   // error: call of overloaded 'helper()' is ambiguous
 ```
+
+The clash comes from name lookup, which sees only the declarations in the current translation unit. So it depends on whether this file can see the global `helper()`, not on where that function is defined. Checked with GCC 13.3, with the unnamed-namespace `helper()` in `main.cpp`:
+
+| The global `helper()` | Result |
+|---|---|
+| Defined in `a.cpp`, not declared in `main.cpp` | Compiles, links and prints `2`. Lookup in `main.cpp` does not see the global function, and the linker sees no clash because the unnamed one has internal linkage. |
+| Defined in `a.cpp`, declared in `main.cpp`, for example through a header | `error: call of overloaded 'helper()' is ambiguous` |
+
+A function from another file is normally used through its header, so the second row is the usual case.
 
 ## Pitfalls
 
