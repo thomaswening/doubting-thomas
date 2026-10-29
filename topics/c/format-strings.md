@@ -2,7 +2,7 @@
 title: printf format strings
 area: c
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-29
 prerequisites: [c/strings]
 related: [numerics/printing-doubles]
 projects: [partonforge]
@@ -23,12 +23,14 @@ tags: [c, printf, snprintf, format-string, conversion-specification, precision, 
 
 - <a id="c1"></a>**C1.** `printf` writes to standard output, `fprintf` to a `FILE*`, `sprintf` to a character buffer without knowing its size, and `snprintf` to a buffer whose size it is given (the `n`); `sprintf` can write past the end of the buffer, `snprintf` cannot.
 - <a id="c2"></a>**C2.** A conversion specification consists of `%`, optional flags, an optional minimum width, an optional precision written as `.` followed by a number, an optional length modifier, and a conversion letter, in that order; in `%016llX`, `0` is a flag, `16` the width, `ll` the length modifier and `X` the conversion.
-- <a id="c3"></a>**C3.** The conversion letter chooses the representation: `d` (or `i`) a signed integer in base 10, `u` an unsigned integer in base 10, `x` and `X` an unsigned integer in base 16 with lower-case or upper-case letters, `o` base 8, `f` a floating-point value without exponent, `e` and `E` with exponent, `g` whichever of the two is shorter, `s` a string, `c` a character, `%%` a literal `%`.
+- <a id="c3"></a>**C3.** *(withdrawn 2026-10-29: %g does not pick the shorter form; see [C9](#c9) and [C10](#c10))* The conversion letter chooses the representation: `d` (or `i`) a signed integer in base 10, `u` an unsigned integer in base 10, `x` and `X` an unsigned integer in base 16 with lower-case or upper-case letters, `o` base 8, `f` a floating-point value without exponent, `e` and `E` with exponent, `g` whichever of the two is shorter, `s` a string, `c` a character, `%%` a literal `%`.
 - <a id="c4"></a>**C4.** For `f`, `e` and `E`, the precision is the number of digits after the decimal point, 6 if none is given; `e` and `E` write exactly one digit before the point, so `%.16E` writes 17 significant digits. For `g`, the precision is the number of significant digits.
 - <a id="c5"></a>**C5.** The width is a minimum number of characters: a shorter value is padded with blanks on the left (right-justified), or on the right with the `-` flag, or with leading zeros with the `0` flag; a longer value is written in full, never cut.
 - <a id="c6"></a>**C6.** A `*` in place of the width or the precision takes that number from the argument list, as an `int` that comes before the value: `printf("%.*f", 3, x)` prints `x` with 3 decimals.
 - <a id="c7"></a>**C7.** The length modifier states the argument's type: `hh` for `char`, `h` for `short`, `l` for `long`, `ll` for `long long`, `z` for `size_t`, `L` for `long double`. A `double` needs none, and a `float` argument is converted to `double` when passed to `printf`. Nothing checks at run time that the argument matches; a mismatch is undefined behaviour, which compilers warn about when the format string is a literal.
 - <a id="c8"></a>**C8.** `%e` writes at least two exponent digits (`e-03`, never `e-3`), and `%.0f` writes no decimal point at all; the `#` flag forces the point, so `%#.0f` of `1e16` gives `10000000000000000.`.
+- <a id="c9"></a>**C9.** The conversion letter chooses the representation: `d` (or `i`) a signed integer in base 10, `u` an unsigned integer in base 10, `x` and `X` an unsigned integer in base 16 with lower-case or upper-case letters, `o` base 8, `f` a floating-point value without exponent, `e` and `E` with exponent, `g` either `f` or `e` style depending on the value's decimal exponent, `s` a string, `c` a character, `%%` a literal `%`.
+- <a id="c10"></a>**C10.** `%g` with precision $P$ (6 if omitted, 1 if 0) takes the decimal exponent $X$ that `e` style would write and uses `e` style if $X < -4$ or $X \ge P$, otherwise `f` style; then it removes trailing zeros and a trailing decimal point, unless the `#` flag is given. It does not pick the shorter form: `%g` of `0.0001` prints `0.0001`, not the shorter `1e-04`.
 
 ## Explanation
 
@@ -54,7 +56,11 @@ Most placeholders use only a few parts: `%d`, `%5d`, `%.2f`.
 
 ### What the letter means
 
-The letter is about **representation**, not type ([C3](#c3)). `d` stands for *decimal*, base 10, as opposed to `x` for hexadecimal or `o` for octal. All three print integers. Similarly `f` stands for *fixed-point*, not "float": it prints a `double` as plain digits with a decimal point, whereas `e` uses exponent notation. The type of the argument is the length modifier's job ([C7](#c7)). `%X` expects an `unsigned int`, 32 bits on the usual platforms. To print a 64-bit value in hexadecimal, write `%llX` and pass an `unsigned long long`.
+The letter is about **representation**, not type ([C9](#c9)). `d` stands for *decimal*, base 10, as opposed to `x` for hexadecimal or `o` for octal. All three print integers. Similarly `f` stands for *fixed-point*, not "float": it prints a `double` as plain digits with a decimal point, whereas `e` uses exponent notation.
+
+`g` stands for *general*: it chooses between `f` and `e` by a fixed rule, not by length ([C10](#c10)). It first works out the exponent $X$ the value would get in `e` style. If that exponent is very small ($X < -4$) or at least the number of significant digits $P$, plain digits would need padding zeros that carry no information, so `g` uses `e` style. Otherwise it uses `f` style. Then it removes trailing zeros. So `0.0001` ($X = -4$) stays `0.0001`, although `1e-04` would be one character shorter, and `0.00001` ($X = -5$) becomes `1e-05`.
+
+The type of the argument is the length modifier's job ([C7](#c7)). `%X` expects an `unsigned int`, 32 bits on the usual platforms. To print a 64-bit value in hexadecimal, write `%llX` and pass an `unsigned long long`.
 
 ### Precision and width
 
@@ -99,16 +105,49 @@ Expected output:
 Line by line:
 
 1. Width 5 pads on the left ([C5](#c5)). With `-` it pads on the right, and with `0` it pads with zeros.
-2. The same number 255 in base 16, then 8 in base 8 ([C3](#c3)).
+2. The same number 255 in base 16, then 8 in base 8 ([C9](#c9)).
 3. `%f` defaults to 6 decimals ([C4](#c4)). `%.0f` drops the point, and `#` brings it back ([C8](#c8)).
 4. `%e` uses a two-digit exponent ([C8](#c8)). `%.16E` writes 17 significant digits with a capital `E`.
 5. The precision 3 comes from the argument list ([C6](#c6)).
 6. `0` flag, width 16, `ll` because `255ULL` is an `unsigned long long`, `X` for upper-case hexadecimal ([C2](#c2)).
-7. `g` switches to exponent notation for small values. It also drops trailing zeros.
+7. `0.0001` has exponent $-4$, so `g` keeps `f` style. `0.00001` has exponent $-5$, so `g` switches to `e` style ([C10](#c10)). Both lose their trailing zeros.
+
+The rule of `%g` in more cases:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    printf("[%g] [%g]\n", 0.0001, 0.00001);
+    printf("[%g] [%g]\n", 123456.0, 1234567.0);
+    printf("[%g] [%#g]\n", 0.5, 0.5);
+    printf("[%.3g] [%.3g]\n", 123.0, 1234.0);
+    printf("[%g]\n", 999999.5);
+    return 0;
+}
+```
+
+Expected output:
+
+```text
+[0.0001] [1e-05]
+[123456] [1.23457e+06]
+[0.5] [0.500000]
+[123] [1.23e+03]
+[1e+06]
+```
+
+1. The boundary at the small end: exponent $-4$ gives `f` style, $-5$ gives `e` style, regardless of which is shorter.
+2. The boundary at the large end, with $P = 6$: exponent 5 gives `f` style, exponent 6 gives `e` style, rounded to 6 significant digits ([C4](#c4)).
+3. `#` keeps the trailing zeros. `0.5` in `f` style with 6 significant digits is `0.500000`.
+4. With $P = 3$, exponent 2 still fits, exponent 3 does not.
+5. The exponent is the one after rounding: `999999.5` rounded to 6 significant digits is `1.00000e+06`, so $X = 6$ and `g` uses `e` style.
 
 ## Pitfalls
 
-- Reading `%d` as "double". It prints an `int` in base 10; a `double` passed to it is undefined behaviour ([C3](#c3), [C7](#c7)).
+- Reading `%d` as "double". It prints an `int` in base 10; a `double` passed to it is undefined behaviour ([C9](#c9), [C7](#c7)).
+- Expecting `%g` to pick the shorter of `f` and `e` style. It decides by the exponent: `0.0001` prints as `0.0001`, not `1e-04` ([C10](#c10)).
 - Printing a 64-bit integer with `%d` or `%X`. Without `ll` (or `z` for `size_t`), the format reads the wrong type ([C7](#c7)).
 - Expecting the width to cut a long value. It only pads ([C5](#c5)).
 - Reading the precision of `%.16E` as 16 significant digits. It is 16 digits after the point, 17 in total ([C4](#c4)).
