@@ -2,7 +2,7 @@
 title: Arrays, std::array, std::vector and std::span
 area: cpp
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-29
 prerequisites: [c/array-parameters, cpp/references]
 related: [cpp/raii-and-ownership, cpp/copy-and-move, cpp/const-and-constexpr]
 projects: [partonforge]
@@ -17,7 +17,7 @@ tags: [cpp, array, std-array, vector, span, decay, list]
 - `std::array<T, N>` stores the same elements the same way, but behaves like a value: it can be copied, assigned and returned, and has `.size()`.
 - `std::vector<T>` keeps its elements on the heap, can grow, and frees them in its destructor. It is C#'s `List<T>`.
 - C#'s `T[]` is closest to `std::vector<T>`, not to `T*`: both have a run-time length and live on the heap. A C# array cannot grow, and assigning one shares it instead of copying.
-- `std::span<T>` (C++20) is a non-owning view of elements stored elsewhere: a pointer plus a length. It is C#'s `Span<T>`, and the modern replacement for a `(const T*, size_t)` parameter pair.
+- `std::span<T>` (C++20) is a non-owning view of elements stored elsewhere: a pointer plus a length. `std::span<T>` may change the elements, like C#'s `Span<T>`; `std::span<const T>` may only read them, like `ReadOnlySpan<T>`. It is the modern replacement for a `(T*, size_t)` parameter pair.
 
 ## Key claims
 
@@ -28,6 +28,7 @@ tags: [cpp, array, std-array, vector, span, decay, list]
 - <a id="c5"></a>**C5.** C#'s `List<T>` corresponds to `std::vector<T>`; C#'s `T[]` corresponds to `std::vector<T>` more closely than to a built-in array or a pointer, since both keep a run-time length on the heap, but a C# array cannot change its length.
 - <a id="c6"></a>**C6.** `std::span<T>` (C++20) refers to a contiguous run of elements owned by something else, holding only a pointer and a length; a `std::span<const T>` parameter accepts a built-in array, a `std::array` or a `std::vector` without copying, as C#'s `ReadOnlySpan<T>` does.
 - <a id="c7"></a>**C7.** `const char* names[] = {"g", "u", "d"};` declares a built-in array of three pointers, its length deduced from the initialiser; `std::size(names)` gives that length, 3.
+- <a id="c8"></a>**C8.** Through a `std::span<T>` the viewed elements can be modified, as through C#'s `Span<T>`; through a `std::span<const T>` they can only be read. The `const` belongs to the element type, as in `const T*`.
 
 ## Explanation
 
@@ -51,7 +52,7 @@ A C# `int[]` lives on the heap, knows its `Length` and is fixed in length once c
 
 ### std::span: a view
 
-A function that only reads a run of values should not care which container holds them. Before C++20 it took a pointer and a length, which nothing checked belonged together. `std::span<const T>` is that pair as one object ([C6](#c6)). It accepts any contiguous storage and copies nothing. Like a reference, it does not keep the elements alive: the container must outlive the span.
+A function that only reads a run of values should not care which container holds them. Before C++20 it took a pointer and a length, which nothing checked belonged together. `std::span<const T>` is that pair as one object ([C6](#c6)). It accepts any contiguous storage and copies nothing. A function that should write the elements, for example to scale them in place, takes `std::span<T>` instead ([C8](#c8)). Like a reference, it does not keep the elements alive: the container must outlive the span.
 
 ## Examples
 
