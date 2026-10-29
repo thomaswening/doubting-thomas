@@ -2,7 +2,7 @@
 title: References and pointers
 area: cpp
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-29
 prerequisites: [c/pointer-declarator-syntax]
 related: [cpp/const-and-constexpr, cpp/copy-and-move, c/stack-and-heap]
 projects: [partonforge]
@@ -48,7 +48,7 @@ The syntax differs at the call and in the body. A reference is used like the obj
 
 Passing a `std::vector` or `std::string` by value copies it, which can be expensive. `const T&` passes the object itself, read-only ([C3](#c3)). It is C#'s `in` parameter ([C6](#c6)).
 
-A `const T&` parameter also accepts a temporary, such as `"temporary"` passed where a `const std::string&` is expected: C++ builds a temporary string for the call. A plain `T&` refuses that ([C4](#c4)). A function that may change its argument should only change something the caller can see afterwards, and a temporary disappears after the call.
+A `const T&` parameter also accepts a temporary, such as `"temporary"` passed where a `const std::string&` is expected: C++ builds a temporary string for the call. A plain `T&` refuses that ([C4](#c4)), on purpose. A function takes `T&` in order to change the caller's object. A change to a temporary would be lost when the call ends, which is almost certainly a bug, so the compiler stops it. Reading a temporary during the call is harmless, so `const T&` accepts one.
 
 ### Dangling references
 
@@ -86,7 +86,7 @@ Output:
 bye! 9
 ```
 
-From [PartonForge](https://github.com/thomaswening/PartonForge)'s `pf_grid`, where the header is small enough that a copy would cost nothing. The `&` is the habit [C7](#c7) describes, and it stays valid because `grid` outlives `header`:
+From [PartonForge](https://github.com/thomaswening/PartonForge)'s `pf_grid`. The header is small, so a copy would cost almost nothing here. `const auto&` is written anyway, as a habit: it never costs more than a copy, and for a large object it saves one ([C7](#c7)). It is safe because `grid` outlives `header` ([C5](#c5)):
 
 ```cpp
 const auto grid = pf::Grid::read(grid_path);
@@ -108,7 +108,7 @@ if (const std::string* name = find_name(7)) {
 ## Pitfalls
 
 - Expecting `alias = other;` to make `alias` refer to `other`. It copies `other` into the object `alias` names ([C1](#c1)).
-- Returning `const std::string&` to a local variable. It compiles, with a warning, and dangles ([C5](#c5)).
+- Returning a reference to one of the function's own local variables, as in `const std::string& f() { std::string s = "x"; return s; }`. `s` is destroyed when `f` returns, so the caller receives a reference to an object that no longer exists. It compiles, with only a warning ([C5](#c5)). A reference to an object that is still alive, as in `const auto& b = a;` with `a` in the same scope, is fine.
 - Writing `auto x = obj.big_member();` and modifying `x`, expecting `obj` to change. `auto` made a copy ([C7](#c7)).
 - Using a pointer parameter "to avoid a copy". A `const T&` does that and cannot be null ([C2](#c2), [C3](#c3)).
 

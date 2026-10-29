@@ -2,7 +2,7 @@
 title: const and constexpr
 area: cpp
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-29
 prerequisites: [cpp/references]
 related: [c/pointer-declarator-syntax, cpp/linkage-and-storage-duration]
 projects: [partonforge]
@@ -47,7 +47,7 @@ A `constexpr` variable always qualifies. A `const` variable usually does not, be
 
 ### const member functions
 
-A member function can promise not to change its object by writing `const` after its parameter list ([C5](#c5)). Inside it, the object's members are read-only. The compiler then lets you call it on a `const` object, or through a `const` reference ([references](references.md)). A function without the promise cannot be called there, because it might change the object.
+A member function can promise not to change its object by writing `const` after its parameter list ([C5](#c5)). Inside it, the object's members are read-only. The compiler then lets you call it on a `const` object, or through a `const` reference ([references](references.md)). A function without the promise cannot be called there, because it might change the object. What counts is the object the function is called on, not the function that makes the call: in `void show(const Counter& counter)`, `show` itself is not a member function, but `counter` is `const`, so `counter.bump()` is refused.
 
 C# has the same idea in `readonly` members of a struct. In C++ it matters far more, because passing objects by `const&` is the normal way to pass them. A getter that forgets its `const` cannot be called on such an argument.
 
@@ -73,7 +73,8 @@ int main(int argc, char** argv) {
     // std::array<T, N> is a fixed-size array whose size N is part of its type,
     // so N must be a constant expression.
     std::array<char, kColumns> field{};   // OK: kColumns is constexpr
-    // std::array<char, count> bad{};     // error: count is not a constant expression
+    // std::array<char, count> bad{};     // error: count is a const int, but its initialiser
+    //                                    // argc is known only at run time (C3)
 
     std::cout << field.size() << ' ' << count << '\n';
 }
@@ -98,7 +99,8 @@ struct Counter {
 
 void show(const Counter& counter) {
     std::cout << counter.get() << '\n'; // OK
-    // counter.bump();                  // error: bump() is not const
+    // counter.bump();                  // error: counter is a const reference, so only
+    //                                  // const member functions may be called on it
 }
 
 int main() {
