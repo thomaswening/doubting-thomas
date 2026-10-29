@@ -7,3 +7,4 @@
 - [RAII and ownership](raii-and-ownership.md): every resource has one owner whose destructor frees it, so code avoids raw `new` and `delete`.
 - [Constructors in C++](constructors.md): `explicit` and implicit conversions, member initialiser lists, declaration order, `= default`, `= delete` and delegation.
 - [Static analysis for C++](static-analysis.md): compiler warnings, clang-tidy and IDE plugins such as SonarQube for IDE.
+- [Formatting output in C++](output-formatting.md): `printf`, iostream manipulators and C++20 `std::format`, compile-time checked format strings, and C# composite formatting.
