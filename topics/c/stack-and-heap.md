@@ -4,7 +4,8 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax]
-related: [c/opaque-handles]
+related: [c/opaque-handles, c/strings, cpp/copy-and-move]
+projects: [tante]
 tags: [c, cpp, memory, malloc, free, raii, destructor, garbage-collection]
 ---
 
@@ -39,7 +40,7 @@ C gives each object a **storage duration**. Two matter here:
 
 ### Why use the heap at all
 
-The stack is fast but has two limits: a local's size must be known when the function is compiled (variable-length arrays aside), and it disappears when the function returns ([C5](#c5)). Memory goes on the heap when it must outlive its creator, or when its size is only known at run time. A number with arbitrarily many digits, as in GMP or Tante, is both: it can grow to millions of digits, and it is created in one function and used in many others.
+The stack is fast but has two limits: a local's size must be known when the function is compiled (variable-length arrays aside), and it disappears when the function returns ([C5](#c5)). Memory goes on the heap when it must outlive its creator, or when its size is only known at run time. A number with arbitrarily many digits, as in GMP or [Tante](https://github.com/thomaswening/Tante), is both: it can grow to millions of digits, and it is created in one function and used in many others.
 
 ### What can go wrong
 
@@ -91,7 +92,7 @@ Expected output:
 Hello, Thomas
 ```
 
-**Reading it: strings in C.** C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, that marks where it stops; functions find the length by counting up to that byte.
+**Reading it: strings in C.** C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, that marks where it stops; functions find the length by counting up to that byte. More in [strings in C](strings.md).
 
 - `char local[16] = "Hello, ";` declares an array of 16 chars on the stack and fills it with the 7 characters of `"Hello, "`, then the terminating `'\0'`, then zeros for the rest.
 - A pointer has no length; it is only an address. The number passed to `malloc` is how many **bytes** to allocate: `strlen` counts the characters before the `'\0'` (7 for `"Hello, "`, 6 for `"Thomas"`), and the `+ 1` makes room for the terminator. `result` then points to the first of those 14 bytes, and remembering how many there are is the programmer's job.
@@ -139,6 +140,6 @@ release a
 
 ## Sources
 
-- Claude session on Tante, 2026-10-20, on why the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) needs a release function for every number handle.
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, on why the module interface of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1) needs a release function for every number handle.
 - cppreference: [storage duration (C)](https://en.cppreference.com/w/c/language/storage_duration), [malloc](https://en.cppreference.com/w/c/memory/malloc), [free](https://en.cppreference.com/w/c/memory/free), [RAII](https://en.cppreference.com/w/cpp/language/raii), [destructors](https://en.cppreference.com/w/cpp/language/destructor).
 - Microsoft Learn: [fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals).

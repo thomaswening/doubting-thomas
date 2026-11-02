@@ -4,7 +4,8 @@ area: c
 created: 2026-10-20
 updated: 2026-10-20
 prerequisites: [c/pointer-declarator-syntax]
-related: [c/opaque-handles]
+related: [c/opaque-handles, c/function-tables]
+projects: [tante]
 tags: [c, cpp, function-pointer, declarator, delegate]
 ---
 
@@ -50,7 +51,7 @@ The brackets around `*f` force step 2 to happen before step 3. Remove them and `
 
 ### A larger example
 
-The field from Tante's module interface:
+The field from [Tante](https://github.com/thomaswening/Tante)'s module interface:
 
 ```c
 tante_rational* (*rational_from_int64)(int64_t value);
@@ -64,7 +65,7 @@ Writing the full syntax every time is error-prone, so code usually names the typ
 
 ### Tables of functions
 
-A struct whose fields are function pointers is C's interface ([C6](#c6)). A library fills one in with its own functions and passes a pointer to it to the client. The client calls `host->rational_add(a, b)` without knowing which function is behind the field, and without linking against the library. In .NET terms this is an object implementing an interface, handed over by dependency injection. C++'s virtual functions are implemented with essentially the same thing, a hidden table of function pointers per class (the vtable).
+A struct whose fields are function pointers is C's interface ([C6](#c6)). A library fills one in with its own functions and passes a pointer to it to the client. The client calls `host->rational_add(a, b)` without knowing which function is behind the field, and without linking against the library. In .NET terms this is an object implementing an interface, handed over by dependency injection. C++'s virtual functions are implemented with essentially the same thing, a hidden table of function pointers per class (the vtable). The whole pattern, including plug-ins and versioning, is in [tables of function pointers](function-tables.md).
 
 ## Examples
 
@@ -114,5 +115,5 @@ More declarations to practise on:
 
 ## Sources
 
-- Claude session on Tante, 2026-10-19, explaining the engine function table of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
+- Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-19, explaining the engine function table of [Tante ADR-0004](https://github.com/thomaswening/Tante/pull/1).
 - cppreference: [pointer declaration (C), pointers to functions](https://en.cppreference.com/w/c/language/pointer), [function declaration (C)](https://en.cppreference.com/w/c/language/function_declaration).
