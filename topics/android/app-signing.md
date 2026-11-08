@@ -115,5 +115,5 @@ How [Skip the Fluff](https://github.com/thomaswening/skip-the-fluff) protects it
 
 - Claude session on Skip the Fluff, 2026-11-08: [ADR-0005](https://github.com/thomaswening/skip-the-fluff/blob/main/docs/adr/0005-signing-key.md) and its review in [PR #9](https://github.com/thomaswening/skip-the-fluff/pull/9).
 - Android Developers: [Sign your app](https://developer.android.com/studio/publish/app-signing).
-- Android Developers: [APK Signature Scheme v3](https://source.android.com/docs/security/features/apksigning/v3).
+- Android Open Source Project: [APK Signature Scheme v3](https://source.android.com/docs/security/features/apksigning/v3).
 - Android Developers: [apksigner](https://developer.android.com/tools/apksigner).
