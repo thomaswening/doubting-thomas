@@ -80,3 +80,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## github
 
 - `github/reviewing-existing-code`: GitHub's three-dot pull request diff, and reviewing code already on `main` through a draft PR against a base branch without it. Came up in [CrateEdit PR #22](https://github.com/thomaswening/CrateEdit/pull/22).
+
+## physics
+
+- `physics/ordering-in-parton-branching`: what angular and virtuality ordering mean in the Parton Branching method, which part is a scale choice (the argument of α_s) and which is kinematics (the resolution scale z_M, the transverse recoil), and why colour coherence motivates angular ordering. Start from arXiv:1704.01757. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-009).
