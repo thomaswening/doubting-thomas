@@ -84,3 +84,9 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## physics
 
 - `physics/ordering-in-parton-branching`: what angular and virtuality ordering mean in the Parton Branching method, which part is a scale choice (the argument of α_s) and which is kinematics (the resolution scale z_M, the transverse recoil), and why colour coherence motivates angular ordering. Start from arXiv:1704.01757. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-009).
+- `physics/parton-branching-splitting`: how the PB method splits a splitting function into resolvable real emissions (z below z_M, a probability density at leading order) and the Sudakov form factor (the probability of no resolvable branching), and why the full P(z) is not a density. Write it when PartonForge implements the LO kernels (REQ-010). Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-010).
+
+## numerics
+
+- `numerics/monte-carlo-integration-versus-sampling`: Monte Carlo integration works for signed functions, sampling needs a positive density; importance sampling with a positive proposal and signed weights f/g, and the sign problem it costs. Write it for the spike on PartonForge's OPEN-E. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-010, OPEN-E).
+- `numerics/uncertainty-of-an-estimated-sigma`: why a sigma estimated from N samples is itself uncertain (about 1/sqrt(2(N-1))), the Student t-distribution as the correction, and why a few seeds cannot support a 5 sigma claim. Write it when PartonForge designs REQ-086. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-086).
