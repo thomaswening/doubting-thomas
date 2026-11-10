@@ -90,3 +90,11 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 - `numerics/monte-carlo-integration-versus-sampling`: Monte Carlo integration works for signed functions, sampling needs a positive density; importance sampling with a positive proposal and signed weights f/g, and the sign problem it costs. Write it for the spike on PartonForge's OPEN-E. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-010, OPEN-E).
 - `numerics/uncertainty-of-an-estimated-sigma`: why a sigma estimated from N samples is itself uncertain (about 1/sqrt(2(N-1))), the Student t-distribution as the correction, and why a few seeds cannot support a 5 sigma claim. Write it when PartonForge designs REQ-086. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-086).
+
+## kotlin
+
+- `kotlin/sealed-interfaces`: a sealed interface with `data class` and `data object` cases as a closed set of results, compared with C# records and enums, and why `when` must then handle every case. Came up in [Skip the Fluff PR #23](https://github.com/thomaswening/skip-the-fluff/pull/23) (`RendererRecovery.kt`).
+
+## android
+
+- `android/webview-renderer-process`: the WebView's page runs in a separate renderer process that Android may end; what `onRenderProcessGone` reports, why returning `true` keeps the app alive, and why the dead WebView must be destroyed and replaced. Came up in [Skip the Fluff PR #23](https://github.com/thomaswening/skip-the-fluff/pull/23) (ADR-0003, point 4).
