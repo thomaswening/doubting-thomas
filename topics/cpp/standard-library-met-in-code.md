@@ -2,25 +2,26 @@
 title: Standard library functions met in code
 area: cpp
 created: 2026-11-08
-updated: 2026-11-08
+updated: 2026-11-10
 prerequisites: [cpp/iterators-and-ranges]
 related: [cpp/arrays-and-containers]
 projects: [partonforge]
-tags: [cpp, standard-library, all-of, string-find, npos, substr, compare, try-emplace, optional, getline]
+tags: [cpp, standard-library, all-of, string-find, npos, substr, compare, try-emplace, optional, getline, string-replace, string-literal, range-for]
 ---
 
 # Standard library functions met in code
 
-This note grows. Each function met in Thomas's code gets a claim for the one thing about it that is easy to get wrong, and a section below. New functions take the next free claim number.
+This note grows. Each function or construct met in Thomas's code gets a claim for the one thing about it that is easy to get wrong, and a section below. New functions take the next free claim number.
 
 ## TL;DR
 
 - `std::all_of` on an empty range is **true**, so "all patterns are formatting-only" holds when there are no patterns.
 - `std::string::find` and its relatives return a position, or `std::string::npos` (the largest `size_t`) for "not found". Test `== npos`, never the position as a bool.
 - `substr(pos, count)` takes a **length**, like C#'s `Substring(start, length)`, not an end position.
-- `compare` returns an `int` that is 0 for **equal**. As a condition it means "differ".
+- `compare` returns an `int` that is 0 for **equal**. As a condition it means "differ". `replace(pos, count, text)` takes out `count` characters and puts in all of `text`, so the string can change length.
 - `try_emplace` inserts only if the key is missing, and tells you which happened. `operator[]` inserts silently.
 - Two empty `std::optional`s compare equal. `std::getline` drops the `'\n'` but keeps a `'\r'`.
+- `"a" "b"` is one literal, `"ab"`, so a missing comma in a list of strings joins two elements. `for (auto x : v)` copies every element; `const auto&` does not.
 
 ## Key claims
 
@@ -32,6 +33,10 @@ This note grows. Each function met in Thomas's code gets a claim for the one thi
 - <a id="c6"></a>**C6.** `map[key]` inserts a value-initialised element (0 for an `int`, an empty string for a `std::string`) if `key` is missing, so merely reading `counts["missing"]` adds an entry; it cannot be used on a `const` map.
 - <a id="c7"></a>**C7.** Two empty `std::optional<T>` objects compare equal with `==`, and an empty one compares unequal to one that holds a value; so `parse(a) == parse(b)` is `true` when both parses fail.
 - <a id="c8"></a>**C8.** `std::getline(stream, line)` reads up to the next `'\n'`, stores the characters without the `'\n'` and returns the stream, which tests `false` once no character could be read; so `while (std::getline(stream, line))` reads every line, including a last one without `'\n'`, and a final `'\n'` does not produce an extra empty line. A `'\r'` before the `'\n'` stays in `line` unless the stream translates line endings, as a Windows text-mode file stream does.
+- <a id="c9"></a>**C9.** `s.replace(pos, count, text)` removes `count` characters starting at `pos` and inserts all of `text` in their place, whatever its length; the string's size changes by `text.size() - count`, so only a `text` of exactly `count` characters keeps the positions after it where they were.
+- <a id="c10"></a>**C10.** The compiler joins adjacent string literals into one, so `"ab" "cd"` is the literal `"abcd"`; in an array initialiser, `{"ln x" "ln mu", "ln k_t^2"}` therefore has two elements, not three, and GCC 13 and Clang 18 give no warning with `-Wall -Wextra`.
+- <a id="c11"></a>**C11.** For an all-blank string, `s.find_last_not_of(' ') + 1` is 0 only because `npos + 1` wraps around to 0 in unsigned arithmetic; an explicit test for `npos` before the arithmetic says the same without relying on the wrap-around.
+- <a id="c12"></a>**C12.** In a range-based `for`, `auto x` makes a copy of every element, so changes to `x` do not reach the container and each `std::string` element is copied; `const auto& x` reads each element without copying, and `auto& x` lets the loop change the elements.
 
 ## Explanation
 
@@ -82,6 +87,29 @@ If `key` was new, `entry->second` is `patterns_.size()`, the index the new patte
 `std::getline` reads one line and throws away the `'\n'` ([C8](#c8)). It returns the stream. A stream in a `while` condition tests "did the last read succeed?". So the loop ends after the last line, whether or not the file ends in `'\n'`. A file `"a\nb\n"` gives two lines, not three.
 
 What `getline` does not remove is a `'\r'`. A file with Windows line endings (`"\r\n"`) read on Linux, or read from bytes on any platform, gives lines that end in `'\r'`. Only a Windows file stream opened in text mode translates `"\r\n"` to `'\n'` before `getline` sees it. PartonForge's `diff_grid_files` reads the files in binary mode and splits them with `getline` on purpose. The `'\r'` survives, so `is_line_ending_only` can report a CRLF line instead of a values difference.
+
+### replace changes the length
+
+`replace(pos, count, text)` reads like "overwrite `count` characters with `text`", but it means "cut out `count`, paste in `text`" ([C9](#c9)). With a `text` of another length, everything after it moves. PartonForge's diff tests build broken grid lines this way: `data_line.replace(position, pf::kColumnsPerValue, wrong_zero)` swaps one 26-column field for another. That works only because `wrong_zero` is exactly 26 characters long. A 25-character replacement would shorten the line. The diff would then compare the line as a whole instead of field by field. C# needs `s.Remove(pos, count).Insert(pos, text)` for the same.
+
+### Adjacent string literals
+
+Two string literals with only whitespace between them are one literal ([C10](#c10)). The compiler joins them before it compiles anything else. This is how PartonForge's `verdict` writes a long message over two lines:
+
+```cpp
+return "Verdict: only the final newline differs -- check how the grid writer ends "
+       "the file (src/grid.cpp).\n";
+```
+
+The same rule turns a forgotten comma into a silent bug. In `{"ln x" "ln mu", "ln k_t^2"}` the first element is `"ln xln mu"`, and the array has two elements. Neither GCC 13 nor Clang 18 warns with `-Wall -Wextra`. When the array has a declared size, as `integrated_coordinates[kIntegratedCoordinates]` in `field_name` has, the missing element becomes a null pointer. `field_name` would turn it into a `std::string`, which is undefined behaviour for a null pointer. C# has no such rule: two literals need a `+`.
+
+### find_last_not_of + 1 and the wrap-around
+
+PartonForge's `shape` computes `field.find_last_not_of(' ') + 1`, the column one past the last non-blank character ([C11](#c11)). For an all-blank field, `find_last_not_of` returns `npos`, the largest `size_t`. Adding 1 wraps around to 0, which happens to be the right answer: no non-blank character, so column 0. The code does not depend on that, because it returns `"blank"` for an empty field one line earlier. That guard is the clear way to write it. A reader who sees only `+ 1` cannot tell whether the all-blank case was thought of.
+
+### auto or const auto& in a range-for
+
+`for (auto key : keys)` declares a new variable for each element and copies the element into it ([C12](#c12)). For `int`s that costs nothing. For `std::string`s it allocates once per element. A change to `key` changes only the copy. `for (const auto& key : keys)` binds a reference instead: no copy, and the compiler rejects any change. PartonForge's loops use that form, as in `for (const auto& key : steering.keys_in_order())`. `auto& key` is for loops that change the elements. C#'s `foreach` gives a read-only copy of a struct element and a reference to a class element. C++ lets the loop choose.
 
 ## Examples
 
@@ -188,7 +216,52 @@ true
 
 `"first\r"` is six characters with the `'\r'` at the end. `"last"` has no `'\n'` and is still read ([C8](#c8)).
 
-Both snippets were compiled with GCC 13.3 and Clang 18.1 (`-std=c++20 -Wall -Wextra`) and gave the output shown.
+`replace`, adjacent literals, the wrap-around and range-for ([C9](#c9) to [C12](#c12)):
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+
+int main() {
+  std::string line = "aaaa|bbbb|cccc";
+  line.replace(5, 4, "XY");                 // 4 characters out, 2 in
+  std::cout << line << ' ' << line.size() << '\n';
+  line.replace(5, 2, "BBBB");
+  std::cout << line << ' ' << line.size() << '\n';
+
+  const char* message = "Verdict: only the final newline differs -- "
+                        "check the grid writer.";
+  std::cout << message << '\n';
+  const char* names[] = {"ln x" "ln mu", "ln k_t^2"};   // a missing comma joins two elements
+  std::cout << sizeof(names) / sizeof(names[0]) << ' ' << names[0] << '\n';
+
+  const std::string blank = "    ";
+  const std::string padded = "  1.5 ";
+  std::cout << blank.find_last_not_of(' ') << ' ' << blank.find_last_not_of(' ') + 1 << ' '
+            << padded.find_last_not_of(' ') + 1 << '\n';
+
+  std::vector<std::string> keys{"q_g", "zm_fixed"};
+  for (auto key : keys) key += "!";              // a copy per element: keys unchanged
+  for (const auto& key : keys) std::cout << key << ' ';
+  for (auto& key : keys) key += "!";             // a reference: keys changed
+  for (const auto& key : keys) std::cout << key << ' ';
+  std::cout << '\n';
+}
+```
+
+Output on a 64-bit platform:
+
+```text
+aaaa|XY|cccc 12
+aaaa|BBBB|cccc 14
+Verdict: only the final newline differs -- check the grid writer.
+2 ln xln mu
+18446744073709551615 0 5
+q_g zm_fixed q_g! zm_fixed!
+```
+
+All three snippets were compiled with GCC 13.3 and Clang 18.1 (`-std=c++20 -Wall -Wextra`) and gave the output shown. Neither compiler warned about the missing comma.
 
 ## Pitfalls
 
@@ -199,9 +272,14 @@ Both snippets were compiled with GCC 13.3 and Clang 18.1 (`-std=c++20 -Wall -Wex
 - Reading from a map with `[]` to check for a key. It inserts the key ([C6](#c6)).
 - Comparing two optionals to ask "same value?" when both may be empty ([C7](#c7)).
 - Expecting `getline` to strip `"\r\n"` on Linux ([C8](#c8)).
+- Replacing a fixed-width field with text of another width. Every later position moves ([C9](#c9)).
+- A missing comma between two strings in an initialiser list. It compiles without a warning ([C10](#c10)).
+- Relying on `npos + 1 == 0` instead of testing for `npos` ([C11](#c11)).
+- `for (auto x : strings)` where `const auto&` was meant: a copy per element, and changes that go nowhere ([C12](#c12)).
 
 ## Sources
 
 - Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-11-08: the walkthrough of [PR 1](https://github.com/thomaswening/PartonForge/pull/1), in [`src/grid_diff.cpp`](https://github.com/thomaswening/PartonForge/blob/56b51e6d0d0d3f2c8c4b2b67de40aaa8c469347a/src/grid_diff.cpp) (`split_lines`, `trimmed`, `is_line_ending_only`, `same_value`, `PatternCollector::add`, `verdict`), [`src/fortran_io.cpp`](https://github.com/thomaswening/PartonForge/blob/56b51e6d0d0d3f2c8c4b2b67de40aaa8c469347a/src/fortran_io.cpp) and [`tests/test_gfortran_diff.cpp`](https://github.com/thomaswening/PartonForge/blob/56b51e6d0d0d3f2c8c4b2b67de40aaa8c469347a/tests/test_gfortran_diff.cpp) (`compare_batch`, `compare_all`).
-- cppreference: [`std::all_of`, `any_of`, `none_of`](https://en.cppreference.com/w/cpp/algorithm/all_any_none_of), [`std::basic_string::find`](https://en.cppreference.com/w/cpp/string/basic_string/find), [`npos`](https://en.cppreference.com/w/cpp/string/basic_string/npos), [`substr`](https://en.cppreference.com/w/cpp/string/basic_string/substr), [`compare`](https://en.cppreference.com/w/cpp/string/basic_string/compare), [`std::map::try_emplace`](https://en.cppreference.com/w/cpp/container/map/try_emplace), [`std::map::operator[]`](https://en.cppreference.com/w/cpp/container/map/operator_at), [`std::optional` comparisons](https://en.cppreference.com/w/cpp/utility/optional/operator_cmp), [`std::getline`](https://en.cppreference.com/w/cpp/string/basic_string/getline).
+- Claude session on PartonForge, 2026-11-09 and 2026-11-10, part 4 of the PR 1 walkthrough: `replace` in [`tests/test_units.cpp`](https://github.com/thomaswening/PartonForge/blob/56b51e6d0d0d3f2c8c4b2b67de40aaa8c469347a/tests/test_units.cpp#L234-L245), the split literal in `verdict`, `shape`'s `find_last_not_of(' ') + 1`, and the range-for loops. Source of [C9](#c9) to [C12](#c12).
+- cppreference: [`std::all_of`, `any_of`, `none_of`](https://en.cppreference.com/w/cpp/algorithm/all_any_none_of), [`std::basic_string::find`](https://en.cppreference.com/w/cpp/string/basic_string/find), [`npos`](https://en.cppreference.com/w/cpp/string/basic_string/npos), [`substr`](https://en.cppreference.com/w/cpp/string/basic_string/substr), [`compare`](https://en.cppreference.com/w/cpp/string/basic_string/compare), [`std::map::try_emplace`](https://en.cppreference.com/w/cpp/container/map/try_emplace), [`std::map::operator[]`](https://en.cppreference.com/w/cpp/container/map/operator_at), [`std::optional` comparisons](https://en.cppreference.com/w/cpp/utility/optional/operator_cmp), [`std::getline`](https://en.cppreference.com/w/cpp/string/basic_string/getline), [`replace`](https://en.cppreference.com/w/cpp/string/basic_string/replace), [string literal concatenation](https://en.cppreference.com/w/cpp/language/string_literal), [range-based for](https://en.cppreference.com/w/cpp/language/range-for).
 - .NET: [`Enumerable.All`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.all), [`Dictionary.TryAdd`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2.tryadd).

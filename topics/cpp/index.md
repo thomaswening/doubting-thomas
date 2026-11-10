@@ -14,4 +14,5 @@
 - [main, its arguments and exit codes](program-entry-and-exit-codes.md): `argc` and `argv` against C#'s `args`, the exit status, and the 0 / 1 / 2 convention.
 - [Ref-qualified member functions](ref-qualified-member-functions.md): `&` and `&&` after a member function's parameters, `take() &&` for handing contents over, and why names are lvalues.
 - [Iterators and half-open ranges](iterators-and-ranges.md): `begin` and one-past-the-end `end`, algorithms on iterator pairs, and C++20 `std::ranges` and views.
-- [Standard library functions met in code](standard-library-met-in-code.md): a growing list of functions with their traps: `all_of` on empty, `npos`, `substr`, `compare`, `try_emplace`, `getline`.
+- [Standard library functions met in code](standard-library-met-in-code.md): a growing list of functions and constructs with their traps: `all_of` on empty, `npos`, `substr`, `compare`, `try_emplace`, `getline`, `replace`, joined literals, range-for copies.
+- [std::variant for a C# developer](variant.md): one value of one of a few types, `get_if` against `get`, `std::visit`, and why `find` returns a pointer.
