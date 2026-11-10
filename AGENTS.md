@@ -95,6 +95,7 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 | `tante` | [Tante](https://github.com/thomaswening/Tante): a symbolic math engine for physicists, successor to FORM |
 | `partonforge` | [PartonForge](https://github.com/thomaswening/PartonForge): a C++20 reimplementation of the Parton Branching TMD evolution Monte Carlo |
 | `crateedit` | [CrateEdit](https://github.com/thomaswening/CrateEdit): a tag editor for DJ music collections that never touches cue points |
+| `skip-the-fluff` | [Skip the Fluff](https://github.com/thomaswening/skip-the-fluff): an Android wrapper for duolingo.com that hides distracting screens |
 
 - In a note's text, the **first mention of a project in each section** links to its repository: `[Tante](https://github.com/thomaswening/Tante)`. Later mentions in the same section are plain text. A project not yet in the table is added to it in the same pull request.
 - `projects` records where a concept came up or matters; it is metadata, not organisation. Notes stay organised by concept (§1).
