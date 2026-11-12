@@ -19,6 +19,12 @@ tags: []
 
 - <a id="c1"></a>**C1.** <A statement that is true on its own and can be checked.>
 
+- <a id="c2"></a>**C2.** <A claim whose main formula is too long to read inline, with an empty line before the next claim:>
+
+  ```math
+  \frac{x^2 - 1}{x + 1} = x - 1
+  ```
+
 ## Explanation
 
 <Build the idea up from what the reader knows. Say why, not only what. Compare to .NET where it helps. Link claims as [C1](#c1). Write formulas in LaTeX: inline $x^2 - 1$, displayed in a math block.>

@@ -63,6 +63,7 @@ Style: plain, precise, short sentences. Define a term before using it. One idea 
 
 - Inline: `$\gcd(p, q) = x - y$`. If the expression contains characters Markdown would interpret, such as `*`, `_` or `\`, use the backtick form `` $`a_1 * b_1`$ ``.
 - Displayed: a ` ```math ` code block, or `$$ … $$` on lines of their own. Prefer the code block: it never collides with Markdown.
+- **Inline formulas stay short**: a symbol, a name or a short relation, such as $`\Lambda(A)`$ or $`A \in SL(2,\mathbb{C})`$. A formula with a fraction, a trace, a sum or an integral, indices above and below, or more than about five symbols is displayed. Inline, such a formula stretches its line and is hard to pick out of the sentence. This holds in key claims and list items too: indent the ` ```math ` block to the item's text, after an empty line. Decided by Thomas, 13 November 2026.
 - A literal dollar sign in prose is written `\$`.
 - GitHub rejects some macros and shows "The following macros are not allowed" in place of the formula. `\operatorname` is one of them: write `\mathrm{tr}` instead of `\operatorname{tr}`. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
 - Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
@@ -113,6 +114,17 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - Each claim is one or two sentences that are **true on their own**, without the rest of the note, and **checkable**: a reader can say whether an answer agrees with them. "Ball arithmetic tracks errors" is not a claim; "If two balls overlap, `a < b` cannot be decided" is.
 - Format, one per bullet, with an anchor:
   `- <a id="c3"></a>**C3.** If two balls overlap, …`
+- An empty line separates two claims. GitHub then spaces the claims like paragraphs instead of packing them into one block. A claim's main formula follows the rule for displayed formulas (§2):
+
+  ````markdown
+  - <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ defines a Lorentz transformation $`\Lambda(A)`$ with matrix
+
+    ```math
+    \Lambda(A)^\mu{}_\nu = \tfrac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).
+    ```
+
+  - <a id="c4"></a>**C4.** …
+  ````
 - **IDs are stable and never renumbered or reused.** A new claim takes the next free number, wherever it sits in the list. A claim found to be wrong is not deleted: it keeps its ID and is marked `**C4.** *(withdrawn 2026-11-02: reason)*`, with a corrected claim under a new ID. The results log refers to claim IDs, so renumbering would corrupt it.
 - Aim for four to ten claims per note. More means the note should be split.
 
