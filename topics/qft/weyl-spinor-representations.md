@@ -26,9 +26,9 @@ Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-doub
 - <a id="c1"></a>**C1.** $\rho_L(A) = A$ and $\rho_R(A) = (A^\dagger)^{-1}$ are both representations of SL(2,ℂ) on $\mathbb{C}^2$. A **left-handed Weyl spinor** is a $\psi \in \mathbb{C}^2$ that transforms as $\psi \mapsto A\psi$. A **right-handed Weyl spinor** is a $\chi \in \mathbb{C}^2$ that transforms as $\chi \mapsto (A^\dagger)^{-1}\chi$. For unitary $A$, $\rho_L(A) = \rho_R(A)$.
 - <a id="c2"></a>**C2.** For every complex 2×2 matrix $M$, $M^T \varepsilon M = (\det M)\, \varepsilon$. Hence for $A \in SL(2,\mathbb{C})$, $A^T \varepsilon A = \varepsilon$. The antisymmetric bilinear form $\langle \psi, \phi \rangle = \psi^T \varepsilon \phi = \psi_1 \phi_2 - \psi_2 \phi_1$ of two left-handed spinors is invariant. The same holds for two right-handed spinors, since $(A^\dagger)^{-1}$ also has determinant 1.
 - <a id="c3"></a>**C3.** $\varepsilon \bar A \varepsilon^{-1} = (A^\dagger)^{-1}$ for $A \in SL(2,\mathbb{C})$. So $\rho_R$ is equivalent to the complex-conjugate representation $A \mapsto \bar A$. In particular, if $\psi$ is left-handed, then $\varepsilon\bar\psi$ is right-handed.
-- <a id="c4"></a>**C4.** $\rho_L$ and $\rho_R$ are not equivalent: there is no invertible $S$ with $S A S^{-1} = (A^\dagger)^{-1}$ for all $A$. For $A = \operatorname{diag}(2i, \frac{1}{2i})$, $\operatorname{tr} A = \frac{3i}{2}$, but $\operatorname{tr}(A^\dagger)^{-1} = -\frac{3i}{2}$.
+- <a id="c4"></a>**C4.** $\rho_L$ and $\rho_R$ are not equivalent: there is no invertible $S$ with $S A S^{-1} = (A^\dagger)^{-1}$ for all $A$. For $A = \mathrm{diag}(2i, \frac{1}{2i})$, $\mathrm{tr} A = \frac{3i}{2}$, but $\mathrm{tr}(A^\dagger)^{-1} = -\frac{3i}{2}$.
 - <a id="c5"></a>**C5.** Write group elements near $I$ as $e^{-i\vec\theta\cdot\vec J - i\vec\eta\cdot\vec K}$, with $\vec J$ generating rotations and $\vec K$ boosts as in [C7 of the previous note](sl2c-double-cover-of-the-lorentz-group.md#c7). On left-handed spinors $\vec J = \vec\sigma/2$ and $\vec K = i\vec\sigma/2$. On right-handed spinors $\vec J = \vec\sigma/2$ and $\vec K = -i\vec\sigma/2$. With $\vec N = \frac12(\vec J - i\vec K)$ and $\vec N^\dagger = \frac12(\vec J + i\vec K)$, the left-handed spinor has $\vec N = \vec\sigma/2$ and $\vec N^\dagger = 0$: spin ½ under the first SU(2), spin 0 under the second, the representation $(\frac12, 0)$. The right-handed spinor is $(0, \frac12)$.
-- <a id="c6"></a>**C6.** Let $P = \operatorname{diag}(1, -1, -1, -1)$ be parity. Then $P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big)$ for all $A \in SL(2,\mathbb{C})$. Conjugating by parity exchanges $\rho_L$ and $\rho_R$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $(\frac12, 0) \oplus (0, \frac12)$.
+- <a id="c6"></a>**C6.** Let $P = \mathrm{diag}(1, -1, -1, -1)$ be parity. Then $P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big)$ for all $A \in SL(2,\mathbb{C})$. Conjugating by parity exchanges $\rho_L$ and $\rho_R$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $(\frac12, 0) \oplus (0, \frac12)$.
 - <a id="c7"></a>**C7.** A Hermitian 2×2 matrix $X \ne 0$ has $\det X = 0$ if and only if $X = \pm\lambda\lambda^\dagger$ for some $\lambda \in \mathbb{C}^2$. The sign is $+$ exactly when $x^0 > 0$. So every future-pointing light-like vector is $X(p) = \lambda\lambda^\dagger$, with $\lambda$ fixed up to a phase. If $\lambda$ transforms as a left-handed spinor, $\lambda \mapsto A\lambda$, then $\lambda\lambda^\dagger \mapsto A\lambda\lambda^\dagger A^\dagger$: the momentum transforms as a four-vector.
 
 ## Explanation
@@ -81,15 +81,15 @@ So a right-handed spinor carries the same information as the complex conjugate o
 
 **Proposition ([C4](#c4)).** $\rho_L$ and $\rho_R$ are not equivalent.
 
-*Proof idea.* Equivalent representations have the same trace for every group element, since $\operatorname{tr}(SAS^{-1}) = \operatorname{tr}A$. For 2×2 matrices of determinant 1, $\operatorname{tr}A^{-1} = \operatorname{tr}A$, so $\operatorname{tr}(A^\dagger)^{-1} = \overline{\operatorname{tr}A}$. Any $A$ with non-real trace separates them.
+*Proof idea.* Equivalent representations have the same trace for every group element, since $\mathrm{tr}(SAS^{-1}) = \mathrm{tr}A$. For 2×2 matrices of determinant 1, $\mathrm{tr}A^{-1} = \mathrm{tr}A$, so $\mathrm{tr}(A^\dagger)^{-1} = \overline{\mathrm{tr}A}$. Any $A$ with non-real trace separates them.
 
 <details><summary>Proof</summary>
 
-Suppose $SAS^{-1} = (A^\dagger)^{-1}$ for all $A \in SL(2,\mathbb{C})$. Taking traces, $\operatorname{tr}A = \operatorname{tr}(A^\dagger)^{-1}$. For $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$ with $ad - bc = 1$, $`A^{-1} = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix}`$, so $\operatorname{tr}A^{-1} = \operatorname{tr}A$, and $(A^\dagger)^{-1} = (A^{-1})^\dagger$ has trace $\overline{\operatorname{tr}A}$. Then $\operatorname{tr}A$ would be real for every $A$. But $A = \operatorname{diag}(2i, \frac{1}{2i})$ has $\det A = 1$ and $\operatorname{tr}A = 2i - \frac{i}{2} = \frac{3i}{2}$. Contradiction. ∎
+Suppose $SAS^{-1} = (A^\dagger)^{-1}$ for all $A \in SL(2,\mathbb{C})$. Taking traces, $\mathrm{tr}A = \mathrm{tr}(A^\dagger)^{-1}$. For $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$ with $ad - bc = 1$, $`A^{-1} = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix}`$, so $\mathrm{tr}A^{-1} = \mathrm{tr}A$, and $(A^\dagger)^{-1} = (A^{-1})^\dagger$ has trace $\overline{\mathrm{tr}A}$. Then $\mathrm{tr}A$ would be real for every $A$. But $A = \mathrm{diag}(2i, \frac{1}{2i})$ has $\det A = 1$ and $\mathrm{tr}A = 2i - \frac{i}{2} = \frac{3i}{2}$. Contradiction. ∎
 
 </details>
 
-The counterexample is a boost combined with a rotation: $\operatorname{diag}(2i, \frac{1}{2i}) = e^{\ln 2\,\sigma_3}\, e^{i\pi\sigma_3/2}$. For rotations alone the two representations are equal ([C1](#c1)), so no counterexample can come from SU(2).
+The counterexample is a boost combined with a rotation: $\mathrm{diag}(2i, \frac{1}{2i}) = e^{\ln 2\,\sigma_3}\, e^{i\pi\sigma_3/2}$. For rotations alone the two representations are equal ([C1](#c1)), so no counterexample can come from SU(2).
 
 ### Generators and the $(j_1, j_2)$ labels
 
@@ -115,23 +115,23 @@ Parity $P$ flips space: $(x^0, \vec x) \mapsto (x^0, -\vec x)$. It is a Lorentz 
 
 **Proposition.** $P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big)$.
 
-*Proof idea.* Parity turns $X = x^0 I + \vec x\cdot\vec\sigma$ into $x^0 I - \vec x\cdot\vec\sigma = (\operatorname{tr}X)I - X$, which for 2×2 matrices is the adjugate $\operatorname{adj}X$, with $X\operatorname{adj}X = \det X \cdot I$. The adjugate reverses products and sends $A$ to $A^{-1}$ when $\det A = 1$.
+*Proof idea.* Parity turns $X = x^0 I + \vec x\cdot\vec\sigma$ into $x^0 I - \vec x\cdot\vec\sigma = (\mathrm{tr}X)I - X$, which for 2×2 matrices is the adjugate $\mathrm{adj}X$, with $X\mathrm{adj}X = \det X \cdot I$. The adjugate reverses products and sends $A$ to $A^{-1}$ when $\det A = 1$.
 
 <details><summary>Proof</summary>
 
-For a 2×2 matrix $`M = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$, the adjugate is $`\operatorname{adj}M = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} = (\operatorname{tr}M)I - M`$. It satisfies $\operatorname{adj}(MN) = \operatorname{adj}N\,\operatorname{adj}M$, and $\operatorname{adj}M = M^{-1}$ when $\det M = 1$. Also $\operatorname{adj}(M^\dagger) = (\operatorname{adj}M)^\dagger$.
+For a 2×2 matrix $`M = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$, the adjugate is $`\mathrm{adj}M = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} = (\mathrm{tr}M)I - M`$. It satisfies $\mathrm{adj}(MN) = \mathrm{adj}N\,\mathrm{adj}M$, and $\mathrm{adj}M = M^{-1}$ when $\det M = 1$. Also $\mathrm{adj}(M^\dagger) = (\mathrm{adj}M)^\dagger$.
 
-For Hermitian $X = X(x)$: $\operatorname{adj}X = 2x^0 I - X = x^0 I - \vec x\cdot\vec\sigma = X(Px)$. Then
+For Hermitian $X = X(x)$: $\mathrm{adj}X = 2x^0 I - X = x^0 I - \vec x\cdot\vec\sigma = X(Px)$. Then
 
 ```math
-X\big(P\Lambda(A)Px\big) = \operatorname{adj}\big(A\,X(Px)\,A^\dagger\big) = \operatorname{adj}(A^\dagger)\,\operatorname{adj}X(Px)\,\operatorname{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .
+X\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,X(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}X(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .
 ```
 
 With $B = (A^\dagger)^{-1}$, $B^\dagger = A^{-1}$, so the right-hand side is $BX(x)B^\dagger = X(\Lambda(B)x)$. ∎
 
 </details>
 
-In words: looking at a Lorentz transformation in a mirror is the same as replacing $A$ by $(A^\dagger)^{-1}$, which swaps the roles of $\rho_L$ and $\rho_R$. In the mirror, a left-handed spinor behaves like a right-handed one. A theory that is unchanged by the mirror, as QED is, must therefore contain both kinds with the same couplings. Stacking them gives the four-component Dirac spinor $\Psi = (\psi_L, \psi_R)$, on which $A$ acts as $\operatorname{diag}\big(A, (A^\dagger)^{-1}\big)$. In the chiral (Weyl) basis of the gamma matrices this block structure is visible directly. The weak interaction violates parity, and there the two halves couple differently.
+In words: looking at a Lorentz transformation in a mirror is the same as replacing $A$ by $(A^\dagger)^{-1}$, which swaps the roles of $\rho_L$ and $\rho_R$. In the mirror, a left-handed spinor behaves like a right-handed one. A theory that is unchanged by the mirror, as QED is, must therefore contain both kinds with the same couplings. Stacking them gives the four-component Dirac spinor $\Psi = (\psi_L, \psi_R)$, on which $A$ acts as $\mathrm{diag}\big(A, (A^\dagger)^{-1}\big)$. In the chiral (Weyl) basis of the gamma matrices this block structure is visible directly. The weak interaction violates parity, and there the two halves couple differently.
 
 ### Four-vectors from two spinors
 
@@ -139,13 +139,13 @@ The vector rule $X \mapsto AXA^\dagger$ has an $A$ on the left and an $A^\dagger
 
 For a light-like vector, one spinor is enough ([C7](#c7)).
 
-**Proposition.** A nonzero Hermitian 2×2 matrix $X$ has $\det X = 0$ if and only if $X = \pm\lambda\lambda^\dagger$, with $+$ exactly when $x^0 = \frac12\operatorname{tr}X > 0$.
+**Proposition.** A nonzero Hermitian 2×2 matrix $X$ has $\det X = 0$ if and only if $X = \pm\lambda\lambda^\dagger$, with $+$ exactly when $x^0 = \frac12\mathrm{tr}X > 0$.
 
 *Proof idea.* A Hermitian matrix has real eigenvalues. Determinant 0 means one eigenvalue is 0. So $X$ is its other eigenvalue times the projector onto that eigenvector: a column times its conjugate.
 
 <details><summary>Proof</summary>
 
-$X$ is Hermitian, so $X = \mu_1 u_1u_1^\dagger + \mu_2 u_2u_2^\dagger$ with real eigenvalues $\mu_1, \mu_2$ and orthonormal eigenvectors $u_1, u_2$ (spectral theorem, *cited*). $\det X = \mu_1\mu_2 = 0$ and $X \ne 0$ mean that exactly one eigenvalue, say $\mu_1$, is nonzero. Then $X = \mu_1 u_1u_1^\dagger = \pm\lambda\lambda^\dagger$ with $\lambda = \sqrt{|\mu_1|}\,u_1$ and the sign of $\mu_1$. Since $\operatorname{tr}X = \mu_1 = 2x^0$, the sign is the sign of $x^0$. Conversely, $\lambda\lambda^\dagger$ has rank at most 1, so its determinant is 0. If $\lambda\lambda^\dagger = \lambda'\lambda'^\dagger$, then $\lambda' = e^{i\varphi}\lambda$: both are eigenvectors for the only nonzero eigenvalue, with the same norm. ∎
+$X$ is Hermitian, so $X = \mu_1 u_1u_1^\dagger + \mu_2 u_2u_2^\dagger$ with real eigenvalues $\mu_1, \mu_2$ and orthonormal eigenvectors $u_1, u_2$ (spectral theorem, *cited*). $\det X = \mu_1\mu_2 = 0$ and $X \ne 0$ mean that exactly one eigenvalue, say $\mu_1$, is nonzero. Then $X = \mu_1 u_1u_1^\dagger = \pm\lambda\lambda^\dagger$ with $\lambda = \sqrt{|\mu_1|}\,u_1$ and the sign of $\mu_1$. Since $\mathrm{tr}X = \mu_1 = 2x^0$, the sign is the sign of $x^0$. Conversely, $\lambda\lambda^\dagger$ has rank at most 1, so its determinant is 0. If $\lambda\lambda^\dagger = \lambda'\lambda'^\dagger$, then $\lambda' = e^{i\varphi}\lambda$: both are eigenvectors for the only nonzero eigenvalue, with the same norm. ∎
 
 </details>
 
@@ -157,7 +157,7 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
 **The invariant product, computed.** $\psi = (1, 0)^T$ and $\phi = (0, 1)^T$ give $\langle\psi,\phi\rangle = 1 \cdot 1 - 0 \cdot 0 = 1$. After the boost above, $A\psi = (2, 0)^T$ and $A\phi = (0, \frac12)^T$, so $\langle A\psi, A\phi\rangle = 2 \cdot \frac12 - 0 = 1$. Unchanged ([C2](#c2)).
 
-**A massless momentum as a spinor.** $p = (E, 0, 0, E)$ gives $X(p) = \operatorname{diag}(2E, 0) = \lambda\lambda^\dagger$ with $\lambda = (\sqrt{2E}, 0)^T$. For $p = (E, 0, 0, -E)$, $X(p) = \operatorname{diag}(0, 2E)$ and $\lambda = (0, \sqrt{2E})^T$. The invariant product of the two is $\sqrt{2E}\cdot\sqrt{2E} - 0 = 2E$, and $|2E|^2 = 4E^2 = (p_1 + p_2)^2$, the squared centre-of-mass energy. This is the first instance of $|\langle ij\rangle|^2 = |s_{ij}|$ ([C2](#c2), [C7](#c7)).
+**A massless momentum as a spinor.** $p = (E, 0, 0, E)$ gives $X(p) = \mathrm{diag}(2E, 0) = \lambda\lambda^\dagger$ with $\lambda = (\sqrt{2E}, 0)^T$. For $p = (E, 0, 0, -E)$, $X(p) = \mathrm{diag}(0, 2E)$ and $\lambda = (0, \sqrt{2E})^T$. The invariant product of the two is $\sqrt{2E}\cdot\sqrt{2E} - 0 = 2E$, and $|2E|^2 = 4E^2 = (p_1 + p_2)^2$, the squared centre-of-mass energy. This is the first instance of $|\langle ij\rangle|^2 = |s_{ij}|$ ([C2](#c2), [C7](#c7)).
 
 ## Pitfalls
 
@@ -172,7 +172,7 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
    <details><summary>Solution</summary>
 
-   Right-handed: $(A^\dagger)^{-1} = e^{-\eta\sigma_3/2} = \operatorname{diag}(e^{-\eta/2}, e^{\eta/2})$ ([C1](#c1)).
+   Right-handed: $(A^\dagger)^{-1} = e^{-\eta\sigma_3/2} = \mathrm{diag}(e^{-\eta/2}, e^{\eta/2})$ ([C1](#c1)).
 
    </details>
 
@@ -213,5 +213,5 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 - Claude session on the spinor-helicity course, 2026-11-12.
 - Mark Srednicki, *Quantum Field Theory* (Cambridge, 2007): chapter 33 (eqs. 33.11–33.21: Lorentz algebra, $N$ and $N^\dagger$, the $(2,1)$ and $(1,2)$ representations); chapter 34 (eqs. 34.9–34.11: left-handed generators, hermitian conjugation swaps left and right); chapter 35 (eq. 35.1: the $\varepsilon$ symbols). Srednicki uses index notation and the mostly-plus metric.
 - Matthew D. Schwartz, *Quantum Field Theory and the Standard Model* (Cambridge, 2014), chapter 10, "Spinors", for the same representations in mostly-minus conventions and the Dirac spinor as a Weyl pair.
-- Brian C. Hall, *Lie Groups, Lie Algebras, and Representations* (2nd ed., Springer, 2015), chapter 4, for the classification of the finite-dimensional representations of $\mathfrak{sl}(2,\mathbb{C})$.
+- Brian C. Hall, *Lie Groups, Lie Algebras, and Representations* (2nd ed., Springer, 2015), chapter 4, for the classification of the finite-dimensional representations of the Lie algebra of SL(2,ℂ).
 - H. K. Dreiner, H. E. Haber, S. P. Martin, [arXiv:0812.1594](https://arxiv.org/abs/0812.1594), section 2, for the same structure in dotted and undotted index notation.
