@@ -13,7 +13,7 @@ tags: [lorentz-group, sl2c, su2, double-cover, spinors, spinor-helicity]
 
 ## TL;DR
 
-- **A four-vector is a Hermitian 2×2 matrix.** Write $`x = (x^0, \vec x)`$ as $`X = x^0 I + \vec x \cdot \vec\sigma`$. Then $`\det X = (x^0)^2 - |\vec x|^2`$ is the Minkowski square of $x$.
+- **A four-vector is a Hermitian 2×2 matrix.** Write $`x = (x^0, \vec{x})`$ as $`X = x^0 I + \vec{x} \cdot \vec{\sigma}`$. Then $`\det X = (x^0)^2 - |\vec{x}|^2`$ is the Minkowski square of $x$.
 - **A complex 2×2 matrix with determinant 1 acts on it by $`X \mapsto A X A^\dagger`$.** The result is again Hermitian with the same determinant. So every $`A \in SL(2,\mathbb{C})`$ gives a Lorentz transformation $`\Lambda(A)`$.
 - **The map $`A \mapsto \Lambda(A)`$ respects multiplication, hits every proper orthochronous Lorentz transformation, and sends exactly $A$ and $-A$ to the same one.** So $`SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\}`$ as groups.
 - **Unitary $A$ give rotations, Hermitian $A$ give boosts.** $`e^{-i\theta\sigma_3/2}`$ rotates by $`\theta`$ about $z$. $`e^{\eta\sigma_3/2}`$ boosts along $z$ with rapidity $`\eta`$.
@@ -21,12 +21,12 @@ tags: [lorentz-group, sl2c, su2, double-cover, spinors, spinor-helicity]
 
 ## Key claims
 
-Conventions: the metric is mostly minus, $`x \cdot y = x^0 y^0 - \vec x \cdot \vec y`$, as in Schwartz. $`\sigma_1, \sigma_2, \sigma_3`$ are the Pauli matrices and $`\sigma_0 = I`$.
+Conventions: the metric is mostly minus, $`x \cdot y = x^0 y^0 - \vec{x} \cdot \vec{y}`$, as in Schwartz. $`\sigma_1, \sigma_2, \sigma_3`$ are the Pauli matrices and $`\sigma_0 = I`$.
 
 - <a id="c1"></a>**C1.** The map $`x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3`$ is a real-linear bijection from $`\mathbb{R}^4`$ to the Hermitian 2×2 matrices. Its inverse is $`x^\mu = \frac12 \mathrm{tr}(\sigma_\mu X)`$.
-- <a id="c2"></a>**C2.** $`\det X(x) = (x^0)^2 - |\vec x|^2 = x \cdot x`$.
+- <a id="c2"></a>**C2.** $`\det X(x) = (x^0)^2 - |\vec{x}|^2 = x \cdot x`$.
 - <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ with $`\Lambda(A)x \cdot \Lambda(A)x = x \cdot x`$, that is a Lorentz transformation. Its matrix is $`\Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger)`$.
-- <a id="c4"></a>**C4.** $`\Lambda(AB) = \Lambda(A)\Lambda(B)`$ and $`\Lambda(I) = 1`$: the map $`\Lambda : SL(2,\mathbb{C}) \to O(1,3)`$ is a group homomorphism. It is continuous, since its entries are polynomials in the entries of $A$ and $`\bar A`$.
+- <a id="c4"></a>**C4.** $`\Lambda(AB) = \Lambda(A)\Lambda(B)`$ and $`\Lambda(I) = 1`$: the map $`\Lambda : SL(2,\mathbb{C}) \to O(1,3)`$ is a group homomorphism. It is continuous, since its entries are polynomials in the entries of $A$ and $`\bar{A}`$.
 - <a id="c5"></a>**C5.** Every $`\Lambda(A)`$ is proper and orthochronous: $`\Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1`$, and $`\det \Lambda(A) = 1`$.
 - <a id="c6"></a>**C6.** $`\Lambda(A) = 1`$ exactly for $`A = \pm I`$. Hence $`\Lambda(A) = \Lambda(B)`$ exactly when $`B = \pm A`$.
 - <a id="c7"></a>**C7.** $`\Lambda(e^{-i\theta\sigma_3/2})`$ is the rotation by $`\theta`$ about the $z$-axis, and $`\Lambda(e^{-i\theta\sigma_2/2})`$ the rotation by $`\theta`$ about the $y$-axis. $`\Lambda(e^{\eta\sigma_3/2})`$ is the boost along $+z$ with rapidity $`\eta`$: $`x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3)`$. For unitary $A$, $`\Lambda(A)`$ fixes $x^0$ and is a rotation, so $`\Lambda`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
@@ -95,7 +95,7 @@ since $`\det A = 1`$. The map is real-linear in $X$. By [C1](#c1), it defines a 
 
 <details><summary>Proof</summary>
 
-$`X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x)`$. Since $`X(\cdot)`$ is a bijection ([C1](#c1)), $`\Lambda(A)\Lambda(B)x = \Lambda(AB)x`$ for every $x$. $`\Lambda(I) = 1`$ because $`I X I^\dagger = X`$. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar A`$. ∎
+$`X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x)`$. Since $`X(\cdot)`$ is a bijection ([C1](#c1)), $`\Lambda(A)\Lambda(B)x = \Lambda(AB)x`$ for every $x$. $`\Lambda(I) = 1`$ because $`I X I^\dagger = X`$. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$. ∎
 
 </details>
 
@@ -157,7 +157,7 @@ The pattern holds in general. A unitary $A$ keeps $`\mathrm{tr} X = 2x^0`$, beca
 
 *Step 1: all rotations are in the image.* By [C7](#c7), rotations about $z$ and about $y$ by any angle are in the image. Every rotation is a product $`R_z(\alpha) R_y(\beta) R_z(\gamma)`$ by Euler's angle decomposition *(cited)*. The image of a homomorphism is closed under products ([C4](#c4)), so every rotation is in the image.
 
-*Step 2: decomposition.* Let $`\Lambda \in SO^+(1,3)`$ and $`u = \Lambda e_0`$, where $`e_0 = (1, 0, 0, 0)`$. Then $`u \cdot u = 1`$ and $`u^0 \ge 1`$, so $`u = (\cosh\eta, \sinh\eta\, \hat n)`$ for some $`\eta \ge 0`$ and unit vector $`\hat n`$. Choose a rotation $R$ with $`R\hat z = \hat n`$ (step 1), and let $B$ be the $z$-boost with rapidity $`\eta`$ ([C7](#c7)). Then $`RB e_0 = R(\cosh\eta, 0, 0, \sinh\eta) = u`$. So $`R' = (RB)^{-1}\Lambda`$ fixes $`e_0`$. A Lorentz transformation that fixes $`e_0`$ maps the orthogonal complement $`\{x^0 = 0\}`$ to itself and keeps $`|\vec x|^2`$ there, so it is an orthogonal transformation of space. It has $`\det R' = 1`$, because $`\det\Lambda = \det R = \det B = 1`$. So $R'$ is a rotation, and $`\Lambda = R B R'`$.
+*Step 2: decomposition.* Let $`\Lambda \in SO^+(1,3)`$ and $`u = \Lambda e_0`$, where $`e_0 = (1, 0, 0, 0)`$. Then $`u \cdot u = 1`$ and $`u^0 \ge 1`$, so $`u = (\cosh\eta, \sinh\eta\, \hat{n})`$ for some $`\eta \ge 0`$ and unit vector $`\hat{n}`$. Choose a rotation $R$ with $`R\hat{z} = \hat{n}`$ (step 1), and let $B$ be the $z$-boost with rapidity $`\eta`$ ([C7](#c7)). Then $`RB e_0 = R(\cosh\eta, 0, 0, \sinh\eta) = u`$. So $`R' = (RB)^{-1}\Lambda`$ fixes $`e_0`$. A Lorentz transformation that fixes $`e_0`$ maps the orthogonal complement $`\{x^0 = 0\}`$ to itself and keeps $`|\vec{x}|^2`$ there, so it is an orthogonal transformation of space. It has $`\det R' = 1`$, because $`\det\Lambda = \det R = \det B = 1`$. So $R'$ is a rotation, and $`\Lambda = R B R'`$.
 
 *Step 3.* $R$, $B$ and $R'$ are in the image (steps 1 and 2, [C7](#c7)), and so is their product. ∎
 
