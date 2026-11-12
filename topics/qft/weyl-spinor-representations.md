@@ -21,13 +21,13 @@ tags: [lorentz-group, sl2c, weyl-spinors, chirality, parity, spinor-helicity]
 
 ## Key claims
 
-Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, $`X(x) = x^0 I + \vec{x} \cdot \vec{\sigma}`$, and $`\Lambda(A)`$ defined by $`X \mapsto AXA^\dagger`$. $`\varepsilon = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}`$.
+Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, $`X(x) = x^0 I + \mathbf{x} \cdot \boldsymbol{\sigma}`$, and $`\Lambda(A)`$ defined by $`X \mapsto AXA^\dagger`$. $`\varepsilon = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}`$.
 
 - <a id="c1"></a>**C1.** $`\rho_L(A) = A`$ and $`\rho_R(A) = (A^\dagger)^{-1}`$ are both representations of SL(2,ℂ) on $`\mathbb{C}^2`$. A **left-handed Weyl spinor** is a $`\psi \in \mathbb{C}^2`$ that transforms as $`\psi \mapsto A\psi`$. A **right-handed Weyl spinor** is a $`\chi \in \mathbb{C}^2`$ that transforms as $`\chi \mapsto (A^\dagger)^{-1}\chi`$. For unitary $A$, $`\rho_L(A) = \rho_R(A)`$.
 - <a id="c2"></a>**C2.** For every complex 2×2 matrix $M$, $`M^T \varepsilon M = (\det M)\, \varepsilon`$. Hence for $`A \in SL(2,\mathbb{C})`$, $`A^T \varepsilon A = \varepsilon`$. The antisymmetric bilinear form $`\langle \psi, \phi \rangle = \psi^T \varepsilon \phi = \psi_1 \phi_2 - \psi_2 \phi_1`$ of two left-handed spinors is invariant. The same holds for two right-handed spinors, since $`(A^\dagger)^{-1}`$ also has determinant 1.
 - <a id="c3"></a>**C3.** $`\varepsilon \bar{A} \varepsilon^{-1} = (A^\dagger)^{-1}`$ for $`A \in SL(2,\mathbb{C})`$. So $`\rho_R`$ is equivalent to the complex-conjugate representation $`A \mapsto \bar{A}`$. In particular, if $`\psi`$ is left-handed, then $`\varepsilon\bar{\psi}`$ is right-handed.
 - <a id="c4"></a>**C4.** $`\rho_L`$ and $`\rho_R`$ are not equivalent: there is no invertible $S$ with $`S A S^{-1} = (A^\dagger)^{-1}`$ for all $A$. For $`A = \mathrm{diag}(2i, \frac{1}{2i})`$, $`\mathrm{tr} A = \frac{3i}{2}`$, but $`\mathrm{tr}(A^\dagger)^{-1} = -\frac{3i}{2}`$.
-- <a id="c5"></a>**C5.** Write group elements near $I$ as $`e^{-i\vec{\theta}\cdot\vec{J} - i\vec{\eta}\cdot\vec{K}}`$, with $`\vec{J}`$ generating rotations and $`\vec{K}`$ boosts as in [C7 of the previous note](sl2c-double-cover-of-the-lorentz-group.md#c7). On left-handed spinors $`\vec{J} = \vec{\sigma}/2`$ and $`\vec{K} = i\vec{\sigma}/2`$. On right-handed spinors $`\vec{J} = \vec{\sigma}/2`$ and $`\vec{K} = -i\vec{\sigma}/2`$. With $`\vec{N} = \frac12(\vec{J} - i\vec{K})`$ and $`\vec{N}^\dagger = \frac12(\vec{J} + i\vec{K})`$, the left-handed spinor has $`\vec{N} = \vec{\sigma}/2`$ and $`\vec{N}^\dagger = 0`$: spin ½ under the first SU(2), spin 0 under the second, the representation $`(\frac12, 0)`$. The right-handed spinor is $`(0, \frac12)`$.
+- <a id="c5"></a>**C5.** Write group elements near $I$ as $`e^{-i\boldsymbol{\theta}\cdot\mathbf{J} - i\boldsymbol{\eta}\cdot\mathbf{K}}`$, with $`\mathbf{J}`$ generating rotations and $`\mathbf{K}`$ boosts as in [C7 of the previous note](sl2c-double-cover-of-the-lorentz-group.md#c7). On left-handed spinors $`\mathbf{J} = \boldsymbol{\sigma}/2`$ and $`\mathbf{K} = i\boldsymbol{\sigma}/2`$. On right-handed spinors $`\mathbf{J} = \boldsymbol{\sigma}/2`$ and $`\mathbf{K} = -i\boldsymbol{\sigma}/2`$. With $`\mathbf{N} = \frac12(\mathbf{J} - i\mathbf{K})`$ and $`\mathbf{N}^\dagger = \frac12(\mathbf{J} + i\mathbf{K})`$, the left-handed spinor has $`\mathbf{N} = \boldsymbol{\sigma}/2`$ and $`\mathbf{N}^\dagger = 0`$: spin ½ under the first SU(2), spin 0 under the second, the representation $`(\frac12, 0)`$. The right-handed spinor is $`(0, \frac12)`$.
 - <a id="c6"></a>**C6.** Let $`P = \mathrm{diag}(1, -1, -1, -1)`$ be parity. Then $`P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big)`$ for all $`A \in SL(2,\mathbb{C})`$. Conjugating by parity exchanges $`\rho_L`$ and $`\rho_R`$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $`(\frac12, 0) \oplus (0, \frac12)`$.
 - <a id="c7"></a>**C7.** A Hermitian 2×2 matrix $`X \ne 0`$ has $`\det X = 0`$ if and only if $`X = \pm\lambda\lambda^\dagger`$ for some $`\lambda \in \mathbb{C}^2`$. The sign is $+$ exactly when $x^0 > 0$. So every future-pointing light-like vector is $`X(p) = \lambda\lambda^\dagger`$, with $`\lambda`$ fixed up to a phase. If $`\lambda`$ transforms as a left-handed spinor, $`\lambda \mapsto A\lambda`$, then $`\lambda\lambda^\dagger \mapsto A\lambda\lambda^\dagger A^\dagger`$: the momentum transforms as a four-vector.
 
@@ -95,33 +95,33 @@ The counterexample is a boost combined with a rotation: $`\mathrm{diag}(2i, \fra
 
 Physics books label representations of the Lorentz group by two spins, $`(j_1, j_2)`$. Here is where the labels come from, for the two cases at hand ([C5](#c5)).
 
-A rotation by $`\theta`$ about $`\hat{n}`$ is $`A = e^{-i\theta\,\hat{n}\cdot\vec{\sigma}/2}`$, and a boost with rapidity $`\eta`$ along $`\hat{n}`$ is $`A = e^{\eta\,\hat{n}\cdot\vec{\sigma}/2}`$ ([previous note, C7](sl2c-double-cover-of-the-lorentz-group.md#c7)). Write both as $`e^{-i\theta\hat{n}\cdot\vec{J}}`$ and $`e^{-i\eta\hat{n}\cdot\vec{K}}`$. In $`\rho_L`$, comparing exponents gives $`\vec{J} = \vec{\sigma}/2`$ and $`\vec{K} = i\vec{\sigma}/2`$. In $`\rho_R`$, the boost becomes $`\big((e^{\eta\hat{n}\cdot\vec{\sigma}/2})^\dagger\big)^{-1} = e^{-\eta\hat{n}\cdot\vec{\sigma}/2}`$, so $`\vec{K} = -i\vec{\sigma}/2`$, while $`\vec{J}`$ is unchanged.
+A rotation by $`\theta`$ about $`\hat{n}`$ is $`A = e^{-i\theta\,\hat{n}\cdot\boldsymbol{\sigma}/2}`$, and a boost with rapidity $`\eta`$ along $`\hat{n}`$ is $`A = e^{\eta\,\hat{n}\cdot\boldsymbol{\sigma}/2}`$ ([previous note, C7](sl2c-double-cover-of-the-lorentz-group.md#c7)). Write both as $`e^{-i\theta\hat{n}\cdot\mathbf{J}}`$ and $`e^{-i\eta\hat{n}\cdot\mathbf{K}}`$. In $`\rho_L`$, comparing exponents gives $`\mathbf{J} = \boldsymbol{\sigma}/2`$ and $`\mathbf{K} = i\boldsymbol{\sigma}/2`$. In $`\rho_R`$, the boost becomes $`\big((e^{\eta\hat{n}\cdot\boldsymbol{\sigma}/2})^\dagger\big)^{-1} = e^{-\eta\hat{n}\cdot\boldsymbol{\sigma}/2}`$, so $`\mathbf{K} = -i\boldsymbol{\sigma}/2`$, while $`\mathbf{J}`$ is unchanged.
 
-The matrices $`\vec{J}, \vec{K}`$ obey the commutation relations of the Lorentz algebra *(cited: Srednicki, eqs. 33.11–33.13)*:
+The matrices $`\mathbf{J}, \mathbf{K}`$ obey the commutation relations of the Lorentz algebra *(cited: Srednicki, eqs. 33.11–33.13)*:
 
 ```math
 [J_i, J_j] = i\epsilon_{ijk}J_k, \qquad [J_i, K_j] = i\epsilon_{ijk}K_k, \qquad [K_i, K_j] = -i\epsilon_{ijk}J_k .
 ```
 
-The minus sign in the last one says that two boosts in different directions combine into a rotation (Thomas precession). The relations mix $J$ and $K$. The combinations $`\vec{N} = \frac12(\vec{J} - i\vec{K})`$ and $`\vec{N}^\dagger = \frac12(\vec{J} + i\vec{K})`$ unmix them: each satisfies the angular momentum algebra, and they commute with each other *(cited: Srednicki, eqs. 33.16–33.20)*. So a representation of the Lorentz algebra is a pair of spins: $`j_1`$ for $`\vec{N}`$, $`j_2`$ for $`\vec{N}^\dagger`$. That every finite-dimensional irreducible representation arises this way is a theorem *(cited: Srednicki, ch. 33; Hall, ch. 4, for the representations of the Lie algebra of SL(2,ℂ))*.
+The minus sign in the last one says that two boosts in different directions combine into a rotation (Thomas precession). The relations mix $J$ and $K$. The combinations $`\mathbf{N} = \frac12(\mathbf{J} - i\mathbf{K})`$ and $`\mathbf{N}^\dagger = \frac12(\mathbf{J} + i\mathbf{K})`$ unmix them: each satisfies the angular momentum algebra, and they commute with each other *(cited: Srednicki, eqs. 33.16–33.20)*. So a representation of the Lorentz algebra is a pair of spins: $`j_1`$ for $`\mathbf{N}`$, $`j_2`$ for $`\mathbf{N}^\dagger`$. That every finite-dimensional irreducible representation arises this way is a theorem *(cited: Srednicki, ch. 33; Hall, ch. 4, for the representations of the Lie algebra of SL(2,ℂ))*.
 
-For $`\rho_L`$: $`\vec{N} = \frac12(\frac{\vec{\sigma}}{2} + \frac{\vec{\sigma}}{2}) = \frac{\vec{\sigma}}{2}`$ and $`\vec{N}^\dagger = 0`$. Spin ½ for $`\vec{N}`$, spin 0 for $`\vec{N}^\dagger`$: $`(\frac12, 0)`$. For $`\rho_R`$ it is the other way round: $`(0, \frac12)`$. Srednicki writes the same representations by their dimensions, $(2, 1)$ and $(1, 2)$, and calls $(2,1)$ left-handed (eq. 33.21). His generators on $(2,1)$, $`J = \sigma/2`$ and $`K = i\sigma/2`$ (eqs. 34.9, 34.10), match $`\rho_L`$ here.
+For $`\rho_L`$: $`\mathbf{N} = \frac12(\frac{\boldsymbol{\sigma}}{2} + \frac{\boldsymbol{\sigma}}{2}) = \frac{\boldsymbol{\sigma}}{2}`$ and $`\mathbf{N}^\dagger = 0`$. Spin ½ for $`\mathbf{N}`$, spin 0 for $`\mathbf{N}^\dagger`$: $`(\frac12, 0)`$. For $`\rho_R`$ it is the other way round: $`(0, \frac12)`$. Srednicki writes the same representations by their dimensions, $(2, 1)$ and $(1, 2)$, and calls $(2,1)$ left-handed (eq. 33.21). His generators on $(2,1)$, $`J = \sigma/2`$ and $`K = i\sigma/2`$ (eqs. 34.9, 34.10), match $`\rho_L`$ here.
 
 Why call them left- and right-handed? For a massless particle, the field equation forces the spin of a $`(\frac12, 0)`$ particle to point against its momentum: negative helicity. Its antiparticle has positive helicity. That is shown in the course note on massless fermions, not here.
 
 ### Parity needs both
 
-Parity $P$ flips space: $`(x^0, \vec{x}) \mapsto (x^0, -\vec{x})`$. It is a Lorentz transformation but not in $SO^+(1,3)$, since $`\det P = -1`$. So it has no preimage in SL(2,ℂ). What it does have is an action *on* SL(2,ℂ) ([C6](#c6)).
+Parity $P$ flips space: $`(x^0, \mathbf{x}) \mapsto (x^0, -\mathbf{x})`$. It is a Lorentz transformation but not in $SO^+(1,3)$, since $`\det P = -1`$. So it has no preimage in SL(2,ℂ). What it does have is an action *on* SL(2,ℂ) ([C6](#c6)).
 
 **Proposition.** $`P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big)`$.
 
-*Proof idea.* Parity turns $`X = x^0 I + \vec{x}\cdot\vec{\sigma}`$ into $`x^0 I - \vec{x}\cdot\vec{\sigma} = (\mathrm{tr}X)I - X`$, which for 2×2 matrices is the adjugate $`\mathrm{adj}X`$, with $`X\mathrm{adj}X = \det X \cdot I`$. The adjugate reverses products and sends $A$ to $A^{-1}$ when $`\det A = 1`$.
+*Proof idea.* Parity turns $`X = x^0 I + \mathbf{x}\cdot\boldsymbol{\sigma}`$ into $`x^0 I - \mathbf{x}\cdot\boldsymbol{\sigma} = (\mathrm{tr}X)I - X`$, which for 2×2 matrices is the adjugate $`\mathrm{adj}X`$, with $`X\mathrm{adj}X = \det X \cdot I`$. The adjugate reverses products and sends $A$ to $A^{-1}$ when $`\det A = 1`$.
 
 <details><summary>Proof</summary>
 
 For a 2×2 matrix $`M = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$, the adjugate is $`\mathrm{adj}M = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} = (\mathrm{tr}M)I - M`$. It satisfies $`\mathrm{adj}(MN) = \mathrm{adj}N\,\mathrm{adj}M`$, and $`\mathrm{adj}M = M^{-1}`$ when $`\det M = 1`$. Also $`\mathrm{adj}(M^\dagger) = (\mathrm{adj}M)^\dagger`$.
 
-For Hermitian $X = X(x)$: $`\mathrm{adj}X = 2x^0 I - X = x^0 I - \vec{x}\cdot\vec{\sigma} = X(Px)`$. Then
+For Hermitian $X = X(x)$: $`\mathrm{adj}X = 2x^0 I - X = x^0 I - \mathbf{x}\cdot\boldsymbol{\sigma} = X(Px)`$. Then
 
 ```math
 X\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,X(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}X(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .
@@ -164,7 +164,7 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 - **Pairing two left-handed spinors by $`\chi^\dagger\psi`$.** This product is not invariant: $`\chi^\dagger\psi \mapsto \chi^\dagger A^\dagger A\psi`$, and $`A^\dagger A \ne I`$ for a boost. The invariant pairings are $`\psi^T\varepsilon\phi`$ for two of the same kind ([C2](#c2)) and $`\chi^\dagger\psi`$ for one of each kind ([C1](#c1)).
 - **"Left and right differ by a rotation of basis."** They don't: no change of basis turns one into the other ([C4](#c4)). Only complex conjugation does ([C3](#c3)), which is not a linear change of basis.
 - **Sign conventions for $`\varepsilon`$.** Books differ on whether $`\varepsilon^{12}`$ or $`\varepsilon_{12}`$ is $+1$, and on whether indices are contracted with the first or second index of $`\varepsilon`$. Srednicki sets $`\varepsilon^{12} = \varepsilon_{21} = +1`$ and contracts with the second index (eq. 35.1). This note uses the matrix $`\varepsilon`$ only and avoids index positions. Spinor-helicity signs such as $`\langle ij\rangle[ji] = \pm s_{ij}`$ trace back to this choice.
-- **$`\vec{N}`$ and $`\vec{N}^\dagger`$ are not Hermitian conjugates of each other as matrices in a given representation.** In $`\rho_L`$, $`\vec{N} = \vec{\sigma}/2`$ but $`\vec{N}^\dagger = 0`$. The names refer to the operators in a unitary representation of the full theory, where boosts are Hermitian. On finite-dimensional spinors, the boost generators $`\pm i\vec{\sigma}/2`$ are anti-Hermitian.
+- **$`\mathbf{N}`$ and $`\mathbf{N}^\dagger`$ are not Hermitian conjugates of each other as matrices in a given representation.** In $`\rho_L`$, $`\mathbf{N} = \boldsymbol{\sigma}/2`$ but $`\mathbf{N}^\dagger = 0`$. The names refer to the operators in a unitary representation of the full theory, where boosts are Hermitian. On finite-dimensional spinors, the boost generators $`\pm i\boldsymbol{\sigma}/2`$ are anti-Hermitian.
 
 ## Exercises
 
@@ -192,11 +192,11 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
    </details>
 
-4. **Parity and the generators.** Using [C5](#c5), show that replacing $`\vec{K}`$ by $`-\vec{K}`$ turns the left-handed generators into the right-handed ones. Why does this match parity, which flips $`\vec{x}`$ and so flips the direction of a boost but not of a rotation? Practises [C5](#c5), [C6](#c6).
+4. **Parity and the generators.** Using [C5](#c5), show that replacing $`\mathbf{K}`$ by $`-\mathbf{K}`$ turns the left-handed generators into the right-handed ones. Why does this match parity, which flips $`\mathbf{x}`$ and so flips the direction of a boost but not of a rotation? Practises [C5](#c5), [C6](#c6).
 
    <details><summary>Solution</summary>
 
-   Left: $`(\vec{J}, \vec{K}) = (\frac{\vec{\sigma}}{2}, \frac{i\vec{\sigma}}{2})`$. Flipping $`\vec{K}`$ gives $`(\frac{\vec{\sigma}}{2}, -\frac{i\vec{\sigma}}{2})`$, the right-handed generators. Under parity, a boost along $`\hat{n}`$ becomes a boost along $`-\hat{n}`$, so $`\vec{K} \to -\vec{K}`$. A rotation about $`\hat{n}`$ stays a rotation about $`\hat{n}`$, because angular momentum is an axial vector, so $`\vec{J} \to \vec{J}`$. This is [C6](#c6) at the level of generators.
+   Left: $`(\mathbf{J}, \mathbf{K}) = (\frac{\boldsymbol{\sigma}}{2}, \frac{i\boldsymbol{\sigma}}{2})`$. Flipping $`\mathbf{K}`$ gives $`(\frac{\boldsymbol{\sigma}}{2}, -\frac{i\boldsymbol{\sigma}}{2})`$, the right-handed generators. Under parity, a boost along $`\hat{n}`$ becomes a boost along $`-\hat{n}`$, so $`\mathbf{K} \to -\mathbf{K}`$. A rotation about $`\hat{n}`$ stays a rotation about $`\hat{n}`$, because angular momentum is an axial vector, so $`\mathbf{J} \to \mathbf{J}`$. This is [C6](#c6) at the level of generators.
 
    </details>
 
