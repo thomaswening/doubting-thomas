@@ -25,9 +25,9 @@ Conventions: the metric is mostly minus, $x \cdot y = x^0 y^0 - \vec x \cdot \ve
 
 - <a id="c1"></a>**C1.** The map $x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3$ is a real-linear bijection from $\mathbb{R}^4$ to the Hermitian 2×2 matrices. Its inverse is $x^\mu = \frac12 \operatorname{tr}(\sigma_\mu X)$.
 - <a id="c2"></a>**C2.** $\det X(x) = (x^0)^2 - |\vec x|^2 = x \cdot x$.
-- <a id="c3"></a>**C3.** For $A \in SL(2,\mathbb{C})$, the map $X \mapsto A X A^\dagger$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $\Lambda(A)$ on $\mathbb{R}^4$ with $\Lambda(A)x \cdot \Lambda(A)x = x \cdot x$, that is a Lorentz transformation. Its matrix is $\Lambda(A)^\mu{}_\nu = \frac12 \operatorname{tr}(\sigma_\mu A \sigma_\nu A^\dagger)$.
+- <a id="c3"></a>**C3.** For $A \in SL(2,\mathbb{C})$, the map $X \mapsto A X A^\dagger$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $\Lambda(A)$ on $\mathbb{R}^4$ with $\Lambda(A)x \cdot \Lambda(A)x = x \cdot x$, that is a Lorentz transformation. Its matrix is $`\Lambda(A)^\mu{}_\nu = \frac12 \operatorname{tr}(\sigma_\mu A \sigma_\nu A^\dagger)`$.
 - <a id="c4"></a>**C4.** $\Lambda(AB) = \Lambda(A)\Lambda(B)$ and $\Lambda(I) = 1$: the map $\Lambda : SL(2,\mathbb{C}) \to O(1,3)$ is a group homomorphism. It is continuous, since its entries are polynomials in the entries of $A$ and $\bar A$.
-- <a id="c5"></a>**C5.** Every $\Lambda(A)$ is proper and orthochronous: $\Lambda(A)^0{}_0 = \frac12 \operatorname{tr}(A A^\dagger) \ge 1$, and $\det \Lambda(A) = 1$.
+- <a id="c5"></a>**C5.** Every $\Lambda(A)$ is proper and orthochronous: $`\Lambda(A)^0{}_0 = \frac12 \operatorname{tr}(A A^\dagger) \ge 1`$, and $\det \Lambda(A) = 1$.
 - <a id="c6"></a>**C6.** $\Lambda(A) = 1$ exactly for $A = \pm I$. Hence $\Lambda(A) = \Lambda(B)$ exactly when $B = \pm A$.
 - <a id="c7"></a>**C7.** $\Lambda(e^{-i\theta\sigma_3/2})$ is the rotation by $\theta$ about the $z$-axis, and $\Lambda(e^{-i\theta\sigma_2/2})$ the rotation by $\theta$ about the $y$-axis. $\Lambda(e^{\eta\sigma_3/2})$ is the boost along $+z$ with rapidity $\eta$: $x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3)$. For unitary $A$, $\Lambda(A)$ fixes $x^0$ and is a rotation, so $\Lambda$ restricts to a homomorphism $SU(2) \to SO(3)$.
 - <a id="c8"></a>**C8.** $\Lambda$ maps $SL(2,\mathbb{C})$ onto the proper orthochronous Lorentz group $SO^+(1,3)$. Together with [C4](#c4) and [C6](#c6): $SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\}$ as groups, and SL(2,ℂ) is a double cover of $SO^+(1,3)$.
@@ -37,7 +37,7 @@ Conventions: the metric is mostly minus, $x \cdot y = x^0 y^0 - \vec x \cdot \ve
 
 ### Why look for a second group at all
 
-The Lorentz group acts on four-vectors. The Dirac equation needs more: objects that transform under Lorentz transformations but change sign under a rotation by $2\pi$. No representation of $SO^+(1,3)$ itself can do that, because the $2\pi$ rotation *is* the identity there. The way out is a bigger group that maps onto the Lorentz group, two elements to one, so that "$+$" and "$-$" survive upstairs. That group is SL(2,ℂ), the complex 2×2 matrices with determinant 1. This note builds the map. The [next note](weyl-spinor-representations.md) builds the spinors that live on SL(2,ℂ).
+The Lorentz group acts on four-vectors. The Dirac equation needs more: objects that transform under Lorentz transformations but change sign under a rotation by $2\pi$. No representation of $SO^+(1,3)$ itself can do that, because the $2\pi$ rotation *is* the identity there. The way out is a bigger group that maps onto the Lorentz group, two elements to one, so that the signs $+$ and $-$ survive upstairs. That group is SL(2,ℂ), the complex 2×2 matrices with determinant 1. This note builds the map. The [next note](weyl-spinor-representations.md) builds the spinors that live on SL(2,ℂ).
 
 Rotations alone show the same pattern one level down, with SU(2) and SO(3). This note contains that case: restrict everything to unitary $A$ ([C7](#c7)).
 
@@ -83,7 +83,7 @@ Let $X$ be Hermitian. Then $(A X A^\dagger)^\dagger = (A^\dagger)^\dagger X^\dag
 \det(A X A^\dagger) = \det A \cdot \det X \cdot \det A^\dagger = \det A \cdot \det X \cdot \overline{\det A} = |\det A|^2 \det X = \det X ,
 ```
 
-since $\det A = 1$. The map is real-linear in $X$. By [C1](#c1), it defines a real-linear map $\Lambda(A)$ on $\mathbb{R}^4$ through $X(\Lambda(A) x) = A X(x) A^\dagger$. By [C2](#c2), $\Lambda(A)x \cdot \Lambda(A)x = \det(A X A^\dagger) = \det X = x \cdot x$. A linear map that keeps $x \cdot x$ for all $x$ keeps $x \cdot y$ for all $x, y$, by the polarisation identity $x \cdot y = \frac14[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)]$, so $\Lambda(A) \in O(1,3)$. The matrix entries follow from the inverse in [C1](#c1): $\Lambda(A)^\mu{}_\nu$ is component $\mu$ of the image of the basis vector $e_\nu$, whose matrix is $\sigma_\nu$. That is $\frac12 \operatorname{tr}(\sigma_\mu A \sigma_\nu A^\dagger)$. ∎
+since $\det A = 1$. The map is real-linear in $X$. By [C1](#c1), it defines a real-linear map $\Lambda(A)$ on $\mathbb{R}^4$ through $X(\Lambda(A) x) = A X(x) A^\dagger$. By [C2](#c2), $\Lambda(A)x \cdot \Lambda(A)x = \det(A X A^\dagger) = \det X = x \cdot x$. A linear map that keeps $x \cdot x$ for all $x$ keeps $x \cdot y$ for all $x, y$, by the polarisation identity $x \cdot y = \frac14[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)]$, so $\Lambda(A) \in O(1,3)$. The matrix entries follow from the inverse in [C1](#c1): $`\Lambda(A)^\mu{}_\nu`$ is component $\mu$ of the image of the basis vector $e_\nu$, whose matrix is $\sigma_\nu$. That is $\frac12 \operatorname{tr}(\sigma_\mu A \sigma_\nu A^\dagger)$. ∎
 
 </details>
 
@@ -101,15 +101,15 @@ $X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger 
 
 ### Which Lorentz transformations come out
 
-The Lorentz group $O(1,3)$ has four pieces. A transformation can reverse time or not (the sign of $\Lambda^0{}_0$), and it can reverse orientation or not (the sign of $\det \Lambda$). The proper orthochronous piece $SO^+(1,3)$, with $\Lambda^0{}_0 \ge 1$ and $\det\Lambda = 1$, is the one connected to the identity: rotations, boosts and their products.
+The Lorentz group $O(1,3)$ has four pieces. A transformation can reverse time or not (the sign of $`\Lambda^0{}_0`$), and it can reverse orientation or not (the sign of $\det \Lambda$). The proper orthochronous piece $SO^+(1,3)$, with $`\Lambda^0{}_0 \ge 1`$ and $\det\Lambda = 1$, is the one connected to the identity: rotations, boosts and their products.
 
 **Proposition ([C5](#c5)).** $\Lambda(A) \in SO^+(1,3)$ for every $A \in SL(2,\mathbb{C})$.
 
-*Proof idea.* For the time direction, compute $\Lambda^0{}_0$ directly. For the orientation, use continuity: $\det\Lambda(A)$ is $\pm 1$, it is $+1$ at $A = I$, and SL(2,ℂ) is connected, so it cannot jump to $-1$.
+*Proof idea.* For the time direction, compute $`\Lambda^0{}_0`$ directly. For the orientation, use continuity: $\det\Lambda(A)$ is $\pm 1$, it is $+1$ at $A = I$, and SL(2,ℂ) is connected, so it cannot jump to $-1$.
 
 <details><summary>Proof</summary>
 
-*Time direction.* By [C3](#c3) with $\mu = \nu = 0$, $\Lambda(A)^0{}_0 = \frac12 \operatorname{tr}(A A^\dagger) = \frac12(|a|^2 + |b|^2 + |c|^2 + |d|^2)$ for $A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}$. Since $1 = |ad - bc| \le |a||d| + |b||c| \le \frac12(|a|^2 + |d|^2) + \frac12(|b|^2 + |c|^2)$, using $uv \le \frac12(u^2 + v^2)$, we get $\Lambda(A)^0{}_0 \ge 1$.
+*Time direction.* By [C3](#c3) with $\mu = \nu = 0$, $`\Lambda(A)^0{}_0 = \frac12 \operatorname{tr}(A A^\dagger) = \frac12(|a|^2 + |b|^2 + |c|^2 + |d|^2)`$ for $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$. Since $1 = |ad - bc| \le |a||d| + |b||c| \le \frac12(|a|^2 + |d|^2) + \frac12(|b|^2 + |c|^2)$, using $uv \le \frac12(u^2 + v^2)$, we get $`\Lambda(A)^0{}_0 \ge 1`$.
 
 *Orientation.* $\Lambda(A) \in O(1,3)$ ([C3](#c3)), so $\det \Lambda(A) = \pm 1$, because $\Lambda^T g \Lambda = g$ gives $(\det\Lambda)^2 = 1$. The function $A \mapsto \det\Lambda(A)$ is continuous ([C4](#c4)). SL(2,ℂ) is path-connected: by the polar decomposition *(cited)*, every $A \in SL(2,\mathbb{C})$ is $A = U e^{H}$ with $U \in SU(2)$ and $H$ Hermitian and traceless. The path $t \mapsto U e^{tH}$ connects $U$ to $A$ inside SL(2,ℂ), since $\det e^{tH} = e^{t \operatorname{tr} H} = 1$. SU(2) is the 3-sphere and is path-connected *(cited)*, so $U$ connects to $I$. A continuous function with values in $\{+1, -1\}$ on a path-connected space is constant. At $A = I$ it is $\det 1 = 1$. ∎
 
@@ -179,7 +179,7 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
 **Two matrices, one rotation.** $e^{-i\theta\sigma_3/2}$ and $-e^{-i\theta\sigma_3/2} = e^{-i(\theta + 2\pi)\sigma_3/2}$ both rotate by $\theta$ about $z$: the second is the rotation by $\theta + 2\pi$, which is the same rotation ([C6](#c6)).
 
-**A light-like vector.** $p = (E, 0, 0, E)$ has $P = \operatorname{diag}(2E, 0) = \begin{pmatrix}\sqrt{2E} \\ 0\end{pmatrix}\begin{pmatrix}\sqrt{2E} & 0\end{pmatrix}$, a column times its conjugate transpose. Under $A$, $P \mapsto A P A^\dagger = (A\lambda)(A\lambda)^\dagger$ with $\lambda = (\sqrt{2E}, 0)^T$. So the momentum transforms because the spinor $\lambda$ does.
+**A light-like vector.** $p = (E, 0, 0, E)$ has $`P = \operatorname{diag}(2E, 0) = \begin{pmatrix}\sqrt{2E} \\ 0\end{pmatrix}\begin{pmatrix}\sqrt{2E} & 0\end{pmatrix}`$, a column times its conjugate transpose. Under $A$, $P \mapsto A P A^\dagger = (A\lambda)(A\lambda)^\dagger$ with $\lambda = (\sqrt{2E}, 0)^T$. So the momentum transforms because the spinor $\lambda$ does.
 
 ## Pitfalls
 
@@ -194,7 +194,7 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
    <details><summary>Solution</summary>
 
-   $X = \begin{pmatrix} 3 & 1 \\ 1 & 1\end{pmatrix}$, $\det X = 3 - 1 = 2 = 4 - 1 - 0 - 1$. Positive, so time-like ([C2](#c2)).
+   $`X = \begin{pmatrix} 3 & 1 \\ 1 & 1\end{pmatrix}`$, $\det X = 3 - 1 = 2 = 4 - 1 - 0 - 1$. Positive, so time-like ([C2](#c2)).
 
    </details>
 
@@ -218,7 +218,7 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
    <details><summary>Solution</summary>
 
-   $AIA^\dagger = AA^\dagger = I$. Commuting with $\sigma_3 = \operatorname{diag}(1,-1)$ kills the off-diagonal entries: $(A\sigma_3)_{12} = -A_{12}$ but $(\sigma_3 A)_{12} = A_{12}$. Commuting with $\sigma_1$ swaps the diagonal entries of a diagonal matrix: $\sigma_1 \operatorname{diag}(a,d) \sigma_1 = \operatorname{diag}(d, a)$. So $a = d$.
+   $AIA^\dagger = AA^\dagger = I$. Commuting with $\sigma_3 = \operatorname{diag}(1,-1)$ kills the off-diagonal entries: $`(A\sigma_3)_{12} = -A_{12}`$ but $`(\sigma_3 A)_{12} = A_{12}`$. Commuting with $\sigma_1$ swaps the diagonal entries of a diagonal matrix: $\sigma_1 \operatorname{diag}(a,d) \sigma_1 = \operatorname{diag}(d, a)$. So $a = d$.
 
    </details>
 
