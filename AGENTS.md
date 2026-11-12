@@ -64,6 +64,7 @@ Style: plain, precise, short sentences. Define a term before using it. One idea 
 - Inline: `$\gcd(p, q) = x - y$`. If the expression contains characters Markdown would interpret, such as `*`, `_` or `\`, use the backtick form `` $`a_1 * b_1`$ ``.
 - Displayed: a ` ```math ` code block, or `$$ … $$` on lines of their own. Prefer the code block: it never collides with Markdown.
 - A literal dollar sign in prose is written `\$`.
+- GitHub rejects some macros and shows "The following macros are not allowed" in place of the formula. `\operatorname` is one of them: write `\mathrm{tr}` instead of `\operatorname{tr}`. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
 - Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
 - Write formulas in LaTeX everywhere a formula appears, key claims included. Code, identifiers and program output stay in backticks: `arb_t`, `x^2 - 1` as typed into a program.
 - Check that the note renders on GitHub before asking for review (§9): in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
