@@ -2,7 +2,7 @@
 title: Linkage and storage duration
 area: cpp
 created: 2026-10-25
-updated: 2026-10-30
+updated: 2026-11-08
 prerequisites: [cpp/header-only-libraries]
 related: [cpp/const-and-constexpr, c/stack-and-heap, cpp/abi-and-shared-libraries]
 projects: [partonforge]
@@ -20,6 +20,7 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 - **Storage duration** says when an object is created and destroyed. Locals have automatic duration; globals and `static` locals live for the whole program.
 - The keyword `static` means three different things: internal linkage at namespace scope (outside any function or class, including the global scope outside every namespace), static duration on a local, and "shared by all objects" on a class member.
 - A `static` variable defined in a header gives every file that includes it a copy of its own. An `inline` variable gives one, shared.
+- A header constant is `inline constexpr` so that the whole program has one constant, not one per file. Then an inline function in the header that takes its address or a reference to it means the same object everywhere.
 
 ## Key claims
 
@@ -32,6 +33,8 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 - <a id="c7"></a>**C7.** Linkage and storage duration are independent: a `static` local has static storage duration but no linkage, a variable in an unnamed namespace has static storage duration and internal linkage, and an ordinary local has automatic storage duration and no linkage.
 - <a id="c8"></a>**C8.** A `static` data member or member function of a class belongs to the class, not to any object, like a `static` member in C#.
 - <a id="c9"></a>**C9.** An unnamed namespace behaves like a namespace with a unique name plus a `using` directive for it in the enclosing namespace. So an unnamed namespace inside `namespace pf` gives the same internal linkage as one at global scope, but its names are found as if declared in `pf`: code in `pf` finds them before any global function of the same name, and the helpers use `pf`'s names without `pf::`. At global scope, a helper with the same name and parameters as a global function makes an unqualified call ambiguous.
+- <a id="c10"></a>**C10.** A namespace-scope `constexpr` variable defined in a header without `inline` is a separate object in every translation unit that includes the header, so its address differs between them; an `inline constexpr` variable (C++17) has external linkage and is one object with one address for the whole program. A `static constexpr` data member is implicitly `inline` since C++17.
+- <a id="c11"></a>**C11.** Every definition of an inline function must refer to the same entities in every translation unit. An inline function in a header that odr-uses a non-`inline` header constant, for example by passing it to `std::min`, which takes `const T&`, refers to a different object in each translation unit and so breaks the one-definition rule (no diagnostic required); declaring the constant `inline constexpr` avoids that.
 
 ## Explanation
 
@@ -62,6 +65,14 @@ To remember it, picture C++ writing an invisible `static` in front of every name
 ### static in a header
 
 A header is pasted into each file that includes it. So `static int per_file = 0;` in a header defines one `per_file` *per translation unit* ([C5](#c5)). Code in `a.cpp` that increments it changes `a.cpp`'s copy, and `main.cpp` still sees 0. If one shared variable is meant, C++17's `inline` variable is the tool: every translation unit sees the same object. `inline constexpr` does the same for constants, which is how [PartonForge](https://github.com/thomaswening/PartonForge) declares `kColumnsPerValue` in a header.
+
+### Why a header constant is inline constexpr
+
+A `constexpr` constant in a header already compiles and links without `inline` ([C4](#c4)): each translation unit gets its own copy. Copies with internal linkage cannot clash. Most uses never notice. When code writes `kColumnsPerValue * 3`, the compiler puts the value 26 into the instruction. No object is needed at all.
+
+The copies become visible when code needs the constant as an **object**: when it takes its address, or binds a reference to it ([C10](#c10)). Each translation unit then sees its own object at its own address. That matters through the **one-definition rule** (ODR): an inline function defined in a header is compiled into every file that includes it, and every one of those definitions must mean the same thing ([C11](#c11)). A call such as `std::min(kBatchSize, remaining)` binds `const T&` to the constant, which is an *odr-use*. Inside a header's inline function or template, that call refers to `a.cpp`'s `kBatchSize` in one file and `main.cpp`'s in another. The program then breaks the rule. Compilers do not diagnose it. It rarely causes visible harm, but the program has undefined behaviour.
+
+`inline constexpr` removes the question. The variable has external linkage. The linker keeps one object, which every file refers to ([C10](#c10)). It is the C++17 way to write a header constant, and the reason PartonForge's headers write `inline constexpr size_t kColumnsPerValue = 26;`. A `static constexpr` class member is `inline` automatically, so `struct Layout { static constexpr int kWidth = 26; };` needs nothing more. Inside a `.cpp` file, a plain `constexpr` in the unnamed namespace stays right: no other file sees it, so no other definition can disagree.
 
 ### Storage duration
 
@@ -190,17 +201,67 @@ The clash comes from name lookup, which sees only the declarations in the curren
 
 A function from another file is normally used through its header, so the second row is the usual case.
 
+Constants in a header, plain `constexpr` against `inline constexpr`, compared by address across two translation units ([C10](#c10)):
+
+```cpp
+// columns.hpp
+#pragma once
+constexpr int kPerFile = 26;          // internal linkage: one object per translation unit
+inline constexpr int kShared = 26;    // C++17 inline variable: one object for the program
+
+struct Layout {
+  static constexpr int kWidth = 26;   // a static constexpr member is implicitly inline
+};
+
+const int* per_file_address_in_a();
+const int* shared_address_in_a();
+const int* width_address_in_a();
+```
+
+```cpp
+// a.cpp
+#include "columns.hpp"
+const int* per_file_address_in_a() { return &kPerFile; }
+const int* shared_address_in_a() { return &kShared; }
+const int* width_address_in_a() { return &Layout::kWidth; }
+```
+
+```cpp
+// main.cpp
+#include <iostream>
+#include "columns.hpp"
+
+int main() {
+  std::cout << std::boolalpha
+            << (per_file_address_in_a() == &kPerFile) << ' '
+            << (shared_address_in_a() == &kShared) << ' '
+            << (width_address_in_a() == &Layout::kWidth) << '
+';
+}
+```
+
+Output, with GCC 13.3 and Clang 18.1 (`g++ -std=c++20 -Wall -Wextra a.cpp main.cpp`):
+
+```text
+false true true
+```
+
+With `-std=c++14`, both compilers warn that inline variables are a C++17 feature.
+
 ## Pitfalls
 
 - Putting `static int counter;` in a header to share it. Every file gets its own ([C5](#c5)). Use `inline int counter;`.
 - Reading `static` on a local as "compile-time constant". It is about lifetime ([C6](#c6)); a compile-time constant is `constexpr` ([const and constexpr](const-and-constexpr.md)).
 - Giving file-local helpers external linkage. It works until another file has a helper with the same name, then the link fails ([C2](#c2), [C3](#c3)).
 - Assuming C's rule for `const` globals in C++, or the reverse ([C4](#c4)).
+- Reading the unnamed namespace as a way to *share* a helper between files. It does the opposite: it keeps the helper private to its file, so that two `.cpp` files can each define a `trimmed` without a link error ([C3](#c3)).
+- Taking the address of, or binding a reference to, a plain `constexpr` header constant inside a header's inline function. Each file sees a different object ([C10](#c10), [C11](#c11)). Make the constant `inline constexpr`.
 - Thinking an unnamed namespace inside `pf` makes its helpers visible to other files that use `pf`. It doesn't: linkage stays internal, and only lookup within this file changes ([C9](#c9)).
 
 ## Sources
 
 - Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-10-25: Thomas's review of [PR 1](https://github.com/thomaswening/PartonForge/pull/1), on the unnamed namespace in `grid_diff.cpp` and on `static const char* two[]`.
 - Claude session on PartonForge, 2026-10-27: Thomas's question why `src/fortran_io.cpp` puts its unnamed namespace inside `namespace pf`. Source of [C9](#c9).
+- Claude session on PartonForge, 2026-11-08: the walkthrough of PR 1, on `inline constexpr` in [`include/partonforge/fortran_io.hpp`](https://github.com/thomaswening/PartonForge/blob/56b51e6d0d0d3f2c8c4b2b67de40aaa8c469347a/include/partonforge/fortran_io.hpp#L33). Source of [C10](#c10) and [C11](#c11). Thomas first had the reason for the unnamed namespace backwards (2026-11-02).
 - Backlog entry `cpp/linkage-and-storage-duration`, from C++ Intermediate Quiz: Round 3, question 3 (2026-10-21).
-- [cppreference: storage class specifiers](https://en.cppreference.com/w/cpp/language/storage_duration) (linkage and storage duration), [namespaces](https://en.cppreference.com/w/cpp/language/namespace#Unnamed_namespaces), [`inline` specifier](https://en.cppreference.com/w/cpp/language/inline).
+- [cppreference: storage class specifiers](https://en.cppreference.com/w/cpp/language/storage_duration) (linkage and storage duration), [namespaces](https://en.cppreference.com/w/cpp/language/namespace#Unnamed_namespaces), [`inline` specifier](https://en.cppreference.com/w/cpp/language/inline), [definitions and the ODR](https://en.cppreference.com/w/cpp/language/definition#One_Definition_Rule).
