@@ -11,6 +11,7 @@ Start at [topics/index.md](topics/index.md). Each area has an index, and each no
 - **Explanation**, **Examples** with snippets, **Pitfalls** and **Sources**.
 - **Good habits** in notes about writing code: what to write by default, and why.
 - **Exercises** in some notes, with solutions folded away: try them before unfolding.
+- In **maths and physics notes**, definitions and results stated as a textbook would, each with what it means and a picture where one helps. The proof idea comes first, and the full proof is folded away. Whatever isn't proved is marked *(cited)*, with a source ([AGENTS.md](AGENTS.md#mathematics-and-physics-notes)).
 
 Formulas are written in LaTeX and render on GitHub. The front matter's `projects` field says which of my projects a note came from or matters to, and the projects' names link to their repositories.
 
