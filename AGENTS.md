@@ -6,7 +6,7 @@ This file is the single rulebook for any AI that reads or writes this repository
 
 <a id="what-makes-a-note"></a>**What makes a note.** A general concept Thomas learned, one he could be quizzed on outside the project where he met it: a piece of mathematics (greatest common divisor), a tool and how it works (what a GitHub Actions workflow is, and how its trigger, jobs and steps fit together). Not a working rule or a decision about how he works ("document every CI check as a rule with a table of cases"): that belongs in his Claude configuration or in the project's documents. Not a project fact either ("Tante pins FLINT 3.6.0"). Decided by Thomas, 25 October 2026.
 
-**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour. Where a concept has a .NET counterpart, compare to it.
+**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour. He has a master's degree in physics. He knows many mathematical concepts well, but not always their proofs and the smaller results they rest on: in topology, for example. Where a concept has a .NET counterpart, compare to it. Mathematics and physics notes follow [their own section](#mathematics-and-physics-notes).
 
 **Language.** Always English.
 
@@ -69,6 +69,41 @@ Style: plain, precise, short sentences. Define a term before using it. One idea 
 - Check that the note renders on GitHub before asking for review (§9): in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
 
 **Snippets use only what Thomas already knows:** C#/.NET, basic C++20, and the note's prerequisites. Any other feature in a snippet is either explained right there or left out. This includes keywords such as `explicit`, member initialiser lists, move constructors and `std::exchange`. Keep each example to the smallest code that shows the concept. An advanced version belongs in the note whose topic it is, with a link to it.
+
+### Mathematics and physics notes
+
+Thomas learns mathematics by speaking it. He wants each statement written as a textbook writes it, together with the idea behind it. Rigour without motivation doesn't work for him, and neither does intuition without rigour. A note in mathematics or physics follows the rules above, plus the ones in this section. Decided by Thomas, 12 November 2026, in the review of [#40](https://github.com/thomaswening/doubting-thomas/pull/40).
+
+**Formal statements, each explained.** Definitions, propositions, lemmas and theorems appear in textbook form: a bold label, then the statement.
+
+```markdown
+**Definition (quotient space).** Let $X$ be a topological space and $\sim$ an equivalence relation on $X$. …
+```
+
+Right after each one, the text answers whichever of these questions apply:
+
+- What does it say in words? What does each symbol stand for?
+- What does it represent? What picture can you draw?
+- What does it look like in a lower dimension, or in the simplest case?
+- Why is it defined this way and not more simply?
+- Which examples fit, and which non-examples don't? A non-example shows what a condition is there for. For example, $t \mapsto (\cos t, \sin t)$ from $[0, 2\pi)$ to the circle is a continuous bijection whose inverse is not continuous. It shows why a homeomorphism needs a continuous inverse.
+
+Notation comes after the idea it names: first the operation is understood, then it gets its symbol.
+
+**Full proofs, in two layers.** Every result that belongs to the note's concept is proved. The **proof idea** comes first, in the open text: the picture and the one trick the proof rests on. The **full proof** follows in a collapsed block, `<details><summary>Proof</summary>`, with the empty lines that §2 asks for. Each step that uses an earlier result links it: a claim, a note or a cited result.
+
+**Every gap is labelled.** A result that the note uses but doesn't prove is **cited**. It is stated precisely and marked *(cited)*, with a link to its note or to a source with a theorem or page number, in the form "Author, *Title*, Theorem 4.2". Nothing is used without being either proved or cited, because a leap of faith Thomas doesn't notice is the error this rule prevents. How much a citation explains depends on how obvious the result is:
+
+- An **intuitive** result gets its statement and the label, nothing more.
+- A **non-obvious** result also gets a short motivation: a picture, a low-dimensional case, or why it can't be otherwise. This is not a proof. It makes the leap of faith a reasonable one.
+
+**Rigour budget.** A note proves what belongs to its own concept and cites what lies below it. A cited result gets a note of its own when a second note needs it, or when Thomas asks about it. Until then it can wait in the backlog (§8). Foundations grow from questions, not as a course.
+
+**Physics: derivations with their assumptions.** In physics, a derivation takes the place of a proof. It lists its assumptions and approximations up front, marks where each one enters, and says what changes without it. A heuristic argument is allowed when it is labelled *(heuristic)* and says what a rigorous version would need.
+
+**Claims and exercises.** The key claims of such a note are mostly its definitions and results, stated precisely. A claim that has a proof links to it. Exercises include proofs: "prove C4", "reconstruct the proof of C2 from its idea", "which condition of the definition fails here?".
+
+**Sources.** Prefer a standard textbook. Follow its notation and its proofs, and cite it by theorem or page number, so that Thomas can check a proof against the book. Paraphrase and cite; never copy passages. Thomas's university textbooks are in the `eBooks` folder of his Google Drive. If a Google Drive connector is available, look there before the web.
 
 ## 3. Key claims
 
@@ -174,6 +209,14 @@ python tools/check_docs.py . --markdown "topics/**/*.md" "templates/*.md" "*.md"
 
   For Clang, use `clang` and `clang++` with the same flags.
 - C# snippets and fragments without a `main` are not compiled. Say so in the pull request if a claim rests on one.
+
+### Proofs
+
+**Every proof is checked against its source before review.** Nothing compiles a proof, and a wrong step can read as smoothly as a right one.
+
+- A proof that follows a textbook names the book and the theorem. Check each step against it.
+- A proof without a textbook source is marked as such in the pull request, so that Thomas checks it line by line.
+- Where a formula can be checked numerically (an identity, a matrix, a special case), do so with a throwaway script and report it.
 
 ### Verification in the pull request
 
