@@ -14,8 +14,11 @@ tags: [cpp, static-analysis, clang-tidy, sonarqube, ci, warnings, core-guideline
 ## TL;DR
 
 - **Static analysis** reads source code without running it and reports likely bugs and style problems. Sanitizers do the opposite: they check the running program.
+
 - C++ has three layers: **compiler warnings** (made errors with `-Werror` or `/WX`), a **linter** such as **clang-tidy**, and IDE plugins such as **SonarQube for IDE** or Visual Studio's Code Analysis.
+
 - clang-tidy is free, open source, needs no server or account, runs the same on Windows, macOS and Linux, and can fail a CI build. That makes it a good gate for every change.
+
 - IDE plugins give feedback while typing. They are a useful addition, not a substitute for a check that CI enforces.
 
 ## Key claims
@@ -94,7 +97,9 @@ clang-tidy -p build src/term.cpp
 ## Pitfalls
 
 - Turning on every check at once. Some checks contradict each other or the project's style; choose groups and switch off single checks deliberately ([C6](#c6)).
+
 - Treating a clean analysis as proof of correctness. It is a filter, not a proof ([C6](#c6)).
+
 - Relying on an IDE plugin as the project's rule. Only checks that CI runs are enforced for everyone.
 
 ## Sources

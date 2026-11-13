@@ -14,9 +14,13 @@ tags: [arbitrary-precision, error-bounds, flint, arb]
 ## TL;DR
 
 - A **ball** $[m \pm r]$ is a number written as a midpoint $m$ and a radius $r$: the true value is somewhere in $[m - r, m + r]$.
+
 - Every operation on balls returns a ball that is **guaranteed** to contain the true result, rounding errors included.
+
 - That makes digits **provable**: if the whole ball rounds to the same digits, those digits are right.
+
 - The price: comparisons can answer "don't know", and the radius can come out larger than the real error.
+
 - In C and C++ it is provided by FLINT's `arb` module (formerly the Arb library), which [Tante](https://github.com/thomaswening/Tante) uses for numerical evaluation.
 
 ## Key claims
@@ -121,8 +125,11 @@ arb_clear(b);
 ## Pitfalls
 
 - **Reading false as "no".** A false comparison means "not proven" ([C4](#c4)). Branch on what was proven, and handle the third case, overlap, explicitly.
+
 - **Testing equality.** Two balls can be proven unequal (disjoint) but almost never proven equal: that needs both to be exact, with radius 0. Use `arb_overlaps` or `arb_contains` for "could these be the same number?".
+
 - **Digits versus bits.** Precision is in bits ([C8](#c8)). 30 digits need about 100 bits, not 30.
+
 - **Long loops.** Each step adds a little radius. Over thousands of steps the ball can become too wide to prove anything, even when the true error is small ([C3](#c3)). Raise the precision, or reformulate to reduce the dependency problem ([C5](#c5)).
 
 ## Sources

@@ -14,9 +14,13 @@ tags: [cpp, array, std-array, vector, span, decay, list]
 ## TL;DR
 
 - A built-in array `T a[N]` holds N elements inline. N is fixed at compile time and is part of the type. The array decays to a pointer, cannot be assigned and does not know its length once passed on.
+
 - `std::array<T, N>` stores the same elements the same way, but behaves like a value: it can be copied, assigned and returned, and has `.size()`.
+
 - `std::vector<T>` keeps its elements on the heap, can grow, and frees them in its destructor. It is C#'s `List<T>`.
+
 - C#'s `T[]` is closest to `std::vector<T>`, not to `T*`: both have a run-time length and live on the heap. A C# array cannot grow, and assigning one shares it instead of copying.
+
 - `std::span<T>` (C++20) is a non-owning view of elements stored elsewhere: a pointer plus a length. `std::span<T>` may change the elements, like C#'s `Span<T>`; `std::span<const T>` may only read them, like `ReadOnlySpan<T>`. It is the modern replacement for a `(T*, size_t)` parameter pair.
 
 ## Key claims
@@ -120,9 +124,13 @@ Output:
 ## Pitfalls
 
 - Reading `const char* names[]` as "a pointer". The brackets make it an array; each element is a pointer ([C7](#c7)).
+
 - Expecting `b = a;` between two vectors to share them, as in C#. It copies ([C4](#c4)).
+
 - Using a run-time length for a built-in array because gcc accepts it. It is not portable C++ ([C1](#c1)); use `std::vector`.
+
 - Keeping a `std::span` to a vector, then letting the vector grow or be destroyed. The span then points to freed memory ([C6](#c6)).
+
 - Taking `T*` as the C++ version of C#'s `T[]`. A pointer carries no length and owns nothing ([C5](#c5)).
 
 ## Sources

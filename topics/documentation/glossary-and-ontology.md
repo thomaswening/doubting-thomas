@@ -14,10 +14,15 @@ tags: [glossary, ontology, skos, owl, rdf, controlled-vocabulary]
 ## TL;DR
 
 - A **glossary** defines terms in prose for people. An **ontology** writes concepts and their relations in a formal language that programs can read.
+
 - **SKOS** (W3C, 2009) is the light option: concepts with labels, definitions and *broader*, *narrower* and *related* links.
+
 - **OWL** is the heavy option: classes and logical axioms that a **reasoner** can draw conclusions from and check for contradictions.
+
 - SKOS's *broader* is a loose hierarchy, not "is a subclass of". Only OWL says "every RATFUN is a coefficient" in a way a machine can check.
+
 - An ontology pays off when a **program reads the vocabulary**, when it is **too large to follow by eye**, or when **several projects or languages share it**. Before that it is cost without a reader.
+
 - A glossary with **fixed labels** (Kind of, See also) can be converted to SKOS later by a short script, so nothing is lost by waiting.
 
 ## Key claims
@@ -170,8 +175,11 @@ Output (run on .NET 10.0.401):
 ## Pitfalls
 
 - **Reading `skos:broader` as "is a".** It also covers "part of" and any other hierarchy ([C3](#c3)). Only OWL's `rdfs:subClassOf` means "is a" with consequences.
+
 - **Assuming `skos:broader` chains.** If A is broader than B and B broader than C, SKOS does not state that A is broader than C. That is `skos:broaderTransitive`.
+
 - **Building the ontology first.** Without a program that reads it, an ontology is a second copy of the glossary that drifts ([C7](#c7)).
+
 - **Free-text relations.** "Related to coefficient, sort of" can't be converted by a script. Fixed labels can ([C8](#c8)).
 
 ## Sources

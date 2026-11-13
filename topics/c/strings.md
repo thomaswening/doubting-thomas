@@ -14,10 +14,15 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8, poi
 ## TL;DR
 
 - C has no string type. A string is an array of `char` ending in a zero byte, `'\0'`, and nothing records its length.
+
 - `strlen` finds the length by counting up to the zero, so a string of $n$ characters needs $n + 1$ bytes.
+
 - An array passed to a function becomes a pointer, so the function can't tell how big the buffer is; the caller has to say.
+
 - `strcpy` and `strcat` never check sizes; writing past the end is a buffer overflow. `snprintf` is the portable safe choice.
+
 - `==` on two strings compares addresses; use `strcmp`.
+
 - A pointer into the middle of a string is a string too: the rest of it, without a copy. That is why `"abc" + 'E'` moves a pointer instead of appending.
 
 ## Key claims
@@ -167,11 +172,17 @@ With the last line uncommented, it still compiles. Clang warns that adding a `ch
 ## Pitfalls
 
 - Allocating `strlen(s)` bytes for a copy and forgetting the `+ 1` for the terminator ([C2](#c2)).
+
 - Taking `sizeof` of a parameter to get its buffer size ([C4](#c4)).
+
 - Treating `strncpy` as a safe `strcpy` ([C7](#c7)).
+
 - Comparing strings with `==` ([C8](#c8)).
+
 - Modifying a string literal through a `char*` that points to it ([C3](#c3)): `char* s = "abc"; s[0] = 'x';` is undefined behaviour, whereas `char s[] = "abc";` makes a modifiable copy.
+
 - Writing `"text" + 'x'` or `ptr + 'x'` to append a character. It moves a pointer ([C11](#c11)); append to a `std::string` instead.
+
 - Keeping a pointer into a `std::string`'s `c_str()` after the string is changed or destroyed. The pointer shares the string's characters ([C10](#c10)), so it dangles.
 
 ## Sources

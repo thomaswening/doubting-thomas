@@ -14,8 +14,11 @@ tags: [rational-functions, gcd, canonical-form, computer-algebra]
 ## TL;DR
 
 - A **rational function** is a fraction of two polynomials, $p/q$. The same function can be written in infinitely many ways.
+
 - To make equal functions look equal, a program **cancels the GCD** of numerator and denominator and then fixes the scale: denominator primitive, with a positive leading coefficient.
+
 - This is exactly what you'd do for integer fractions, $6/(-4) \to -3/2$, with a polynomial GCD in place of the integer one.
+
 - With a normal form, "are these equal?" and "is this zero?" become plain comparisons.
 
 ## Key claims
@@ -147,8 +150,11 @@ The denominator $x^2 - 1$ is already primitive with a positive leading coefficie
 ## Pitfalls
 
 - **Normalising only the numbers.** Making the denominator primitive but skipping the polynomial GCD leaves $(x^2 - 1)/(x^2 + 2x + 1)$ unreduced, and equal functions still compare unequal ([C5](#c5)).
+
 - **Calling the normal form "the simplest form".** The normal form is unique, not necessarily short: $2/(x^2 - 1)$ is normal, while $1/(x - 1) - 1/(x + 1)$ may be what a physicist wants to read.
+
 - **Assuming cancelling keeps the domain** ([C7](#c7)).
+
 - **Forgetting the variable order.** The sign of the denominator's leading coefficient depends on it, as in [content and primitive part, C8](content-and-primitive-part.md#c8).
 
 ## Sources

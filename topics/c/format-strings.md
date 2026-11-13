@@ -14,9 +14,13 @@ tags: [c, printf, snprintf, format-string, conversion-specification, precision, 
 ## TL;DR
 
 - The `printf` family differs only in where the text goes. `printf` writes to the screen, `fprintf` to a file, `sprintf` to a buffer, and `snprintf` to a buffer of a given size.
+
 - A placeholder, a **conversion specification**, has five parts: `%` [flags] [width] [.precision] [length] conversion. Only the `%` and the conversion letter are required.
+
 - The conversion letter says how the value **looks**: `d` decimal, `x` hexadecimal, `f` fixed-point, `e` exponent notation. The length modifier says what **type** the argument has, such as `ll` for `long long`.
+
 - For `f` and `e`, the precision is the number of digits after the point, so `%.16E` gives 17 significant digits.
+
 - The width is a minimum. It pads, usually on the left, and never cuts a value short.
 
 ## Key claims
@@ -156,10 +160,15 @@ Expected output:
 ## Pitfalls
 
 - Reading `%d` as "double". It prints an `int` in base 10; a `double` passed to it is undefined behaviour ([C9](#c9), [C7](#c7)).
+
 - Expecting `%g` to pick the shorter of `f` and `e` style. It decides by the exponent: `0.0001` prints as `0.0001`, not `1e-04` ([C10](#c10)).
+
 - Printing a 64-bit integer with `%d` or `%X`. Without `ll` (or `z` for `size_t`), the format reads the wrong type ([C7](#c7)).
+
 - Expecting the width to cut a long value. It only pads ([C5](#c5)).
+
 - Reading the precision of `%.16E` as 16 significant digits. It is 16 digits after the point, 17 in total ([C4](#c4)).
+
 - Using `sprintf` where the text could be longer than the buffer ([C1](#c1)).
 
 ## Exercises

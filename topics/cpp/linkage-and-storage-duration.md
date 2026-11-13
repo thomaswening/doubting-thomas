@@ -14,11 +14,17 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 ## TL;DR
 
 - A **translation unit** is one `.cpp` file with its `#include`s pasted in. Each is compiled on its own, and the linker joins them.
+
 - **Linkage** says whether a name in one translation unit means the same thing as that name in another. **External** linkage: shared by the whole program. **Internal** linkage: private to its translation unit.
+
 - An **unnamed namespace**, `namespace { … }`, gives everything in it internal linkage. It is the C++ way to write file-local helpers, like a `file class` in C#.
+
 - An unnamed namespace usually sits **inside** the project's namespace. Linkage is the same either way, but code in that namespace then finds the helpers first, and the helpers can use the namespace's names without a prefix.
+
 - **Storage duration** says when an object is created and destroyed. Locals have automatic duration; globals and `static` locals live for the whole program.
+
 - The keyword `static` means three different things: internal linkage at namespace scope (outside any function or class, including the global scope outside every namespace), static duration on a local, and "shared by all objects" on a class member.
+
 - A `static` variable defined in a header gives every file that includes it a copy of its own. An `inline` variable gives one, shared.
 
 ## Key claims
@@ -201,9 +207,13 @@ A function from another file is normally used through its header, so the second 
 ## Pitfalls
 
 - Putting `static int counter;` in a header to share it. Every file gets its own ([C5](#c5)). Use `inline int counter;`.
+
 - Reading `static` on a local as "compile-time constant". It is about lifetime ([C6](#c6)); a compile-time constant is `constexpr` ([const and constexpr](const-and-constexpr.md)).
+
 - Giving file-local helpers external linkage. It works until another file has a helper with the same name, then the link fails ([C2](#c2), [C3](#c3)).
+
 - Assuming C's rule for `const` globals in C++, or the reverse ([C4](#c4)).
+
 - Thinking an unnamed namespace inside `pf` makes its helpers visible to other files that use `pf`. It doesn't: linkage stays internal, and only lookup within this file changes ([C9](#c9)).
 
 ## Sources

@@ -14,9 +14,13 @@ tags: [cpp, copy-constructor, move-constructor, rvalue-reference, lvalue, std-mo
 ## TL;DR
 
 - C++ objects are **values**: `T b = a;` makes a second, independent object, like assigning a C# `struct`, not like assigning a C# class reference.
+
 - Copying calls the **copy constructor** (`T(const T&)`, for a new object) or the **copy assignment** (`operator=(const T&)`, for an existing one). The compiler writes both for you, copying every member.
+
 - **Moving** (`T(T&&)`, `operator=(T&&)`) lets a new object take over the resources of one that is about to be discarded, instead of duplicating them.
+
 - `std::move(x)` doesn't move anything; it only marks `x` as something that may be moved from.
+
 - Rule of zero: build classes from members that manage themselves, and write none of these functions. Rule of five: if you write one, think about all five.
 
 ## Key claims
@@ -194,10 +198,15 @@ Reading it:
 ## Pitfalls
 
 - Expecting `T b = a;` to share one object, as in C#: it makes an independent copy ([C1](#c1)).
+
 - Relying on the generated copy for a class with an owning raw pointer: a double release ([C2](#c2)).
+
 - Reading a variable after `std::move` from it ([C4](#c4)).
+
 - Adding a destructor "for logging" and silently losing the generated move constructor ([C5](#c5)). Declare all five or leave the destructor out; clang-tidy's `cppcoreguidelines-special-member-functions` reports the mistake.
+
 - Forgetting `noexcept` on a move constructor and getting copies in `std::vector` ([C7](#c7)); clang-tidy's `performance-noexcept-move-constructor` reports it.
+
 - Marking a move constructor `noexcept` when it can throw: the program ends with `std::terminate` instead of reporting the exception ([C9](#c9)).
 
 ## Sources

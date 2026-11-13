@@ -14,9 +14,13 @@ tags: [c, plugin, interface, vtable, com, abi, versioning, callbacks]
 ## TL;DR
 
 - A **table of function pointers** is a struct whose fields are function pointers. It is C's version of an interface: whoever fills the table decides which functions run.
+
 - It is needed when one piece of code must call another it **isn't linked against**, the usual case being a plug-in loaded at run time.
+
 - A plug-in exports one entry function, found by name. Everything else travels through tables: the host passes in a table of its services, and the plug-in returns a table of what it provides.
+
 - Tables are extended only by **appending** fields, and they carry their size or version, so that old plug-ins keep working with new hosts and the other way round.
+
 - C++ virtual functions and COM interfaces are built from the same idea.
 
 ## Key claims
@@ -178,9 +182,13 @@ With a version 2 host, `square(&host, 5)` calls `multiply(5, 5)`. With a version
 ## Pitfalls
 
 - Inserting or reordering fields in a published table: every plug-in compiled against the old layout calls the wrong functions ([C4](#c4)).
+
 - Calling an optional entry without checking it for null ([C5](#c5)).
+
 - Assuming the plug-in can call host functions by name: it isn't linked against the host, so only the entry function is found by name and everything else must come through a table ([C2](#c2)).
+
 - Reading the two `static`s in the example as one thing: on a function at file scope, `static` means internal linkage ([C8](#c8)); on a variable inside a function, it means the variable lives as long as the program instead of being destroyed when the function returns ([stack and heap](stack-and-heap.md#c1)).
+
 - Confusing the table with the handles passed through it: the table holds functions, the handles stand for objects ([opaque handles](opaque-handles.md#c11)).
 
 ## Sources

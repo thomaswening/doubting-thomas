@@ -14,10 +14,15 @@ tags: [golden-tests, snapshot-testing, approval-testing, dependencies, regressio
 ## TL;DR
 
 - A **golden test** (also called a snapshot or approval test) compares a program's output with a stored expected result. It detects **change**, not error.
+
 - When a dependency update changes the output, the failing test means **investigate**, not "accept the new snapshot".
+
 - The expected result is corrected only with **independent evidence** that the new output is right, and that evidence goes into the commit.
+
 - A changed output doesn't say **where** the bug is. It can be in the dependency, in your own code, or in the stored result itself.
+
 - Golden tests only work if correct output is **unique**, so normalise first. Otherwise a harmless convention change breaks them.
+
 - **Pin versions**, so that output can only change in a deliberate update commit.
 
 ## Key claims
@@ -171,9 +176,13 @@ This is why a test of each library adapter on its own, at the interface, is wort
 ## Pitfalls
 
 - **"Fails = blocks the upgrade."** No. It means "find out which version is right" ([C4](#c4)). A real bug fix is adopted, with evidence.
+
 - **"Fails = update the snapshot."** Also no ([C3](#c3)).
+
 - **"The new output is wrong, so the update is to blame."** Not necessarily. Your own code may be wrong, and the update only exposed it ([C9](#c9), [C10](#c10)). Check the raw result at the boundary first.
+
 - **Checking with the same tool.** A second program built on the same library agrees with it for the wrong reasons ([C6](#c6)).
+
 - **Golden results that were never checked.** If the first recorded output was never compared with anything independent, a pass proves only consistency ([C2](#c2)).
 
 ## Sources

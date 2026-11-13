@@ -14,9 +14,13 @@ tags: [cpp, c, undefined-behaviour, asan, ubsan, tsan, testing, ci]
 ## TL;DR
 
 - C and C++ do not check array bounds, freed memory or signed overflow at run time. Breaking those rules is **undefined behaviour**: the program may crash, print garbage, or seem to work.
+
 - .NET checks these things on every access and throws an exception. C++ only checks them when you build with a **sanitizer**.
+
 - A sanitizer is a compiler option that inserts run-time checks into the program. When a check fails, it stops the program and reports the file, the line and the kind of error.
+
 - **AddressSanitizer** finds memory errors, **UndefinedBehaviorSanitizer** finds arithmetic and type errors, and **ThreadSanitizer** finds data races.
+
 - Sanitized builds are slower, so they are used for tests and CI, not for releases. They only find errors on code paths the tests actually run.
 
 ## Key claims
@@ -105,8 +109,11 @@ target_link_options(app PRIVATE -fsanitize=address,undefined)
 ## Pitfalls
 
 - "It printed the right answer, so there is no bug." Undefined behaviour often gives the right answer until the compiler, the optimisation level or the input changes ([C2](#c2)).
+
 - A clean sanitizer run proves only that the paths the tests ran were clean ([C3](#c3)).
+
 - Sanitizers check code compiled with them. A library built without the flag, such as a prebuilt C library, is not checked inside.
+
 - Unsigned overflow is not a bug to the sanitizer, because it is defined ([C7](#c7)). A `size_t` that wraps below zero to a huge number is still a bug in your logic.
 
 ## Sources

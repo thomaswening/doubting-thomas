@@ -14,10 +14,15 @@ tags: [cpp, main, argc, argv, exit-code, exit-status, shell, ci]
 ## TL;DR
 
 - `int main(int argc, char** argv)` receives the command line as C strings. `argc` counts them. `argv[0]` is the program's own name and `argv[1]` the first real argument.
+
 - C#'s `Main(string[] args)` leaves the program name out, so `args[0]` there is `argv[1]` here.
+
 - There is no `main(std::vector<std::string>)`. Convert with `std::vector<std::string> args(argv, argv + argc);`.
+
 - The value `main` returns is the program's **exit status**. Falling off the end of `main` returns 0.
+
 - By convention 0 means success and anything else failure. `diff` and `grep` refine it: 1 for a negative answer, 2 for trouble.
+
 - Shells, CTest and CI all read this number. A non-zero exit fails a test or a CI step.
 
 ## Key claims
@@ -113,8 +118,11 @@ int main(int argc, char** argv) try {
 ## Pitfalls
 
 - Taking `argv[0]` as the first argument, out of C# habit ([C2](#c2)).
+
 - Returning 256, or −1, to signal an error on Linux. The parent sees 0 and 255 ([C6](#c6)).
+
 - Calling `std::exit` deep inside the program to stop on an error, and losing what destructors would have written or removed ([C7](#c7)).
+
 - A test program that prints "FAILED" but returns 0. CTest and CI only look at the exit status ([C8](#c8)).
 
 ## Sources

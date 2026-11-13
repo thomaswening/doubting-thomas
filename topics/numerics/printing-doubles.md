@@ -14,9 +14,13 @@ tags: [ieee-754, double, round-trip, significant-digits, decimal-exponent, signe
 ## TL;DR
 
 - A `double` is binary. Most decimal numbers, such as 0.1, have no exact `double`, so printing one means choosing how many decimal digits to show.
+
 - **17 significant digits are always enough**: reading the 17-digit text back gives exactly the same `double`. 15 are not always enough.
+
 - Many values need fewer digits. .NET's `ToString()` and C++'s `std::to_chars` print the *shortest* text that reads back exactly.
+
 - To find a value's decimal exponent, read it from the printed text, not from `log10`, which can be off by one at powers of ten.
+
 - `-0.0` exists. It equals `0.0`, so `x < 0` misses it; `std::signbit` finds it.
 
 ## Key claims
@@ -160,9 +164,13 @@ decimals: 17 − e     →  15      →  13.354993539365465
 ## Pitfalls
 
 - Printing with 15 or 16 digits and expecting to read back the same `double` ([C2](#c2)).
+
 - Reading 17 printed digits as the exact value. They identify the `double`; its exact decimal expansion is longer ([C3](#c3)).
+
 - Computing a decimal exponent with `floor(log10(x))` near a power of ten ([C6](#c6)).
+
 - Testing the sign with `x < 0` when `-0.0` must print as negative ([C7](#c7)).
+
 - Mixing up $d.ddd \times 10^{k}$ and $0.ddd \times 10^{e}$ and getting the exponent off by one ([C5](#c5)).
 
 ## Exercises

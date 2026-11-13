@@ -14,9 +14,13 @@ tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
 ## TL;DR
 
 - `&a`, for an array `int a[4]`, is a pointer to the whole array. Its type is `int (*)[4]`. It holds the same address as `a` decayed, but `+ 1` on it skips all four elements.
+
 - `int (*p)[4]` is a pointer to an array of four `int`. `int *q[4]` is an array of four pointers. The parentheses decide, because `[]` binds tighter than `*`.
+
 - `int m[3][4]` is three rows of four `int`, stored row after row with no pointers in between. It is not an array of pointers, so passing it as an `int**` is wrong.
+
 - As a parameter, only the outermost level is adjusted: `int m[3][4]` becomes `int (*m)[4]`. The row length stays in the type; the row count must be passed separately.
+
 - `const` on an array type applies to its elements, so a parameter `const frac_t a` becomes `const frac_struct *a`.
 
 ## Key claims
@@ -143,8 +147,11 @@ Expected output:
 ## Pitfalls
 
 - Passing an `int m[3][4]` to a function that takes `int**`. C++ and GCC 14 or later reject it. GCC 13 and Clang 18 compile it with only a warning. A cast silences even that. The function then reads `int` values as addresses ([C7](#c7)).
+
 - Writing `int *p[4]` when a pointer to an array was meant. That is an array of four pointers ([C2](#c2)).
+
 - Taking `&z` of a GMP or FLINT `_t` variable. It has type pointer-to-array, not pointer-to-struct ([C1](#c1)). Pass `z`.
+
 - Expecting a function taking `int (*m)[4]` to know how many rows there are ([C6](#c6)).
 
 ## Exercises

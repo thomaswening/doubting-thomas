@@ -14,8 +14,11 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 ## TL;DR
 
 - A polynomial is **irreducible** over a set of numbers if it can't be written as a product of two non-constant polynomials whose coefficients come from that set.
+
 - The answer depends on the numbers allowed: $x^2 - 2$ is irreducible over the rationals, but splits into $(x - \sqrt2)(x + \sqrt2)$ over the reals.
+
 - Over the rationals, factorisation into irreducibles is **unique** up to the order of the factors and constant factors. That makes it suitable for a canonical form.
+
 - **Multiplying the factors back** proves the factors are *correct*, not that they are *irreducible*.
 
 ## Key claims
@@ -109,8 +112,11 @@ $x^2 - y^2$ splits ([C8](#c8)). The other factors were already irreducible. FLIN
 ## Pitfalls
 
 - **"Has no rational root" means irreducible only up to degree 3** ([C4](#c4)). $(x^2 + 1)^2$ and $(x^2 - 2)(x^2 - 3)$ have no rational roots and are reducible.
+
 - **Saying "irreducible" without saying over what.** $x^2 + 1$ is irreducible over $\mathbb{Q}$ and $\mathbb{R}$, not over $\mathbb{C}$ ([C2](#c2)).
+
 - **Treating multiplication back as a full check** ([C7](#c7)). It proves correctness, not irreducibility.
+
 - **Counting constants as factors.** $2x + 2 = 2(x + 1)$ is still "one irreducible factor" over $\mathbb{Q}$: the $2$ is a constant, a unit, and does not count ([C1](#c1)).
 
 ## Sources

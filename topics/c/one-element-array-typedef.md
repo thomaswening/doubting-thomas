@@ -14,9 +14,13 @@ tags: [c, cpp, array, pointer, typedef, decay, parameter, gmp, flint]
 ## TL;DR
 
 - GMP and FLINT define their `_t` types as `typedef S T[1];`: "array of one `S`".
+
 - As a variable or struct member, `T x;` holds one whole `S` inline, with no `malloc`.
+
 - As a parameter, `T x` is adjusted to `S*`. At a call, `x` decays to `&x[0]`. So `f(x)` passes the address of the caller's struct without `&`. `f` works on that struct.
+
 - The same spelling `T` is a pointer inside the function and an array outside. A parameter can therefore be stored in an `S*`, but cannot initialise another `T`.
+
 - A plain `S x;` needs `&x` at every call. `typedef S* T;` creates no `S`. The array form gives inline storage *and* calls without `&`.
 
 ## Key claims
@@ -264,11 +268,17 @@ Expected output on a platform with 8-byte `long`:
 ## Pitfalls
 
 - Using an `mpz_t` or `fmpz_mpoly_t` before its init function has run. The definition reserved storage but initialised nothing ([C5](#c5)).
+
 - Expecting a pointer typedef to come with an object: after `frac_p w;`, `w->num = 1;` writes through an indeterminate address ([C3](#c3)).
+
 - Writing `x = y;` with two `mpz_t` or `fmpz_mpoly_t` variables. It does not compile, because they are arrays ([array parameters, C4](array-parameters.md#c4)). The library's set function (`mpz_set`, `fmpz_mpoly_set`) does the copy.
+
 - Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([copy and move, C2](../cpp/copy-and-move.md#c2); [RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
+
 - Returning an `fmpz_mpoly_t` from a function. Arrays cannot be returned ([array parameters, C4](array-parameters.md#c4)). The library convention is to pass the result as the first parameter, as `frac_mul` does.
+
 - Taking `&ctx` of an `fmpz_mpoly_ctx_t` local and passing it where an `fmpz_mpoly_ctx_struct*` is expected. `&ctx` is a pointer to an array of one struct, which has a different type ([pointers to arrays, C1](pointers-to-arrays.md#c1)). Pass `ctx`.
+
 - Storing the parameter's pointer and letting the caller's struct die first: the stored pointer dangles ([C2](#c2)).
 
 ## Exercises
