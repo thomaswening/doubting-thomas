@@ -24,7 +24,7 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 
 - <a id="c2"></a>**C2.** A polynomial with rational coefficients also has a content: the rational number $c$, unique up to sign, for which $p / c$ has integer coefficients with GCD $1$. For example,
 
-  $$\displaystyle \tfrac12 x + \tfrac13 = \tfrac16(3x + 2),$$
+  $`\displaystyle \tfrac12 x + \tfrac13 = \tfrac16(3x + 2),`$
 
   so the content is $\tfrac16$ (or $-\tfrac16$).
 
@@ -32,11 +32,11 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 
 - <a id="c4"></a>**C4.** Gauss's lemma: the product of two primitive integer polynomials is primitive. Consequently, up to sign,
 
-  $$\displaystyle \mathrm{cont}(pq) = \mathrm{cont}(p) \cdot \mathrm{cont}(q), \qquad \mathrm{pp}(pq) = \mathrm{pp}(p) \cdot \mathrm{pp}(q).$$
+  $`\displaystyle \mathrm{cont}(pq) = \mathrm{cont}(p) \cdot \mathrm{cont}(q), \qquad \mathrm{pp}(pq) = \mathrm{pp}(p) \cdot \mathrm{pp}(q).`$
 
 - <a id="c5"></a>**C5.** Over the integers, the GCD splits into a number part and a polynomial part, up to sign:
 
-  $$\displaystyle \gcd(p, q) = \gcd(\mathrm{cont}\, p, \mathrm{cont}\, q) \cdot \gcd(\mathrm{pp}\, p, \mathrm{pp}\, q).$$
+  $`\displaystyle \gcd(p, q) = \gcd(\mathrm{cont}\, p, \mathrm{cont}\, q) \cdot \gcd(\mathrm{pp}\, p, \mathrm{pp}\, q).`$
 
 - <a id="c6"></a>**C6.** In several variables, the leading term is defined by a fixed monomial order. In lexicographic order with $x > y$, a term with a higher power of $x$ comes first, and powers of $y$ only break ties; so the leading term of $3xy^2 - 5x^2 + y$ is $-5x^2$.
 

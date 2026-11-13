@@ -30,7 +30,7 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 
 - <a id="c5"></a>**C5.** Rational root test: if $p/q$ in lowest terms is a root of the polynomial with integer coefficients
 
-  $$\displaystyle a_n x^n + \dots + a_1 x + a_0,$$
+  $`\displaystyle a_n x^n + \dots + a_1 x + a_0,`$
 
   then $p$ divides $a_0$ and $q$ divides $a_n$.
 
@@ -38,7 +38,7 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 
 - <a id="c7"></a>**C7.** Checking that the product of the factors equals the input proves the factorisation is correct, but not that each factor is irreducible. For example,
 
-  $$\displaystyle (x^2 - 1)(x + 2) = x^3 + 2x^2 - x - 2,$$
+  $`\displaystyle (x^2 - 1)(x + 2) = x^3 + 2x^2 - x - 2,`$
 
   yet $x^2 - 1 = (x - 1)(x + 1)$ splits further.
 

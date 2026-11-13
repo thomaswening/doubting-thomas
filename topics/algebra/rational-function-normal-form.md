@@ -28,23 +28,23 @@ tags: [rational-functions, gcd, canonical-form, computer-algebra]
 
 - <a id="c4"></a>**C4.** Requiring, in addition, that the denominator be primitive with a positive leading coefficient in a fixed monomial order makes the representation unique: a normal form. The numerator then carries any rational constants, for example
 
-  $$\displaystyle \frac{2x + 2}{-4y} = \frac{-\tfrac12 x - \tfrac12}{y}.$$
+  $`\displaystyle \frac{2x + 2}{-4y} = \frac{-\tfrac12 x - \tfrac12}{y}.`$
 
 - <a id="c5"></a>**C5.** A common factor can be invisible in the expanded form. Only a polynomial GCD finds the reduction
 
-  $$\displaystyle \frac{x^2 - 1}{x^2 + 2x + 1} = \frac{x - 1}{x + 1}.$$
+  $`\displaystyle \frac{x^2 - 1}{x^2 + 2x + 1} = \frac{x - 1}{x + 1}.`$
 
 - <a id="c6"></a>**C6.** In normal form, two rational functions are equal if and only if their numerators and their denominators are identical, and a rational function is zero if and only if its numerator is the zero polynomial.
 
 - <a id="c7"></a>**C7.** Cancelling a common factor changes where the expression is defined but not the rational function. As rational functions,
 
-  $$\displaystyle \frac{x^2 - 1}{x - 1} = x + 1,$$
+  $`\displaystyle \frac{x^2 - 1}{x - 1} = x + 1,`$
 
   although the left-hand side can't be evaluated at $x = 1$.
 
 - <a id="c8"></a>**C8.** Adding fractions without reducing makes them grow, because
 
-  $$\displaystyle \frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$$
+  $`\displaystyle \frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}`$
 
   multiplies the denominators every time. So a long sum is normalised step by step, or put over the least common multiple of the denominators.
 
