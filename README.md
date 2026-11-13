@@ -4,7 +4,7 @@ What I've learned, written down so I can look it up, and so any AI can test me o
 
 ## Reading
 
-Start at [topics/index.md](topics/index.md). Each area has an index, and each note covers one concept:
+Read the notes on the [reading site](https://thomaswening.github.io/doubting-thomas/), which is built from this repository on every merge ([tools/site](tools/site/README.md)). It has a comfortable text column, boxes for definitions and theorems, and display settings each browser remembers. Or read them here: start at [topics/index.md](topics/index.md). Each area has an index, and each note covers one concept:
 
 - **TL;DR**: the gist in a few bullets.
 - **Key claims**: numbered statements (C1, C2, …) that are true on their own. These are what a quiz is built from and graded against.
@@ -36,4 +36,5 @@ templates/                starting points for a note and a results file
 backlog.md                topics that could become notes later
 AGENTS.md                 the rules for any AI working here
 tools/check_docs.py       the link check every pull request runs (AGENTS.md §9)
+tools/site/               builds the reading site
 ```
