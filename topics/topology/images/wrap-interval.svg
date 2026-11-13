@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300" width="680" height="300" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <title>The map from the half-open interval [0, 2 pi) onto the circle: the image of [0, 1) is not open at (1, 0)</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7f7f7f"/>
+    </marker>
+  </defs>
+  <!-- interval [0, 2pi): length 2pi maps to 260 px, from x=30 to x=290 -->
+  <line x1="30" y1="150" x2="290" y2="150" stroke="#7f7f7f" stroke-width="2"/>
+  <line x1="30" y1="150" x2="71.4" y2="150" stroke="#2f7fd0" stroke-width="6"/>
+  <line x1="262" y1="150" x2="290" y2="150" stroke="#e07b00" stroke-width="6"/>
+  <circle cx="30" cy="150" r="5" fill="#2f7fd0"/>
+  <circle cx="290" cy="150" r="5" fill="none" stroke="#7f7f7f" stroke-width="2"/>
+  <text x="22" y="180" fill="#7f7f7f">0</text>
+  <text x="64" y="180" fill="#7f7f7f">1</text>
+  <text x="280" y="180" fill="#7f7f7f">2π</text>
+  <text x="30" y="125" fill="#2f7fd0">[0, 1): open in [0, 2π)</text>
+  <text x="200" y="210" fill="#e07b00">t close to 2π</text>
+  <!-- arrow e -->
+  <line x1="320" y1="150" x2="380" y2="150" stroke="#7f7f7f" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="342" y="140" fill="#7f7f7f">e</text>
+  <!-- circle centre (500,150) r 90; angle 0 at (590,150); 1 rad up to (548.6, 74.3) -->
+  <circle cx="500" cy="150" r="90" fill="none" stroke="#7f7f7f" stroke-width="2"/>
+  <path d="M 590 150 A 90 90 0 0 0 548.6 74.3" fill="none" stroke="#2f7fd0" stroke-width="6"/>
+  <path d="M 586.3 175.7 A 90 90 0 0 0 590 150" fill="none" stroke="#e07b00" stroke-width="6"/>
+  <circle cx="590" cy="150" r="5" fill="#2f7fd0"/>
+  <circle cx="590" cy="150" r="22" fill="none" stroke="#7f7f7f" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="618" y="128" fill="#7f7f7f">(1, 0)</text>
+  <text x="430" y="275" fill="#7f7f7f">every ball around (1, 0) also</text>
+  <text x="430" y="295" fill="#e07b00">contains images of t near 2π</text>
+</svg>
