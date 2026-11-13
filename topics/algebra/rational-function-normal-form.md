@@ -2,7 +2,7 @@
 title: Normal form of rational functions
 area: algebra
 created: 2026-10-20
-updated: 2026-10-25
+updated: 2026-11-13
 prerequisites: [algebra/content-and-primitive-part]
 related: [algebra/irreducible-over-the-rationals]
 projects: [tante]
@@ -26,27 +26,51 @@ tags: [rational-functions, gcd, canonical-form, computer-algebra]
 
 - <a id="c3"></a>**C3.** Dividing $p$ and $q$ by $\gcd(p, q)$ gives a reduced fraction. Over the rationals, the reduced fraction is unique up to multiplying numerator and denominator by the same non-zero constant.
 
-- <a id="c4"></a>**C4.** Requiring, in addition, that the denominator be primitive with a positive leading coefficient in a fixed monomial order makes the representation unique: a normal form. The numerator then carries any rational constants, for example $\dfrac{2x + 2}{-4y} = \dfrac{-\tfrac12 x - \tfrac12}{y}$.
+- <a id="c4"></a>**C4.** Requiring, in addition, that the denominator be primitive with a positive leading coefficient in a fixed monomial order makes the representation unique: a normal form. The numerator then carries any rational constants, for example
 
-- <a id="c5"></a>**C5.** A common factor can be invisible in the expanded form: $\dfrac{x^2 - 1}{x^2 + 2x + 1}$ reduces to $\dfrac{x - 1}{x + 1}$, which only a polynomial GCD finds.
+  $$\displaystyle \frac{2x + 2}{-4y} = \frac{-\tfrac12 x - \tfrac12}{y}.$$
+
+- <a id="c5"></a>**C5.** A common factor can be invisible in the expanded form. Only a polynomial GCD finds the reduction
+
+  $$\displaystyle \frac{x^2 - 1}{x^2 + 2x + 1} = \frac{x - 1}{x + 1}.$$
 
 - <a id="c6"></a>**C6.** In normal form, two rational functions are equal if and only if their numerators and their denominators are identical, and a rational function is zero if and only if its numerator is the zero polynomial.
 
-- <a id="c7"></a>**C7.** Cancelling a common factor changes where the expression is defined but not the rational function: $\dfrac{x^2 - 1}{x - 1}$ and $x + 1$ are equal as rational functions, although the first expression can't be evaluated at $x = 1$.
+- <a id="c7"></a>**C7.** Cancelling a common factor changes where the expression is defined but not the rational function. As rational functions,
 
-- <a id="c8"></a>**C8.** Adding fractions without reducing makes them grow: $\frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$ multiplies the denominators every time, so a long sum is normalised step by step, or put over the least common multiple of the denominators.
+  $$\displaystyle \frac{x^2 - 1}{x - 1} = x + 1,$$
+
+  although the left-hand side can't be evaluated at $x = 1$.
+
+- <a id="c8"></a>**C8.** Adding fractions without reducing makes them grow, because
+
+  $$\displaystyle \frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$$
+
+  multiplies the denominators every time. So a long sum is normalised step by step, or put over the least common multiple of the denominators.
 
 ## Explanation
 
 ### Start with integer fractions
 
-You know this from integer fractions. $\frac{6}{-4}$, $\frac{-3}{2}$ and $\frac{30}{-20}$ are the same number, but as pairs of integers they are different ([C2](#c2)). To make `Equals` work, a `Fraction` type normalises in its constructor: divide by the GCD, and move the sign into the numerator. After that, two fractions are equal exactly when their fields are equal ([C6](#c6)). The C# snippet below does exactly this.
+You know this from integer fractions. These are the same number:
+
+```math
+\frac{6}{-4} = \frac{-3}{2} = \frac{30}{-20}
+```
+
+As pairs of integers, though, they are different ([C2](#c2)). To make `Equals` work, a `Fraction` type normalises in its constructor: divide by the GCD, and move the sign into the numerator. After that, two fractions are equal exactly when their fields are equal ([C6](#c6)). The C# snippet below does exactly this.
 
 ### The same for polynomials
 
 A rational function is a fraction of polynomials ([C1](#c1)), and the same recipe works with two changes.
 
-**The GCD is a polynomial GCD.** Common factors can be hidden ([C5](#c5)): nothing in $\frac{x^2 - 1}{x^2 + 2x + 1}$ looks cancellable until you see that $x^2 - 1 = (x - 1)(x + 1)$ and $x^2 + 2x + 1 = (x + 1)^2$. Dividing both by their GCD, $x + 1$, gives the reduced fraction ([C3](#c3)).
+**The GCD is a polynomial GCD.** Common factors can be hidden ([C5](#c5)). Nothing in
+
+```math
+\frac{x^2 - 1}{x^2 + 2x + 1}
+```
+
+looks cancellable until you see that $x^2 - 1 = (x - 1)(x + 1)$ and $x^2 + 2x + 1 = (x + 1)^2$. Dividing both by their GCD, $x + 1$, gives the reduced fraction ([C3](#c3)).
 
 **Fixing the scale needs a convention.** After cancelling, numerator and denominator can still both be multiplied by the same constant. Integer fractions fix this with "denominator positive". Polynomial fractions use the convention from [content and primitive part](content-and-primitive-part.md): the denominator is primitive and has a positive leading coefficient ([C4](#c4)). Whatever constant that takes is divided out of the numerator too, so the numerator may end up with fractional coefficients.
 
@@ -56,7 +80,13 @@ Feynman-integral calculations produce huge sums of rational functions in kinemat
 
 ### Cancelling is allowed, even at the "holes"
 
-$\frac{x^2 - 1}{x - 1}$ can't be evaluated at $x = 1$, while $x + 1$ can. They are still the same rational function ([C7](#c7)). A rational function is an algebraic object defined by [C1](#c1), not a function on points, and the two satisfy $(x^2 - 1)\cdot 1 = (x - 1)(x + 1)$. Computer-algebra systems cancel freely. If you need to know where the original expression was undefined, track that separately.
+The left-hand side of
+
+```math
+\frac{x^2 - 1}{x - 1} = x + 1
+```
+
+can't be evaluated at $x = 1$, while the right-hand side can. They are still the same rational function ([C7](#c7)). A rational function is an algebraic object defined by [C1](#c1), not a function on points, and the two satisfy $(x^2 - 1)\cdot 1 = (x - 1)(x + 1)$. Computer-algebra systems cancel freely. If you need to know where the original expression was undefined, track that separately.
 
 ## Examples
 
@@ -90,7 +120,7 @@ True
 False
 ```
 
-The last line compares the raw pairs and says "different", although $\frac{6}{-4} = \frac{-3}{2}$. After normalising, plain tuple equality is correct.
+The last line compares the raw pairs and says "different", although $6/(-4) = -3/2$. After normalising, plain tuple equality is correct.
 
 ### Polynomial fractions
 
@@ -116,8 +146,8 @@ The denominator $x^2 - 1$ is already primitive with a positive leading coefficie
 
 ## Pitfalls
 
-- **Normalising only the numbers.** Making the denominator primitive but skipping the polynomial GCD leaves $\frac{x^2 - 1}{x^2 + 2x + 1}$ unreduced, and equal functions still compare unequal ([C5](#c5)).
-- **Calling the normal form "the simplest form".** The normal form is unique, not necessarily short: $\frac{2}{x^2 - 1}$ is normal, while $\frac{1}{x - 1} - \frac{1}{x + 1}$ may be what a physicist wants to read.
+- **Normalising only the numbers.** Making the denominator primitive but skipping the polynomial GCD leaves $(x^2 - 1)/(x^2 + 2x + 1)$ unreduced, and equal functions still compare unequal ([C5](#c5)).
+- **Calling the normal form "the simplest form".** The normal form is unique, not necessarily short: $2/(x^2 - 1)$ is normal, while $1/(x - 1) - 1/(x + 1)$ may be what a physicist wants to read.
 - **Assuming cancelling keeps the domain** ([C7](#c7)).
 - **Forgetting the variable order.** The sign of the denominator's leading coefficient depends on it, as in [content and primitive part, C8](content-and-primitive-part.md#c8).
 

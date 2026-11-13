@@ -2,7 +2,7 @@
 title: Content, primitive part and the polynomial GCD
 area: algebra
 created: 2026-10-20
-updated: 2026-10-25
+updated: 2026-11-13
 prerequisites: []
 related: [algebra/irreducible-over-the-rationals, algebra/rational-function-normal-form]
 projects: [tante]
@@ -22,13 +22,21 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 
 - <a id="c1"></a>**C1.** The content $\mathrm{cont}(p)$ of a non-zero polynomial $p$ with integer coefficients is the GCD of its coefficients, and its primitive part is $\mathrm{pp}(p) = p / \mathrm{cont}(p)$. A polynomial is primitive when its content is $1$ (up to sign).
 
-- <a id="c2"></a>**C2.** A polynomial with rational coefficients also has a content: the rational number $c$, unique up to sign, for which $p / c$ has integer coefficients with GCD $1$. For example, $\tfrac12 x + \tfrac13 = \tfrac16(3x + 2)$, so the content is $\tfrac16$ (or $-\tfrac16$).
+- <a id="c2"></a>**C2.** A polynomial with rational coefficients also has a content: the rational number $c$, unique up to sign, for which $p / c$ has integer coefficients with GCD $1$. For example,
+
+  $$\displaystyle \tfrac12 x + \tfrac13 = \tfrac16(3x + 2),$$
+
+  so the content is $\tfrac16$ (or $-\tfrac16$).
 
 - <a id="c3"></a>**C3.** Over the rationals, if $g$ is a GCD of $p$ and $q$, then so is $cg$ for every non-zero rational $c$, and every GCD has this form. The GCD is unique only up to a constant factor.
 
-- <a id="c4"></a>**C4.** Gauss's lemma: the product of two primitive integer polynomials is primitive. Consequently $\mathrm{cont}(pq) = \mathrm{cont}(p) \cdot \mathrm{cont}(q)$ and $\mathrm{pp}(pq) = \mathrm{pp}(p) \cdot \mathrm{pp}(q)$, up to sign.
+- <a id="c4"></a>**C4.** Gauss's lemma: the product of two primitive integer polynomials is primitive. Consequently, up to sign,
 
-- <a id="c5"></a>**C5.** Over the integers, the GCD splits into a number part and a polynomial part: $\gcd(p, q) = \gcd(\mathrm{cont} p, \mathrm{cont} q) \cdot \gcd(\mathrm{pp} p, \mathrm{pp} q)$, up to sign.
+  $$\displaystyle \mathrm{cont}(pq) = \mathrm{cont}(p) \cdot \mathrm{cont}(q), \qquad \mathrm{pp}(pq) = \mathrm{pp}(p) \cdot \mathrm{pp}(q).$$
+
+- <a id="c5"></a>**C5.** Over the integers, the GCD splits into a number part and a polynomial part, up to sign:
+
+  $$\displaystyle \gcd(p, q) = \gcd(\mathrm{cont}\, p, \mathrm{cont}\, q) \cdot \gcd(\mathrm{pp}\, p, \mathrm{pp}\, q).$$
 
 - <a id="c6"></a>**C6.** In several variables, the leading term is defined by a fixed monomial order. In lexicographic order with $x > y$, a term with a higher power of $x$ comes first, and powers of $y$ only break ties; so the leading term of $3xy^2 - 5x^2 + y$ is $-5x^2$.
 
@@ -42,7 +50,13 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 
 ### What a GCD is
 
-A **common divisor** of two integers $a$ and $b$ is a number that divides both without remainder. The common divisors of $12$ and $18$ are $\pm1, \pm2, \pm3, \pm6$. The **greatest common divisor** is the largest of them, $6$. You use it whenever you reduce a fraction: $\frac{12}{18} = \frac{12/6}{18/6} = \frac23$. Dividing by the GCD is the biggest single cancellation, and the result is in lowest terms.
+A **common divisor** of two integers $a$ and $b$ is a number that divides both without remainder. The common divisors of $12$ and $18$ are $\pm1, \pm2, \pm3, \pm6$. The **greatest common divisor** is the largest of them, $6$. You use it whenever you reduce a fraction:
+
+```math
+\frac{12}{18} = \frac{12/6}{18/6} = \frac23
+```
+
+Dividing by the GCD is the biggest single cancellation, and the result is in lowest terms.
 
 A few cases ([C9](#c9)):
 
