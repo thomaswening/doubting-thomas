@@ -2,7 +2,7 @@
 title: SL(2,ℂ) as the double cover of the Lorentz group
 area: qft
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-13
 prerequisites: []
 related: [qft/weyl-spinor-representations]
 projects: []
@@ -23,14 +23,42 @@ tags: [lorentz-group, sl2c, su2, double-cover, spinors, spinor-helicity]
 
 Conventions: the metric is mostly minus, $`x \cdot y = x^0 y^0 - \mathbf{x} \cdot \mathbf{y}`$, as in Schwartz. $`\sigma_1, \sigma_2, \sigma_3`$ are the Pauli matrices and $`\sigma_0 = I`$. Bold letters are three-vectors: $`\mathbf{x} = (x^1, x^2, x^3)`$ and $`\boldsymbol{\sigma} = (\sigma_1, \sigma_2, \sigma_3)`$.
 
-- <a id="c1"></a>**C1.** The map $`x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3`$ is a real-linear bijection from $`\mathbb{R}^4`$ to the Hermitian 2×2 matrices. Its inverse is $`x^\mu = \frac12 \mathrm{tr}(\sigma_\mu X)`$.
-- <a id="c2"></a>**C2.** $`\det X(x) = (x^0)^2 - |\mathbf{x}|^2 = x \cdot x`$.
-- <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ with $`\Lambda(A)x \cdot \Lambda(A)x = x \cdot x`$, that is a Lorentz transformation. Its matrix is $`\Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger)`$.
+- <a id="c1"></a>**C1.** The map
+
+  $$\displaystyle x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3$$
+
+  is a real-linear bijection from $`\mathbb{R}^4`$ to the Hermitian 2×2 matrices. Its inverse is
+
+  $$\displaystyle x^\mu = \frac12 \mathrm{tr}(\sigma_\mu X).$$
+
+- <a id="c2"></a>**C2.** The determinant of $X(x)$ is the Minkowski square of $x$:
+
+  $$\displaystyle \det X(x) = (x^0)^2 - |\mathbf{x}|^2 = x \cdot x.$$
+
+- <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ with $`\Lambda(A)x \cdot \Lambda(A)x = x \cdot x`$, that is a Lorentz transformation. Its matrix is
+
+  $$\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).$$
+
 - <a id="c4"></a>**C4.** $`\Lambda(AB) = \Lambda(A)\Lambda(B)`$ and $`\Lambda(I) = 1`$: the map $`\Lambda : SL(2,\mathbb{C}) \to O(1,3)`$ is a group homomorphism. It is continuous, since its entries are polynomials in the entries of $A$ and $`\bar{A}`$.
-- <a id="c5"></a>**C5.** Every $`\Lambda(A)`$ is proper and orthochronous: $`\Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1`$, and $`\det \Lambda(A) = 1`$.
+
+- <a id="c5"></a>**C5.** Every $`\Lambda(A)`$ is proper and orthochronous:
+
+  $$\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1, \qquad \det \Lambda(A) = 1.$$
+
 - <a id="c6"></a>**C6.** $`\Lambda(A) = 1`$ exactly for $`A = \pm I`$. Hence $`\Lambda(A) = \Lambda(B)`$ exactly when $`B = \pm A`$.
-- <a id="c7"></a>**C7.** $`\Lambda(e^{-i\theta\sigma_3/2})`$ is the rotation by $`\theta`$ about the $z$-axis, and $`\Lambda(e^{-i\theta\sigma_2/2})`$ the rotation by $`\theta`$ about the $y$-axis. $`\Lambda(e^{\eta\sigma_3/2})`$ is the boost along $+z$ with rapidity $`\eta`$: $`x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3)`$. For unitary $A$, $`\Lambda(A)`$ fixes $x^0$ and is a rotation, so $`\Lambda`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
-- <a id="c8"></a>**C8.** $`\Lambda`$ maps $`SL(2,\mathbb{C})`$ onto the proper orthochronous Lorentz group $SO^+(1,3)$. Together with [C4](#c4) and [C6](#c6): $`SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\}`$ as groups, and SL(2,ℂ) is a double cover of $SO^+(1,3)$.
+
+- <a id="c7"></a>**C7.** $`\Lambda(e^{-i\theta\sigma_3/2})`$ is the rotation by $`\theta`$ about the $z$-axis, and $`\Lambda(e^{-i\theta\sigma_2/2})`$ the rotation by $`\theta`$ about the $y$-axis. $`\Lambda(e^{\eta\sigma_3/2})`$ is the boost along $+z$ with rapidity $`\eta`$:
+
+  $$\displaystyle x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3).$$
+
+  For unitary $A$, $`\Lambda(A)`$ fixes $x^0$ and is a rotation, so $`\Lambda`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
+
+- <a id="c8"></a>**C8.** $`\Lambda`$ maps $`SL(2,\mathbb{C})`$ onto the proper orthochronous Lorentz group $SO^+(1,3)$. Together with [C4](#c4) and [C6](#c6), as groups,
+
+  $$\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\lbrace \pm I \rbrace,$$
+
+  and SL(2,ℂ) is a double cover of $SO^+(1,3)$.
+
 - <a id="c9"></a>**C9.** The path $`A(t) = e^{-it\sigma_3/2}`$, $`t \in [0, 2\pi]`$, runs from $I$ to $`A(2\pi) = -I`$. Its image $`\Lambda(A(t))`$ is the full rotation about $z$, a closed loop in $SO^+(1,3)$. So a vector $`\psi \in \mathbb{C}^2`$ on which $A$ acts as $`\psi \mapsto A\psi`$ returns as $`-\psi`$ after a $`2\pi`$ rotation.
 
 ## Explanation
@@ -77,13 +105,29 @@ Two cases to picture:
 
 <details><summary>Proof</summary>
 
-Let $X$ be Hermitian. Then $`(A X A^\dagger)^\dagger = (A^\dagger)^\dagger X^\dagger A^\dagger = A X A^\dagger`$, so $`AXA^\dagger`$ is Hermitian. Its determinant is
+Let $X$ be Hermitian. Then
+
+```math
+(A X A^\dagger)^\dagger = (A^\dagger)^\dagger X^\dagger A^\dagger = A X A^\dagger ,
+```
+
+so $`AXA^\dagger`$ is Hermitian. Its determinant is
 
 ```math
 \det(A X A^\dagger) = \det A \cdot \det X \cdot \det A^\dagger = \det A \cdot \det X \cdot \overline{\det A} = |\det A|^2 \det X = \det X ,
 ```
 
-since $`\det A = 1`$. The map is real-linear in $X$. By [C1](#c1), it defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ through $`X(\Lambda(A) x) = A X(x) A^\dagger`$. By [C2](#c2), $`\Lambda(A)x \cdot \Lambda(A)x = \det(A X A^\dagger) = \det X = x \cdot x`$. A linear map that keeps $`x \cdot x`$ for all $x$ keeps $`x \cdot y`$ for all $x, y$, by the polarisation identity $`x \cdot y = \frac14[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)]`$, so $`\Lambda(A) \in O(1,3)`$. The matrix entries follow from the inverse in [C1](#c1): $`\Lambda(A)^\mu{}_\nu`$ is component $`\mu`$ of the image of the basis vector $`e_\nu`$, whose matrix is $`\sigma_\nu`$. That is $`\frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger)`$. ∎
+since $`\det A = 1`$. The map is real-linear in $X$. By [C1](#c1), it defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ through $`X(\Lambda(A) x) = A X(x) A^\dagger`$. By [C2](#c2), $`\Lambda(A)x \cdot \Lambda(A)x = \det(A X A^\dagger) = \det X = x \cdot x`$. A linear map that keeps $`x \cdot x`$ for all $x$ keeps $`x \cdot y`$ for all $x, y$, by the polarisation identity
+
+```math
+x \cdot y = \tfrac14\big[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)\big] ,
+```
+
+so $`\Lambda(A) \in O(1,3)`$. The matrix entries follow from the inverse in [C1](#c1): $`\Lambda(A)^\mu{}_\nu`$ is component $`\mu`$ of the image of the basis vector $`e_\nu`$, whose matrix is $`\sigma_\nu`$. That is
+
+```math
+\Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger) . \qquad ∎
+```
 
 </details>
 
@@ -95,7 +139,11 @@ since $`\det A = 1`$. The map is real-linear in $X$. By [C1](#c1), it defines a 
 
 <details><summary>Proof</summary>
 
-$`X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x)`$. Since $`X(\cdot)`$ is a bijection ([C1](#c1)), $`\Lambda(A)\Lambda(B)x = \Lambda(AB)x`$ for every $x$. $`\Lambda(I) = 1`$ because $`I X I^\dagger = X`$. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$. ∎
+```math
+X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x) .
+```
+
+Since $`X(\cdot)`$ is a bijection ([C1](#c1)), $`\Lambda(A)\Lambda(B)x = \Lambda(AB)x`$ for every $x$. $`\Lambda(I) = 1`$ because $`I X I^\dagger = X`$. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$. ∎
 
 </details>
 
@@ -109,7 +157,19 @@ The Lorentz group $O(1,3)$ has four pieces. A transformation can reverse time or
 
 <details><summary>Proof</summary>
 
-*Time direction.* By [C3](#c3) with $`\mu = \nu = 0`$, $`\Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12(|a|^2 + |b|^2 + |c|^2 + |d|^2)`$ for $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$. Since $`1 = |ad - bc| \le |a||d| + |b||c| \le \frac12(|a|^2 + |d|^2) + \frac12(|b|^2 + |c|^2)`$, using $`uv \le \frac12(u^2 + v^2)`$, we get $`\Lambda(A)^0{}_0 \ge 1`$.
+*Time direction.* Write $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$. By [C3](#c3) with $`\mu = \nu = 0`$,
+
+```math
+\Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12\big(|a|^2 + |b|^2 + |c|^2 + |d|^2\big) .
+```
+
+Using $`uv \le \frac12(u^2 + v^2)`$ twice,
+
+```math
+1 = |ad - bc| \le |a||d| + |b||c| \le \frac12\big(|a|^2 + |d|^2\big) + \frac12\big(|b|^2 + |c|^2\big) ,
+```
+
+so $`\Lambda(A)^0{}_0 \ge 1`$.
 
 *Orientation.* $`\Lambda(A) \in O(1,3)`$ ([C3](#c3)), so $`\det \Lambda(A) = \pm 1`$, because $`\Lambda^T g \Lambda = g`$ gives $`(\det\Lambda)^2 = 1`$. The function $`A \mapsto \det\Lambda(A)`$ is continuous ([C4](#c4)). SL(2,ℂ) is path-connected: by the polar decomposition *(cited)*, every $`A \in SL(2,\mathbb{C})`$ is $A = U e^{H}$ with $`U \in SU(2)`$ and $H$ Hermitian and traceless. The path $`t \mapsto U e^{tH}`$ connects $U$ to $A$ inside SL(2,ℂ), since $`\det e^{tH} = e^{t \mathrm{tr} H} = 1`$. SU(2) is the 3-sphere and is path-connected *(cited)*, so $U$ connects to $I$. A continuous function with values in $`\{+1, -1\}`$ on a path-connected space is constant. At $A = I$ it is $`\det 1 = 1`$. ∎
 
@@ -129,7 +189,13 @@ For the second statement: $`\Lambda(A) = \Lambda(B)`$ means $`\Lambda(B^{-1}A) =
 
 ### Rotations and boosts
 
-Now compute what specific matrices do ([C7](#c7)). Take $`A = e^{-i\theta\sigma_3/2} = \mathrm{diag}(e^{-i\theta/2}, e^{i\theta/2})`$. Then $`A^\dagger = \mathrm{diag}(e^{i\theta/2}, e^{-i\theta/2})`$, and multiplying out:
+Now compute what specific matrices do ([C7](#c7)). Take
+
+```math
+A = e^{-i\theta\sigma_3/2} = \mathrm{diag}(e^{-i\theta/2}, e^{i\theta/2}) , \qquad A^\dagger = \mathrm{diag}(e^{i\theta/2}, e^{-i\theta/2}) .
+```
+
+Multiplying out:
 
 ```math
 A X A^\dagger = \begin{pmatrix} x^0 + x^3 & e^{-i\theta}(x^1 - i x^2) \\ e^{i\theta}(x^1 + i x^2) & x^0 - x^3 \end{pmatrix} .
@@ -175,11 +241,23 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
 ## Examples
 
-**A boost, computed.** Take $`A = e^{\eta\sigma_3/2}`$ with $`\eta = 0.4`$ and the vector $x = (1, 0, 0, 0)$. Then $X = I$ and $`A X A^\dagger = A^2 = \mathrm{diag}(e^{0.4}, e^{-0.4})`$. Reading off with [C1](#c1): $`x'^0 = \frac12(e^{0.4} + e^{-0.4}) = \cosh 0.4 \approx 1.0811`$ and $`x'^3 = \frac12(e^{0.4} - e^{-0.4}) = \sinh 0.4 \approx 0.4108`$. Check: $`\cosh^2 - \sinh^2 = 1`$, as [C2](#c2) requires.
+**A boost, computed.** Take $`A = e^{\eta\sigma_3/2}`$ with $`\eta = 0.4`$ and the vector $x = (1, 0, 0, 0)$. Then $X = I$ and $`A X A^\dagger = A^2 = \mathrm{diag}(e^{0.4}, e^{-0.4})`$. Reading off with [C1](#c1):
+
+```math
+x'^0 = \frac12(e^{0.4} + e^{-0.4}) = \cosh 0.4 \approx 1.0811 , \qquad x'^3 = \frac12(e^{0.4} - e^{-0.4}) = \sinh 0.4 \approx 0.4108 .
+```
+
+Check: $`\cosh^2 - \sinh^2 = 1`$, as [C2](#c2) requires.
 
 **Two matrices, one rotation.** $`e^{-i\theta\sigma_3/2}`$ and $`-e^{-i\theta\sigma_3/2} = e^{-i(\theta + 2\pi)\sigma_3/2}`$ both rotate by $`\theta`$ about $z$: the second is the rotation by $`\theta + 2\pi`$, which is the same rotation ([C6](#c6)).
 
-**A light-like vector.** $p = (E, 0, 0, E)$ has $`P = \mathrm{diag}(2E, 0) = \begin{pmatrix}\sqrt{2E} \\ 0\end{pmatrix}\begin{pmatrix}\sqrt{2E} & 0\end{pmatrix}`$, a column times its conjugate transpose. Under $A$, $`P \mapsto A P A^\dagger = (A\lambda)(A\lambda)^\dagger`$ with $`\lambda = (\sqrt{2E}, 0)^T`$. So the momentum transforms because the spinor $`\lambda`$ does.
+**A light-like vector.** $p = (E, 0, 0, E)$ has
+
+```math
+P = \mathrm{diag}(2E, 0) = \begin{pmatrix}\sqrt{2E} \\ 0\end{pmatrix}\begin{pmatrix}\sqrt{2E} & 0\end{pmatrix} ,
+```
+
+a column times its conjugate transpose. Under $A$, $`P \mapsto A P A^\dagger = (A\lambda)(A\lambda)^\dagger`$ with $`\lambda = (\sqrt{2E}, 0)^T`$. So the momentum transforms because the spinor $`\lambda`$ does.
 
 ## Pitfalls
 
@@ -194,7 +272,9 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
    <details><summary>Solution</summary>
 
-   $`X = \begin{pmatrix} 3 & 1 \\ 1 & 1\end{pmatrix}`$, $`\det X = 3 - 1 = 2 = 4 - 1 - 0 - 1`$. Positive, so time-like ([C2](#c2)).
+   $$\displaystyle X = \begin{pmatrix} 3 & 1 \cr 1 & 1\end{pmatrix}, \qquad \det X = 3 - 1 = 2 = 4 - 1 - 0 - 1.$$
+
+   Positive, so time-like ([C2](#c2)).
 
    </details>
 
@@ -210,7 +290,13 @@ On four-vectors this makes no difference, since $-I$ and $I$ act the same ([C6](
 
    <details><summary>Solution</summary>
 
-   $`A = e^{\eta\sigma_1/2} = \cosh\frac{\eta}{2} I + \sinh\frac{\eta}{2}\sigma_1`$. Then $`AIA^\dagger = A^2 = e^{\eta\sigma_1} = \cosh\eta\, I + \sinh\eta\, \sigma_1`$, which by [C1](#c1) is $`(\cosh\eta, \sinh\eta, 0, 0)`$.
+   $$\displaystyle A = e^{\eta\sigma_1/2} = \cosh\frac{\eta}{2}\, I + \sinh\frac{\eta}{2}\,\sigma_1.$$
+
+   Then
+
+   $$\displaystyle AIA^\dagger = A^2 = e^{\eta\sigma_1} = \cosh\eta\, I + \sinh\eta\, \sigma_1,$$
+
+   which by [C1](#c1) is $`(\cosh\eta, \sinh\eta, 0, 0)`$.
 
    </details>
 
