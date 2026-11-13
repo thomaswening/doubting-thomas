@@ -6,3 +6,5 @@
 - [C++](cpp/index.md): C++ language and build concepts, compared with .NET.
 - [Testing](testing/index.md): how tests show that results are right, and what they can't show.
 - [Documentation](documentation/index.md): how project and user documentation is organised, and how vocabularies are described.
+- [Git](git/index.md): how git stores, checks out and compares files, and how scripts ask it questions.
+- [PowerShell](powershell/index.md): Windows PowerShell scripting as seen from C#.
