@@ -21,9 +21,7 @@ tags: []
 
 - <a id="c2"></a>**C2.** <A claim whose main formula is too long to read inline, with an empty line before the next claim:>
 
-  ```math
-  \frac{x^2 - 1}{x + 1} = x - 1
-  ```
+  $$\displaystyle \frac{x^2 - 1}{x + 1} = x - 1$$
 
 ## Explanation
 
