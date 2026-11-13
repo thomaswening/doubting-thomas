@@ -2,11 +2,11 @@
 title: const and constexpr
 area: cpp
 created: 2026-10-25
-updated: 2026-10-29
+updated: 2026-11-10
 prerequisites: [cpp/references]
-related: [c/pointer-declarator-syntax, cpp/linkage-and-storage-duration]
+related: [c/pointer-declarator-syntax, cpp/linkage-and-storage-duration, cpp/arrays-and-containers]
 projects: [partonforge]
-tags: [cpp, const, constexpr, readonly, constant-expression, member-function]
+tags: [cpp, const, constexpr, readonly, constant-expression, member-function, constexpr-function, string-view]
 ---
 
 # const and constexpr
@@ -22,6 +22,8 @@ tags: [cpp, const, constexpr, readonly, constant-expression, member-function]
 - `const` after a member function's parameter list, as in `bool identical() const`, promises that the function does not change its object. Only such functions can be called on a `const` object or through a `const` reference.
 
 - `const` on a returned value of a built-in type, as in `const bool f()`, means nothing. gcc warns about it.
+- A `constexpr` function can be run by the compiler when its arguments are constants. Otherwise it runs like any function.
+- A `std::vector` or a long `std::string` cannot be a `constexpr` variable. A fixed list of names is a `constexpr std::array<std::string_view, N>`.
 
 ## Key claims
 
@@ -38,6 +40,10 @@ tags: [cpp, const, constexpr, readonly, constant-expression, member-function]
 - <a id="c6"></a>**C6.** `const` on a return type returned by value has no effect for built-in types: `const bool f();` returns a plain `bool` that the caller may copy into a non-const variable. gcc warns with `-Wignored-qualifiers`, which `-Wextra` enables.
 
 - <a id="c7"></a>**C7.** In `constexpr const char* names[] = {"g", "u"};` the `constexpr` applies to the array variable `names`, making it and its elements constant, while the `const` in `const char*` belongs to the element type and makes the characters the pointers point to read-only.
+- <a id="c8"></a>**C8.** A `constexpr` function may be called in a constant expression, such as the initialiser of a `constexpr` variable, when all its arguments are constant expressions; the compiler then evaluates the call. Called with a value known only at run time, it runs as an ordinary function. So `constexpr` on a function means "can be computed at compile time", not "is always".
+- <a id="c9"></a>**C9.** Inside a `constexpr` function, a local variable computed from a parameter cannot itself be `constexpr`, because the parameter is not a constant expression: `constexpr int twice(int x) { constexpr int y = 2 * x; return y; }` does not compile.
+- <a id="c10"></a>**C10.** Memory allocated during a constant evaluation must be freed before the evaluation ends (C++20). So a `std::vector` that holds elements cannot be a `constexpr` variable, while a `constexpr` function may use a local `std::vector` that is destroyed before it returns.
+- <a id="c11"></a>**C11.** Whether a `std::string` can be a `constexpr` variable depends on the standard library: GCC 13's library accepts a short one such as `"ab"`, which fits its small-string buffer without allocating, and rejects a long one. A list of names fixed at compile time is therefore written `constexpr std::array<std::string_view, N>`, whose `std::string_view` elements point into the string literals and allocate nothing.
 
 ## Explanation
 
@@ -66,6 +72,24 @@ C# has the same idea in `readonly` members of a struct. In C++ it matters far mo
 `const` on a value that is returned by copy changes nothing ([C6](#c6)). The caller gets its own copy and may do what it likes with it. gcc warns that the qualifier is ignored.
 
 `const` inside a pointer type follows the reading rules of [where the * goes](../c/pointer-declarator-syntax.md#c6). `constexpr` is different: it is not part of the type, it applies to the variable being declared ([C7](#c7)).
+
+### constexpr functions
+
+A function marked `constexpr` makes a weaker promise than a `constexpr` variable. It says the compiler *can* compute a call, not that it always does ([C8](#c8)). Where a constant expression is needed and the arguments are constants, the compiler runs the function while compiling. Anywhere else it is an ordinary function. C# has no counterpart: its `const` takes only literals and other constants, never a method call.
+
+So one function serves both uses. `fields_per_row(GridKind::Tmd)` can size an array. `fields_per_row(kind)`, with a `kind` read from a file, works at run time. The price is that the body may only do what the compiler can do while compiling. Inside the body, a parameter is not a constant, because the same body must also work when it is called at run time. A local computed from it cannot be `constexpr` either ([C9](#c9)). It can be a plain `const`.
+
+### Containers at compile time
+
+C++20 lets a constant evaluation allocate memory, on one condition: it must free that memory before it ends ([C10](#c10)). A `constexpr` function may therefore build a `std::vector` to compute a result, as long as the vector is gone when the function returns. A `constexpr` *variable* of type `std::vector` with elements is impossible. Its memory would have to survive into the running program, and memory from the compiler's evaluation cannot.
+
+`std::string` is the same with a twist ([C11](#c11)). Many libraries store a short string inside the string object itself, in a small buffer, and allocate only for longer ones. GCC 13's library therefore accepts `constexpr std::string s = "ab";` but rejects a long string. That depends on the library, so portable code does not rely on it.
+
+The portable form of a fixed list of names is a `std::array` of `std::string_view`. A `std::string_view` is a pointer and a length that view characters stored elsewhere, like C#'s `ReadOnlySpan<char>`. It owns nothing and allocates nothing. Pointed at string literals, which live for the whole program, it is safe to keep. `std::to_array` (C++20) counts the elements, so the size need not be written out:
+
+```cpp
+constexpr auto kKnownKeys = std::to_array<std::string_view>({"output", "Ipdf", "q_g"});
+```
 
 ## Examples
 
@@ -134,6 +158,56 @@ constexpr const char* kSpeciesNames[18] = {"tbar", "bbar", /* ... */ "H"};
 
 `kSpeciesNames` is an array of 18 pointers. Each points to a string literal whose characters are read-only (`const char`). The `constexpr` makes the array itself a compile-time constant, so its pointers cannot be changed either.
 
+A `constexpr` function used at compile time and at run time, and a fixed list of names, compiled with `g++ -std=c++20` and run without arguments:
+
+```cpp
+#include <array>
+#include <iostream>
+#include <string_view>
+
+enum class Kind { Integrated, Tmd };
+
+constexpr int fields_per_row(Kind kind) {
+    const int coordinate_count = kind == Kind::Tmd ? 3 : 2;   // const, not constexpr (C9)
+    return coordinate_count + 18;
+}
+
+// A list fixed at compile time, without allocation (C11).
+constexpr auto kKeys = std::to_array<std::string_view>({"output", "Ipdf", "q_g"});
+
+int main(int argc, char**) {
+    std::array<double, fields_per_row(Kind::Tmd)> row{};      // computed by the compiler (C8)
+    const Kind kind = argc > 1 ? Kind::Tmd : Kind::Integrated;
+    std::cout << row.size() << ' ' << fields_per_row(kind) << ' ' << kKeys.size() << '\n';  // at run time
+
+    // constexpr int fields = fields_per_row(kind);  // error: kind is known only at run time (C8)
+}
+```
+
+Output:
+
+```text
+21 20 3
+```
+
+A `std::vector` inside a `constexpr` function, and as a `constexpr` variable:
+
+```cpp
+#include <vector>
+
+constexpr int count() {
+    std::vector<int> values = {1, 2, 3};    // allocated and freed during the evaluation (C10)
+    return static_cast<int>(values.size());
+}
+
+constexpr int kCount = count();             // OK: 3
+// constexpr std::vector<int> kValues = {1, 2, 3};  // error: the memory would outlive the evaluation (C10)
+
+int main() { return kCount == 3 ? 0 : 1; }
+```
+
+This compiles and exits with 0.
+
 ## Pitfalls
 
 - Writing `const` where a compile-time value is needed, then being surprised that it works for `int` and fails for `double` ([C3](#c3)). Write `constexpr`.
@@ -143,8 +217,12 @@ constexpr const char* kSpeciesNames[18] = {"tbar", "bbar", /* ... */ "H"};
 - Reading `const bool identical()` as "a function that doesn't change the object". That promise is the `const` *after* the parameters; the one before the return type does nothing ([C6](#c6)).
 
 - Assuming `const` means "known at compile time", as C#'s `const` does. In C++, that is `constexpr` ([C4](#c4)).
+- Reading `constexpr` on a function as a guarantee that it runs at compile time. It only can ([C8](#c8)). C++20's `consteval` is the keyword for a function that must.
+- Writing `static const std::vector<std::string> kNames = {...};` for a list known at compile time. It allocates on first use. `constexpr std::array<std::string_view, N>` does not ([C10](#c10), [C11](#c11)).
+- Keeping a `std::string_view` to a temporary `std::string`. The view points at characters the string owns, and they disappear with it. Views of string literals are safe, because literals live for the whole program ([C11](#c11)).
 
 ## Sources
 
 - Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-10-25: Thomas's review of [PR 1](https://github.com/thomaswening/PartonForge/pull/1), on `constexpr size_t kHeaderLines`, `constexpr const char*` and `bool identical() const` in `grid_diff`.
-- [cppreference: `constexpr` specifier](https://en.cppreference.com/w/cpp/language/constexpr), [cv qualifiers](https://en.cppreference.com/w/cpp/language/cv), [constant expressions](https://en.cppreference.com/w/cpp/language/constant_expression) (usable in constant expressions), [const member functions](https://en.cppreference.com/w/cpp/language/member_functions#const-_and_volatile-qualified_member_functions).
+- Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-11-10: Thomas's review of [PR 6](https://github.com/thomaswening/PartonForge/pull/6), asking why `fields_per_row` ([comment](https://github.com/thomaswening/PartonForge/pull/6#discussion_r4524341850)) and the list of steering keys ([comment](https://github.com/thomaswening/PartonForge/pull/6#discussion_r4524546422)) were not `constexpr`.
+- [cppreference: `constexpr` specifier](https://en.cppreference.com/w/cpp/language/constexpr), [cv qualifiers](https://en.cppreference.com/w/cpp/language/cv), [constant expressions](https://en.cppreference.com/w/cpp/language/constant_expression) (usable in constant expressions, and transient allocation), [`std::to_array`](https://en.cppreference.com/w/cpp/container/array/to_array), [`std::basic_string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view), [const member functions](https://en.cppreference.com/w/cpp/language/member_functions#const-_and_volatile-qualified_member_functions).
