@@ -181,7 +181,9 @@ For $`\rho_L`$:
 
 ```math
 \mathbf{N} = \frac12\Big(\frac{\boldsymbol{\sigma}}{2} + \frac{\boldsymbol{\sigma}}{2}\Big) = \frac{\boldsymbol{\sigma}}{2} , \qquad \mathbf{N}^\dagger = 0 .
-``` Spin ½ for $`\mathbf{N}`$, spin 0 for $`\mathbf{N}^\dagger`$: $`(\frac12, 0)`$. For $`\rho_R`$ it is the other way round: $`(0, \frac12)`$. Srednicki writes the same representations by their dimensions, $(2, 1)$ and $(1, 2)$, and calls $(2,1)$ left-handed (eq. 33.21). His generators on $(2,1)$, $`J = \sigma/2`$ and $`K = i\sigma/2`$ (eqs. 34.9, 34.10), match $`\rho_L`$ here.
+```
+
+Spin ½ for $`\mathbf{N}`$, spin 0 for $`\mathbf{N}^\dagger`$: $`(\frac12, 0)`$. For $`\rho_R`$ it is the other way round: $`(0, \frac12)`$. Srednicki writes the same representations by their dimensions, $(2, 1)$ and $(1, 2)$, and calls $(2,1)$ left-handed (eq. 33.21). His generators on $(2,1)$, $`J = \sigma/2`$ and $`K = i\sigma/2`$ (eqs. 34.9, 34.10), match $`\rho_L`$ here.
 
 Why call them left- and right-handed? For a massless particle, the field equation forces the spin of a $`(\frac12, 0)`$ particle to point against its momentum: negative helicity. Its antiparticle has positive helicity. That is shown in the course note on massless fermions, not here.
 
