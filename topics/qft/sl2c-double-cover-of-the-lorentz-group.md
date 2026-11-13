@@ -25,37 +25,37 @@ Conventions: the metric is mostly minus, $`x \cdot y = x^0 y^0 - \mathbf{x} \cdo
 
 - <a id="c1"></a>**C1.** The map
 
-  $$\displaystyle x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3$$
+  $`\displaystyle x \mapsto X(x) = x^0 I + x^1\sigma_1 + x^2\sigma_2 + x^3\sigma_3`$
 
   is a real-linear bijection from $`\mathbb{R}^4`$ to the Hermitian 2×2 matrices. Its inverse is
 
-  $$\displaystyle x^\mu = \frac12 \mathrm{tr}(\sigma_\mu X).$$
+  $`\displaystyle x^\mu = \frac12 \mathrm{tr}(\sigma_\mu X).`$
 
 - <a id="c2"></a>**C2.** The determinant of $X(x)$ is the Minkowski square of $x$:
 
-  $$\displaystyle \det X(x) = (x^0)^2 - |\mathbf{x}|^2 = x \cdot x.$$
+  $`\displaystyle \det X(x) = (x^0)^2 - |\mathbf{x}|^2 = x \cdot x.`$
 
 - <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ sends Hermitian matrices to Hermitian matrices and keeps the determinant. It therefore defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ with $`\Lambda(A)x \cdot \Lambda(A)x = x \cdot x`$, that is a Lorentz transformation. Its matrix is
 
-  $$\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).$$
+  $`\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).`$
 
 - <a id="c4"></a>**C4.** $`\Lambda(AB) = \Lambda(A)\Lambda(B)`$ and $`\Lambda(I) = 1`$: the map $`\Lambda : SL(2,\mathbb{C}) \to O(1,3)`$ is a group homomorphism. It is continuous, since its entries are polynomials in the entries of $A$ and $`\bar{A}`$.
 
 - <a id="c5"></a>**C5.** Every $`\Lambda(A)`$ is proper and orthochronous:
 
-  $$\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1, \qquad \det \Lambda(A) = 1.$$
+  $`\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1, \qquad \det \Lambda(A) = 1.`$
 
 - <a id="c6"></a>**C6.** $`\Lambda(A) = 1`$ exactly for $`A = \pm I`$. Hence $`\Lambda(A) = \Lambda(B)`$ exactly when $`B = \pm A`$.
 
 - <a id="c7"></a>**C7.** $`\Lambda(e^{-i\theta\sigma_3/2})`$ is the rotation by $`\theta`$ about the $z$-axis, and $`\Lambda(e^{-i\theta\sigma_2/2})`$ the rotation by $`\theta`$ about the $y$-axis. $`\Lambda(e^{\eta\sigma_3/2})`$ is the boost along $+z$ with rapidity $`\eta`$:
 
-  $$\displaystyle x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3).$$
+  $`\displaystyle x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3).`$
 
   For unitary $A$, $`\Lambda(A)`$ fixes $x^0$ and is a rotation, so $`\Lambda`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
 
 - <a id="c8"></a>**C8.** $`\Lambda`$ maps $`SL(2,\mathbb{C})`$ onto the proper orthochronous Lorentz group $SO^+(1,3)$. Together with [C4](#c4) and [C6](#c6), as groups,
 
-  $$\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\lbrace \pm I \rbrace,$$
+  $`\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\},`$
 
   and SL(2,ℂ) is a double cover of $SO^+(1,3)$.
 
@@ -107,27 +107,19 @@ Two cases to picture:
 
 Let $X$ be Hermitian. Then
 
-```math
-(A X A^\dagger)^\dagger = (A^\dagger)^\dagger X^\dagger A^\dagger = A X A^\dagger ,
-```
+$`\displaystyle (A X A^\dagger)^\dagger = (A^\dagger)^\dagger X^\dagger A^\dagger = A X A^\dagger ,`$
 
 so $`AXA^\dagger`$ is Hermitian. Its determinant is
 
-```math
-\det(A X A^\dagger) = \det A \cdot \det X \cdot \det A^\dagger = \det A \cdot \det X \cdot \overline{\det A} = |\det A|^2 \det X = \det X ,
-```
+$`\displaystyle \det(A X A^\dagger) = \det A \cdot \det X \cdot \det A^\dagger = \det A \cdot \det X \cdot \overline{\det A} = |\det A|^2 \det X = \det X ,`$
 
 since $`\det A = 1`$. The map is real-linear in $X$. By [C1](#c1), it defines a real-linear map $`\Lambda(A)`$ on $`\mathbb{R}^4`$ through $`X(\Lambda(A) x) = A X(x) A^\dagger`$. By [C2](#c2), $`\Lambda(A)x \cdot \Lambda(A)x = \det(A X A^\dagger) = \det X = x \cdot x`$. A linear map that keeps $`x \cdot x`$ for all $x$ keeps $`x \cdot y`$ for all $x, y$, by the polarisation identity
 
-```math
-x \cdot y = \tfrac14\big[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)\big] ,
-```
+$`\displaystyle x \cdot y = \tfrac14\big[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)\big] ,`$
 
 so $`\Lambda(A) \in O(1,3)`$. The matrix entries follow from the inverse in [C1](#c1): $`\Lambda(A)^\mu{}_\nu`$ is component $`\mu`$ of the image of the basis vector $`e_\nu`$, whose matrix is $`\sigma_\nu`$. That is
 
-```math
-\Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger) . \qquad ∎
-```
+$`\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger) . \qquad ∎`$
 
 </details>
 
@@ -139,9 +131,7 @@ so $`\Lambda(A) \in O(1,3)`$. The matrix entries follow from the inverse in [C1]
 
 <details><summary>Proof</summary>
 
-```math
-X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x) .
-```
+$`\displaystyle X(\Lambda(A)\Lambda(B)x) = A\, X(\Lambda(B)x)\, A^\dagger = A B X(x) B^\dagger A^\dagger = (AB) X(x) (AB)^\dagger = X(\Lambda(AB)x) .`$
 
 Since $`X(\cdot)`$ is a bijection ([C1](#c1)), $`\Lambda(A)\Lambda(B)x = \Lambda(AB)x`$ for every $x$. $`\Lambda(I) = 1`$ because $`I X I^\dagger = X`$. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$. ∎
 
@@ -159,15 +149,11 @@ The Lorentz group $O(1,3)$ has four pieces. A transformation can reverse time or
 
 *Time direction.* Write $`A = \begin{pmatrix} a & b \\ c & d\end{pmatrix}`$. By [C3](#c3) with $`\mu = \nu = 0`$,
 
-```math
-\Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12\big(|a|^2 + |b|^2 + |c|^2 + |d|^2\big) .
-```
+$`\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12\big(|a|^2 + |b|^2 + |c|^2 + |d|^2\big) .`$
 
 Using $`uv \le \frac12(u^2 + v^2)`$ twice,
 
-```math
-1 = |ad - bc| \le |a||d| + |b||c| \le \frac12\big(|a|^2 + |d|^2\big) + \frac12\big(|b|^2 + |c|^2\big) ,
-```
+$`\displaystyle 1 = |ad - bc| \le |a||d| + |b||c| \le \frac12\big(|a|^2 + |d|^2\big) + \frac12\big(|b|^2 + |c|^2\big) ,`$
 
 so $`\Lambda(A)^0{}_0 \ge 1`$.
 
@@ -272,7 +258,7 @@ a column times its conjugate transpose. Under $A$, $`P \mapsto A P A^\dagger = (
 
    <details><summary>Solution</summary>
 
-   $$\displaystyle X = \begin{pmatrix} 3 & 1 \cr 1 & 1\end{pmatrix}, \qquad \det X = 3 - 1 = 2 = 4 - 1 - 0 - 1.$$
+   $`\displaystyle X = \begin{pmatrix} 3 & 1 \\ 1 & 1\end{pmatrix}, \qquad \det X = 3 - 1 = 2 = 4 - 1 - 0 - 1.`$
 
    Positive, so time-like ([C2](#c2)).
 
@@ -290,11 +276,11 @@ a column times its conjugate transpose. Under $A$, $`P \mapsto A P A^\dagger = (
 
    <details><summary>Solution</summary>
 
-   $$\displaystyle A = e^{\eta\sigma_1/2} = \cosh\frac{\eta}{2}\, I + \sinh\frac{\eta}{2}\,\sigma_1.$$
+   $`\displaystyle A = e^{\eta\sigma_1/2} = \cosh\frac{\eta}{2}\, I + \sinh\frac{\eta}{2}\,\sigma_1.`$
 
    Then
 
-   $$\displaystyle AIA^\dagger = A^2 = e^{\eta\sigma_1} = \cosh\eta\, I + \sinh\eta\, \sigma_1,$$
+   $`\displaystyle AIA^\dagger = A^2 = e^{\eta\sigma_1} = \cosh\eta\, I + \sinh\eta\, \sigma_1,`$
 
    which by [C1](#c1) is $`(\cosh\eta, \sinh\eta, 0, 0)`$.
 

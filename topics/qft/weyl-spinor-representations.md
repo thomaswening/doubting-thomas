@@ -31,11 +31,11 @@ Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-doub
 
 - <a id="c2"></a>**C2.** For every complex 2×2 matrix $M$,
 
-  $$\displaystyle M^T \varepsilon M = (\det M)\, \varepsilon.$$
+  $`\displaystyle M^T \varepsilon M = (\det M)\, \varepsilon.`$
 
   Hence for $`A \in SL(2,\mathbb{C})`$, $`A^T \varepsilon A = \varepsilon`$. The antisymmetric bilinear form of two left-handed spinors
 
-  $$\displaystyle \langle \psi, \phi \rangle = \psi^T \varepsilon \phi = \psi_1 \phi_2 - \psi_2 \phi_1$$
+  $`\displaystyle \langle \psi, \phi \rangle = \psi^T \varepsilon \phi = \psi_1 \phi_2 - \psi_2 \phi_1`$
 
   is invariant. The same holds for two right-handed spinors, since $`(A^\dagger)^{-1}`$ also has determinant 1.
 
@@ -43,21 +43,21 @@ Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-doub
 
 - <a id="c4"></a>**C4.** $`\rho_L`$ and $`\rho_R`$ are not equivalent: there is no invertible $S$ with $`S A S^{-1} = (A^\dagger)^{-1}`$ for all $A$. For example,
 
-  $$\displaystyle A = \mathrm{diag}\Big(2i, \frac{1}{2i}\Big): \qquad \mathrm{tr} A = \frac{3i}{2}, \qquad \mathrm{tr}(A^\dagger)^{-1} = -\frac{3i}{2}.$$
+  $`\displaystyle A = \mathrm{diag}\Big(2i, \frac{1}{2i}\Big): \qquad \mathrm{tr} A = \frac{3i}{2}, \qquad \mathrm{tr}(A^\dagger)^{-1} = -\frac{3i}{2}.`$
 
 - <a id="c5"></a>**C5.** Write group elements near $I$ as $`e^{-i\boldsymbol{\theta}\cdot\mathbf{J} - i\boldsymbol{\eta}\cdot\mathbf{K}}`$, with $`\mathbf{J}`$ generating rotations and $`\mathbf{K}`$ boosts as in [C7 of the previous note](sl2c-double-cover-of-the-lorentz-group.md#c7). The generators are
 
-  $$\displaystyle \text{left-handed: } \mathbf{J} = \frac{\boldsymbol{\sigma}}{2},\ \mathbf{K} = \frac{i\boldsymbol{\sigma}}{2}; \qquad \text{right-handed: } \mathbf{J} = \frac{\boldsymbol{\sigma}}{2},\ \mathbf{K} = -\frac{i\boldsymbol{\sigma}}{2}.$$
+  $`\displaystyle \text{left-handed: } \mathbf{J} = \frac{\boldsymbol{\sigma}}{2},\ \mathbf{K} = \frac{i\boldsymbol{\sigma}}{2}; \qquad \text{right-handed: } \mathbf{J} = \frac{\boldsymbol{\sigma}}{2},\ \mathbf{K} = -\frac{i\boldsymbol{\sigma}}{2}.`$
 
   Define
 
-  $$\displaystyle \mathbf{N} = \frac12(\mathbf{J} - i\mathbf{K}), \qquad \mathbf{N}^\dagger = \frac12(\mathbf{J} + i\mathbf{K}).$$
+  $`\displaystyle \mathbf{N} = \frac12(\mathbf{J} - i\mathbf{K}), \qquad \mathbf{N}^\dagger = \frac12(\mathbf{J} + i\mathbf{K}).`$
 
   The left-handed spinor has $`\mathbf{N} = \boldsymbol{\sigma}/2`$ and $`\mathbf{N}^\dagger = 0`$: spin ½ under the first SU(2), spin 0 under the second, the representation $`(\frac12, 0)`$. The right-handed spinor is $`(0, \frac12)`$.
 
 - <a id="c6"></a>**C6.** Let $`P = \mathrm{diag}(1, -1, -1, -1)`$ be parity. Then for all $`A \in SL(2,\mathbb{C})`$
 
-  $$\displaystyle P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big).$$
+  $`\displaystyle P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big).`$
 
   Conjugating by parity exchanges $`\rho_L`$ and $`\rho_R`$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $`(\frac12, 0) \oplus (0, \frac12)`$.
 
@@ -95,9 +95,7 @@ The inverse puts the factors back in the right order after the dagger reversed t
 
 $`\psi^T\varepsilon\phi = \psi_1\phi_2 - \psi_2\phi_1 = \det(\psi \mid \phi)`$, the determinant of the matrix with columns $`\psi`$ and $`\phi`$. Then
 
-```math
-(M\psi)^T\varepsilon(M\phi) = \det(M\psi \mid M\phi) = \det\big(M(\psi\mid\phi)\big) = \det M \cdot \det(\psi\mid\phi) = \det M \cdot \psi^T\varepsilon\phi .
-```
+$`\displaystyle (M\psi)^T\varepsilon(M\phi) = \det(M\psi \mid M\phi) = \det\big(M(\psi\mid\phi)\big) = \det M \cdot \det(\psi\mid\phi) = \det M \cdot \psi^T\varepsilon\phi .`$
 
 Since this holds for all $`\psi, \phi`$, $`M^T\varepsilon M = (\det M)\varepsilon`$. For $`A \in SL(2,\mathbb{C})`$ the factor is 1. For the right-handed case, $`\det (A^\dagger)^{-1} = 1/\overline{\det A} = 1`$. ∎
 
@@ -117,9 +115,7 @@ Why antisymmetric and not a dot product like $`\psi^T\phi`$? Because $`\psi^T\ph
 
 From $`A^T\varepsilon A = \varepsilon`$: $`\varepsilon A = (A^T)^{-1}\varepsilon`$, so $`\varepsilon A\varepsilon^{-1} = (A^T)^{-1}`$. $`\varepsilon`$ is real, so conjugating gives $`\varepsilon\bar{A}\varepsilon^{-1} = (\bar{A}^T)^{-1} = (A^\dagger)^{-1}`$. For a left-handed $`\psi`$:
 
-```math
-\varepsilon\bar{\psi} \mapsto \varepsilon\overline{A\psi} = \varepsilon\bar{A}\varepsilon^{-1}\,\varepsilon\bar{\psi} = (A^\dagger)^{-1}\varepsilon\bar{\psi} ,
-```
+$`\displaystyle \varepsilon\bar{\psi} \mapsto \varepsilon\overline{A\psi} = \varepsilon\bar{A}\varepsilon^{-1}\,\varepsilon\bar{\psi} = (A^\dagger)^{-1}\varepsilon\bar{\psi} ,`$
 
 so $`\varepsilon\bar{\psi}`$ is right-handed. ∎
 
@@ -137,15 +133,11 @@ So a right-handed spinor carries the same information as the complex conjugate o
 
 Suppose $`SAS^{-1} = (A^\dagger)^{-1}`$ for all $`A \in SL(2,\mathbb{C})`$. Taking traces, $`\mathrm{tr}A = \mathrm{tr}(A^\dagger)^{-1}`$. For $ad - bc = 1$,
 
-```math
-A = \begin{pmatrix} a & b \\ c & d\end{pmatrix} , \qquad A^{-1} = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} ,
-```
+$`\displaystyle A = \begin{pmatrix} a & b \\ c & d\end{pmatrix} , \qquad A^{-1} = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} ,`$
 
 so $`\mathrm{tr}A^{-1} = \mathrm{tr}A`$, and $`(A^\dagger)^{-1} = (A^{-1})^\dagger`$ has trace $`\overline{\mathrm{tr}A}`$. Then $`\mathrm{tr}A`$ would be real for every $A$. But
 
-```math
-A = \mathrm{diag}\Big(2i, \frac{1}{2i}\Big) \quad \text{has} \quad \det A = 1 , \qquad \mathrm{tr}A = 2i - \frac{i}{2} = \frac{3i}{2} .
-```
+$`\displaystyle A = \mathrm{diag}\Big(2i, \frac{1}{2i}\Big) \quad \text{has} \quad \det A = 1 , \qquad \mathrm{tr}A = 2i - \frac{i}{2} = \frac{3i}{2} .`$
 
 Contradiction. ∎
 
@@ -205,17 +197,13 @@ Parity $P$ flips space: $`(x^0, \mathbf{x}) \mapsto (x^0, -\mathbf{x})`$. It is 
 
 For a 2×2 matrix $M$, the adjugate is
 
-```math
-M = \begin{pmatrix} a & b \\ c & d\end{pmatrix} , \qquad \mathrm{adj}M = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} = (\mathrm{tr}M)I - M .
-```
+$`\displaystyle M = \begin{pmatrix} a & b \\ c & d\end{pmatrix} , \qquad \mathrm{adj}M = \begin{pmatrix} d & -b \\ -c & a\end{pmatrix} = (\mathrm{tr}M)I - M .`$
 
 It satisfies $`\mathrm{adj}(MN) = \mathrm{adj}N\,\mathrm{adj}M`$, and $`\mathrm{adj}M = M^{-1}`$ when $`\det M = 1`$. Also $`\mathrm{adj}(M^\dagger) = (\mathrm{adj}M)^\dagger`$.
 
 For Hermitian $X = X(x)$: $`\mathrm{adj}X = 2x^0 I - X = x^0 I - \mathbf{x}\cdot\boldsymbol{\sigma} = X(Px)`$. Then
 
-```math
-X\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,X(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}X(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .
-```
+$`\displaystyle X\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,X(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}X(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .`$
 
 With $`B = (A^\dagger)^{-1}`$, $`B^\dagger = A^{-1}`$, so the right-hand side is $`BX(x)B^\dagger = X(\Lambda(B)x)`$. ∎
 
@@ -237,9 +225,7 @@ For a light-like vector, one spinor is enough ([C7](#c7)).
 
 $X$ is Hermitian, so
 
-```math
-X = \mu_1 u_1u_1^\dagger + \mu_2 u_2u_2^\dagger
-```
+$`\displaystyle X = \mu_1 u_1u_1^\dagger + \mu_2 u_2u_2^\dagger`$
 
 with real eigenvalues $`\mu_1, \mu_2`$ and orthonormal eigenvectors $`u_1, u_2`$ (spectral theorem, *cited*). $`\det X = \mu_1\mu_2 = 0`$ and $`X \ne 0`$ mean that exactly one eigenvalue, say $`\mu_1`$, is nonzero. Then $`X = \mu_1 u_1u_1^\dagger = \pm\lambda\lambda^\dagger`$ with $`\lambda = \sqrt{|\mu_1|}\,u_1`$ and the sign of $`\mu_1`$. Since $`\mathrm{tr}X = \mu_1 = 2x^0`$, the sign is the sign of $x^0$. Conversely, $`\lambda\lambda^\dagger`$ has rank at most 1, so its determinant is 0. If $`\lambda\lambda^\dagger = \lambda'\lambda'^\dagger`$, then $`\lambda' = e^{i\varphi}\lambda`$: both are eigenvectors for the only nonzero eigenvalue, with the same norm. ∎
 
@@ -276,9 +262,9 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
    <details><summary>Solution</summary>
 
-   $$\displaystyle \varepsilon M = \begin{pmatrix} c & d \cr -a & -b\end{pmatrix},$$
+   $`\displaystyle \varepsilon M = \begin{pmatrix} c & d \\ -a & -b\end{pmatrix},`$
 
-   $$\displaystyle M^T\varepsilon M = \begin{pmatrix} a & c \cr b & d\end{pmatrix}\begin{pmatrix} c & d \cr -a & -b\end{pmatrix} = \begin{pmatrix} 0 & ad - bc \cr bc - ad & 0\end{pmatrix} = (\det M)\,\varepsilon.$$
+   $`\displaystyle M^T\varepsilon M = \begin{pmatrix} a & c \\ b & d\end{pmatrix}\begin{pmatrix} c & d \\ -a & -b\end{pmatrix} = \begin{pmatrix} 0 & ad - bc \\ bc - ad & 0\end{pmatrix} = (\det M)\,\varepsilon.`$
 
    </details>
 
@@ -296,7 +282,7 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
    Left-handed, and with $`\mathbf{K}`$ flipped:
 
-   $$\displaystyle (\mathbf{J}, \mathbf{K}) = \Big(\frac{\boldsymbol{\sigma}}{2}, \frac{i\boldsymbol{\sigma}}{2}\Big) \ \longrightarrow\ \Big(\frac{\boldsymbol{\sigma}}{2}, -\frac{i\boldsymbol{\sigma}}{2}\Big).$$
+   $`\displaystyle (\mathbf{J}, \mathbf{K}) = \Big(\frac{\boldsymbol{\sigma}}{2}, \frac{i\boldsymbol{\sigma}}{2}\Big) \ \longrightarrow\ \Big(\frac{\boldsymbol{\sigma}}{2}, -\frac{i\boldsymbol{\sigma}}{2}\Big).`$
 
    The result is the right-handed generators. Under parity, a boost along $`\hat{n}`$ becomes a boost along $`-\hat{n}`$, so $`\mathbf{K} \to -\mathbf{K}`$. A rotation about $`\hat{n}`$ stays a rotation about $`\hat{n}`$, because angular momentum is an axial vector, so $`\mathbf{J} \to \mathbf{J}`$. This is [C6](#c6) at the level of generators.
 
@@ -306,7 +292,7 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 
    <details><summary>Solution</summary>
 
-   $$\displaystyle X(p) = E(I + \sigma_1) = E\begin{pmatrix} 1 & 1 \cr 1 & 1\end{pmatrix} = \lambda\lambda^\dagger$$
+   $`\displaystyle X(p) = E(I + \sigma_1) = E\begin{pmatrix} 1 & 1 \\ 1 & 1\end{pmatrix} = \lambda\lambda^\dagger`$
 
    with $`\lambda = \sqrt{E}\,(1, 1)^T`$, up to a phase.
 
