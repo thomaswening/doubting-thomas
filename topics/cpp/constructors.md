@@ -14,10 +14,15 @@ tags: [cpp, constructor, explicit, conversion, initialiser-list, default, delete
 ## TL;DR
 
 - A constructor that can be called with one argument is also an **implicit conversion** unless it is marked `explicit`. C# never converts through constructors; it only has `implicit operator` and `explicit operator`.
+
 - The **member initialiser list** (`: x(1), y(2)`) initialises the fields before the body runs. Assigning in the body is too late for `const` and reference members, and does the work twice for the others.
+
 - Members are always initialised in the order they are **declared in the class**, whatever order the initialiser list names them in.
+
 - The compiler writes a default constructor only for a class that declares no constructor at all. `= default` asks for it back; `= delete` forbids a function outright.
+
 - A **delegating constructor** hands the work to another constructor of the same class, like C#'s `: this(...)`.
+
 - `T b = a;` is initialisation and calls a constructor; `b = a;` on an existing object is assignment and calls `operator=`.
 
 ## Key claims
@@ -228,21 +233,33 @@ struct Fixed {
 ## Good habits
 
 - Mark every constructor that can be called with one argument `explicit`. Leave it off only where the conversion is the point, as for `std::string` from `"hello"` ([C1](#c1), [C2](#c2); [Core Guidelines C.46](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-explicit)).
+
 - Give every member of built-in type a default member initialiser, `int count = 0;`, so that no constructor can leave it indeterminate ([C4](#c4); [C.48](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-in-class-initializer)).
+
 - Initialise members in the member initialiser list, not by assignment in the body ([C4](#c4), [C6](#c6); [C.49](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-initialize)).
+
 - Write the list in declaration order. Initialise each member from the parameters, not from other members ([C5](#c5); [C.47](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-order)).
+
 - Build with `-Wall -Wextra` (GCC, Clang) or `/W4` (MSVC). Turn warnings into errors with `-Werror` or `/WX`. The `Buffer` bug above then stops the build ([C5](#c5)).
+
 - Forbid what must not happen with `= delete`: copies that would share a resource, or an overload such as `set(double)` that would convert silently ([C8](#c8); [C.81](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delete)).
+
 - Put shared initialisation in one constructor and delegate to it, instead of repeating the list or calling an `init()` member from every body ([C9](#c9); [C.51](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rc-delegating)).
 
 ## Pitfalls
 
 - Leaving `explicit` off a one-argument constructor, then finding that an `int` was silently turned into a `Buffer` somewhere ([C1](#c1), [C2](#c2)).
+
 - Believing `explicit` has nothing to do with constructors of two or more parameters: it still blocks `Point p = {1, 2};` ([C2](#c2)).
+
 - Expecting members to be initialised in the order of the list ([C5](#c5)).
+
 - Expecting an `int` member to start at `0`, as in C#. Without a default member initialiser or an entry in the list, its value is indeterminate ([C4](#c4)).
+
 - Adding a constructor with parameters and finding that `T x;` or `std::vector<T>(10)` no longer compiles: the implicit default constructor is gone ([C7](#c7)).
+
 - Writing `Point p();` to mean "a default-constructed `Point`". It declares a function named `p` that returns a `Point`. Write `Point p;` or `Point p{};`.
+
 - Reading `T b = a;` as assignment. It is initialisation; `operator=` is not called ([C10](#c10)).
 
 ## Sources

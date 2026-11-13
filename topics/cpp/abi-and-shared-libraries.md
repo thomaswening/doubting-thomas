@@ -14,9 +14,13 @@ tags: [cpp, c, abi, linking, dll, shared-library, static-library, extern-c, pinv
 ## TL;DR
 
 - A **static library** (`.lib`, `.a`) is compiled code the linker copies into the executable at build time; nothing of it exists separately at run time.
+
 - A **shared library** (`.dll`, `.so`, `.dylib`) is a separate file loaded at run time, like a .NET assembly.
+
 - Code built separately has to agree on a binary contract, the **ABI**: how functions are named and called, and how types are laid out in memory.
+
 - C++ has no ABI shared by all compilers: classes, `std::string` and exceptions may be laid out differently by MSVC and GCC, or even by one compiler's Debug and Release builds. Plain C has one per platform.
+
 - So the safe boundary between separately compiled pieces is C (`extern "C"`, C types). .NET avoids the problem because assemblies carry IL and metadata, not machine code.
 
 ## Key claims
@@ -103,8 +107,11 @@ __declspec(dllexport) std::string greet(const std::string& name);
 ## Pitfalls
 
 - Mixing Debug and Release builds of libraries that pass standard C++ types to each other on MSVC ([C4](#c4)).
+
 - Forgetting `extern "C"` on a function meant to be found by name: its symbol is mangled, and `GetProcAddress`, `dlsym` or P/Invoke cannot find it ([C6](#c6)).
+
 - Letting a C++ exception escape an `extern "C"` function: the caller has no idea what to do with it. Catch everything at the boundary and return an error code.
+
 - Using `long` in a C interface meant for all platforms: it is 32 bits on 64-bit Windows and 64 bits on 64-bit Linux and macOS. Use `int64_t`.
 
 ## Sources

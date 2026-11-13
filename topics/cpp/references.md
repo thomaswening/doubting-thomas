@@ -14,10 +14,15 @@ tags: [cpp, reference, pointer, const-reference, ref, in, dangling]
 ## TL;DR
 
 - A **reference** `T&` is a second name for an object that already exists. It must be set when declared, always refers to the same object, and cannot be null.
+
 - A **pointer** `T*` holds an address. It can be null, be pointed elsewhere, and must be followed with `*` or `->`.
+
 - `const T&` is the normal way to pass an object a function only reads: no copy is made and the function cannot change it. It is C#'s `in` parameter.
+
 - `T&` as a parameter lets the function change the caller's object, like C#'s `ref`.
+
 - Prefer a reference when an object must be there. Use a pointer only where "no object" is a valid answer.
+
 - `auto` copies: `auto h = grid.header();` makes a copy, `const auto& h = grid.header();` does not.
 
 ## Key claims
@@ -114,8 +119,11 @@ if (const std::string* name = find_name(7)) {
 ## Pitfalls
 
 - Expecting `alias = other;` to make `alias` refer to `other`. It copies `other` into the object `alias` names ([C1](#c1)).
+
 - Returning a reference to one of the function's own local variables, as in `const std::string& f() { std::string s = "x"; return s; }`. `s` is destroyed when `f` returns, so the caller receives a reference to an object that no longer exists. It compiles, with only a warning ([C5](#c5)). A reference to an object that is still alive, as in `const auto& b = a;` with `a` in the same scope, is fine.
+
 - Writing `auto x = obj.big_member();` and modifying `x`, expecting `obj` to change. `auto` made a copy ([C7](#c7)).
+
 - Using a pointer parameter "to avoid a copy". A `const T&` does that and cannot be null ([C2](#c2), [C3](#c3)).
 
 ## Sources

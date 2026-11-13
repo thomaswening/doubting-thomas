@@ -14,9 +14,13 @@ tags: [c, cpp, memory, malloc, free, raii, destructor, garbage-collection]
 ## TL;DR
 
 - C frees **local variables** automatically when their block ends, structs held by value included, just as C# does for locals.
+
 - C never frees **heap memory** (from `malloc`) on its own: there is no garbage collector, and the code must call `free` exactly once.
+
 - Forgetting `free` leaks memory; calling it twice, or using memory after it, is undefined behaviour.
+
 - Memory goes on the heap when its size isn't known in advance or it must outlive the function that creates it, as an arbitrary-size number must.
+
 - C++ adds **destructors**: objects such as `std::string` free their heap memory automatically at the end of their scope (RAII), so well-written C++ rarely calls `delete`.
 
 ## Key claims
@@ -140,8 +144,11 @@ release a
 ## Pitfalls
 
 - Believing a pointer going out of scope frees what it points to ([C4](#c4)).
+
 - Returning the address of a local array or struct ([C5](#c5)); compilers often warn, but not always.
+
 - Freeing memory with a different allocator than the one that allocated it: `free` for `malloc`, `delete` for `new`, and a library's own release function for what the library allocated. On Windows, freeing in one DLL what another DLL allocated can crash, because each may use its own heap.
+
 - Expecting C++ RAII from a raw pointer: `T* p = new T;` has no destructor attached to `p`; `std::unique_ptr<T>` does.
 
 ## Sources

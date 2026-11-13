@@ -14,9 +14,13 @@ tags: [c, declarator, declaration, definition, typedef, storage-duration, initia
 ## TL;DR
 
 - A C declaration has a base type on the left and a declarator around the name. Read it from the name outwards: `int a[4];` is "`a` is an array of 4 `int`".
+
 - `typedef` in front of a variable declaration turns the would-be variable name into a name for its type. `typedef int quad[4];` creates no object.
+
 - A definition in a block, without `static`, reserves storage for the whole object until the block ends. It calls no `malloc` and initialises nothing.
+
 - A pointer is an object of its own that holds only an address. Defining one creates nothing for it to point to.
+
 - Brace lists initialise arrays and structs. Nested aggregates take nested braces: `frac_struct y[1] = {{1, 2}};`. Members left out become zero.
 
 ## Key claims
@@ -182,8 +186,11 @@ Expected output (with `-Wextra`, GCC and Clang also warn that `{{3}}` leaves `de
 ## Pitfalls
 
 - Reading an automatic object before giving it a value: `int a[4]; printf("%d", a[0]);` reads an indeterminate value ([C3](#c3)).
+
 - Expecting a pointer to come with an object: after `frac_struct *w;`, `w->num = 1;` writes through an indeterminate address ([C4](#c4)).
+
 - Calling `malloc` for every struct "because it is behind a pointer". A pointer to an automatic object needs none ([C4](#c4)).
+
 - Reading `typedef int quad[4];` as defining an array. It only names a type ([C2](#c2)).
 
 ## Exercises

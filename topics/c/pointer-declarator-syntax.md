@@ -14,9 +14,13 @@ tags: [c, cpp, pointer, declarator, const, dereference]
 ## TL;DR
 
 - In a **declaration**, `*` means "pointer to". `int* p` and `int *p` are the same declaration; spacing is style.
+
 - The `*` binds to each declared name, not to the type: `int* a, b;` makes `a` a pointer and `b` a plain `int`. C# does the opposite.
+
 - In an **expression**, `*p` follows the pointer to what it points to (dereferencing), `&x` takes an address, and `a * b` is multiplication.
+
 - `p->x` is shorthand for `(*p).x`.
+
 - `const` applies to what is on its left (or, at the start, to what is on its right): `const int* p` protects the int, `int* const p` protects the pointer.
 
 ## Key claims
@@ -103,9 +107,13 @@ Expected output:
 ## Pitfalls
 
 - Writing `int* a, b;` and expecting two pointers ([C2](#c2)), especially when coming from C# ([C3](#c3)).
+
 - Writing `*p.x` meaning `(*p).x`: it parses as `*(p.x)`. Use `p->x` ([C5](#c5)).
+
 - Reading `const int* p` as "a constant pointer"; it is a pointer to a constant ([C6](#c6)).
+
 - Believing the object behind a `const int*` cannot change: only changes through that pointer are forbidden ([C7](#c7)).
+
 - Dereferencing a pointer that is null or no longer points to a live object: undefined behaviour in C, where C# would throw.
 
 ## Sources

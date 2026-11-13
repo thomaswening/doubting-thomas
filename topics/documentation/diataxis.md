@@ -14,9 +14,13 @@ tags: [diataxis, user-documentation, tutorials, how-to, reference, explanation]
 ## TL;DR
 
 - **Diátaxis** sorts user documentation into four kinds by what the reader needs at that moment: **tutorials**, **how-to guides**, **reference** and **explanation**.
+
 - The four kinds come from two questions. Is the reader **doing** something or **thinking** about it? Are they **learning** or **working**?
+
 - Each kind is written differently. **Mixing them is the usual failure**: a tutorial that lists every option loses the beginner.
+
 - The scheme is for documentation of a product's *use*. Project records such as requirements and ADRs are a different layer.
+
 - Daniele Procida created it. Django's documentation is organised this way. NumPy adopted it in NEP 44.
 
 ## Key claims
@@ -108,8 +112,11 @@ Repaired, with each part where it belongs:
 ## Pitfalls
 
 - **"Tutorial" and "how-to" are not synonyms.** A tutorial is for someone who doesn't yet know what to ask. A how-to guide is for someone with a goal.
+
 - **Reference generated from code is not enough on its own.** It covers the reference kind only. Users still need the other three.
+
 - **Diátaxis is not a folder structure.** Folders help, but the point is that each page has one kind. A page in `tutorials/` that explains design reasons is still mixed.
+
 - **Not every document is user documentation.** Forcing ADRs or requirements into the four kinds misreads them.
 
 ## Sources

@@ -14,9 +14,13 @@ tags: [c, cpp, array, pointer, decay, parameter, subscript, pointer-arithmetic]
 ## TL;DR
 
 - Two separate rules turn arrays into pointers. An array used in an expression *decays* to a pointer to its first element: a rule about expressions. A parameter declared as an array is *adjusted* to a pointer: a rule about declarations.
+
 - `a[i]` is defined as `*(a + i)`: pointer arithmetic, then a dereference. So `[]` works on any pointer. On an array it works only because the array decays first.
+
 - Inside a function, `sizeof` of an array parameter is the size of a pointer. The length must be passed separately.
+
 - Arrays cannot be copied, assigned, passed or returned by value. A struct that contains an array can.
+
 - Together, decay and adjustment make `f(a)` pass the address of the caller's first element. `f` can therefore change the caller's array. The [one-element array typedef](one-element-array-typedef.md) of GMP and FLINT is built on exactly this.
 
 ## Key claims
@@ -193,8 +197,11 @@ Expected output (GCC and Clang also warn that `sizeof a` gives the size of a poi
 ## Pitfalls
 
 - Using `sizeof a / sizeof a[0]` to count the elements of an array parameter. It divides the size of a pointer by the size of an element ([C2](#c2)).
+
 - Writing `b = a;` to copy an array. It does not compile ([C4](#c4)). Use `memcpy`, or wrap the array in a struct.
+
 - Returning a local array from a function. Arrays cannot be returned ([C4](#c4)). Pass the destination as a parameter instead.
+
 - Trusting `[]` to check bounds. `p[i]` only computes an address. Reading past the end is undefined behaviour ([C15](#c15)).
 
 ## Exercises

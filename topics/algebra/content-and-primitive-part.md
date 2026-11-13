@@ -14,8 +14,11 @@ tags: [polynomials, gcd, canonical-form, computer-algebra]
 ## TL;DR
 
 - The **content** of a polynomial with integer coefficients is the GCD of its coefficients. The **primitive part** is what is left after dividing by it: $6x + 4 = 2(3x + 2)$.
+
 - The GCD of two polynomials over the rationals is only fixed **up to a non-zero constant factor**: $x - y$, $y - x$ and $2x - 2y$ are all valid answers to the same question.
+
 - A program that must print one answer picks a **convention**: the primitive representative with a positive leading coefficient.
+
 - "Leading" depends on a fixed **order of the variables and monomials**. Change the order and the "positive" representative can flip sign.
 
 ## Key claims
@@ -191,7 +194,9 @@ The leading coefficient is $-5$, the content is $\gcd(5, 3, 1) = 1$, and the nor
 ## Pitfalls
 
 - **Total degree is not the leading term.** $3xy^2$ has total degree 3 and $-5x^2$ only 2, yet in lexicographic order $-5x^2$ leads ([C6](#c6)). Other monomial orders (graded ones) compare total degree first. Say which order you mean.
+
 - **"The" GCD over the integers versus over the rationals.** Over the integers $\gcd(6x + 6, 4x + 4) = 2(x + 1)$, because the integer content $2$ is part of it ([C5](#c5)). Over the rationals the normalised answer is $x + 1$: constants don't count there ([C3](#c3)).
+
 - **Forgetting the variable order.** Two programs with the same convention but different variable orders print $x - y$ and $y - x$ ([C8](#c8)).
 
 ## Sources

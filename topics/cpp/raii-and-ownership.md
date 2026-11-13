@@ -14,9 +14,13 @@ tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move, i
 ## TL;DR
 
 - Every resource in C++ (heap memory, a file, a library handle) needs an **owner**: the one object responsible for releasing it.
+
 - **RAII** puts that responsibility in a class: the constructor acquires the resource and the destructor releases it. The destructor runs automatically at the end of the owner's scope.
+
 - Ordinary code therefore does not call `new` and `delete` itself. It owns things through **values**, **standard containers** and **smart pointers**, whose destructors do the freeing.
+
 - `std::unique_ptr` means one owner. It can be moved but not copied. `std::shared_ptr` means shared ownership by reference counting.
+
 - A class that owns a resource forbids copying, or defines what a copy means, so that two objects never free the same thing.
 
 ## Key claims
@@ -185,11 +189,17 @@ cannot open missing.txt
 ## Pitfalls
 
 - Treating `shared_ptr` as "the C# reference": it costs a reference count on every copy and leaks on cycles ([C7](#c7)). Prefer values and `unique_ptr`.
+
 - Using a `unique_ptr` after `std::move` from it: it is empty, and dereferencing it is undefined behaviour ([C6](#c6)).
+
 - Forgetting `= delete` on the copy operations of a class that owns a C handle: the first copy that goes out of scope frees the handle the other still uses ([C8](#c8)).
+
 - An exception that is never caught ends the program through `std::terminate`, and whether destructors run on the way out is then up to the implementation. The guarantee of [C2](#c2) is for exceptions that are caught somewhere up the call stack.
+
 - Assuming that a function returning a raw pointer hands over ownership, or that it doesn't. Freeing what you don't own is a double free; not freeing what you do own is a leak. Read the documentation, and in your own code return `unique_ptr` when ownership moves ([C9](#c9)).
+
 - Expecting `std::ifstream file(path);` to throw when the file is missing, as C#'s `File.OpenRead` does. It doesn't by default; check `if (!file)` ([C10](#c10)).
+
 - Keeping a reference or raw pointer to something after its owner is gone. RAII decides when things are freed; it does not stop you looking at them afterwards. AddressSanitizer finds this ([sanitizers](sanitizers.md)).
 
 ## Sources

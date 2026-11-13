@@ -14,9 +14,13 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ## TL;DR
 
 - An **opaque handle** is a pointer to a type whose definition the user never sees. The user can store it and pass it back, but not look inside, like an `IntPtr` from native code.
+
 - The library declares the type without a body in its header and defines it only in its own source, so it can change the layout without breaking users.
+
 - The hidden struct holds the library's **data**. The operations are ordinary functions of the library, declared next to it, which the user calls directly.
+
 - Every handle comes with a **create** function and a **release** function, and the user must call the release function exactly once.
+
 - A C++ wrapper class turns this into RAII: its destructor calls the release function. It must also forbid copying, or two copies would release the same handle twice.
 
 ## Key claims
@@ -153,10 +157,15 @@ A wrapper this simple can't be returned from a function or stored in a `std::vec
 ## Pitfalls
 
 - Copying a handle-wrapping C++ class without defining what a copy means: two destructors, one handle, a double release ([C5](#c5)).
+
 - Freeing a handle with `free` or `delete` instead of the library's release function ([C4](#c4)).
+
 - Reading `= delete` as "deletes the object": it removes a member function from the class ([C7](#c7)).
+
 - Thinking the hidden struct contains the library's functions, or a table of them: it holds data; the functions are separate ([C8](#c8)).
+
 - Using a handle after releasing it: the pointer value still looks valid, but the object behind it is gone.
+
 - Treating `FILE*` from `<stdio.h>` as a strictly opaque type: it is used as a handle, but most C libraries do define `FILE` in the header.
 
 ## Sources
