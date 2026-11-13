@@ -6,3 +6,4 @@
 - [C++](cpp/index.md): C++ language and build concepts, compared with .NET.
 - [Testing](testing/index.md): how tests show that results are right, and what they can't show.
 - [Documentation](documentation/index.md): how project and user documentation is organised, and how vocabularies are described.
+- [Android](android/index.md): how Android installs, updates and trusts apps.
