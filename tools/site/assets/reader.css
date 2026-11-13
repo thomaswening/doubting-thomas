@@ -82,6 +82,13 @@ body::before {
 .icon-button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .type-sample { font-family: Georgia, serif; font-size: 17px; letter-spacing: .02em; }
 
+.preview-banner {
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.4; text-align: center;
+  padding-block: 6px; background: var(--box); color: var(--text); border-bottom: 1px solid var(--box-border);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
 /* ---------- panels ---------- */
 .panel {
   position: fixed; z-index: 20; top: calc(env(safe-area-inset-top, 0px) + 54px);

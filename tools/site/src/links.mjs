@@ -4,6 +4,8 @@ import path from "node:path";
 /** The repository on GitHub; links that leave topics/ point there. */
 export const REPOSITORY_URL = "https://github.com/thomaswening/doubting-thomas";
 export const TOPICS_FOLDER = "topics";
+/** Where a pull request's preview lives inside the site: pr/52/. */
+export const PREVIEW_FOLDER = "pr";
 const MARKDOWN_EXTENSION = ".md";
 const PAGE_EXTENSION = ".html";
 const URL_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;

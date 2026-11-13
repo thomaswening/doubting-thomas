@@ -236,7 +236,7 @@ python tools/check_docs.py . --markdown "topics/**/*.md" "templates/*.md" "*.md"
 
 ### The reading site
 
-**Every note builds into the reading site, and every formula renders there.** The site renders maths with KaTeX, GitHub with MathJax. A formula only one of them accepts shows up red on the other. The `site` workflow ([.github/workflows/site.yml](.github/workflows/site.yml)) builds the site on every pull request and fails on such a formula. How the site reads a note, what fails and how to fix it are in [tools/site/README.md](tools/site/README.md).
+**Every note builds into the reading site, and every formula renders there.** The site renders maths with KaTeX, GitHub with MathJax. A formula only one of them accepts shows up red on the other. The `site` workflow ([.github/workflows/site.yml](.github/workflows/site.yml)) builds the site on every pull request and fails on such a formula. It also publishes a preview of each open pull request and keeps a section **Read on the site** at the top of its description, with a link to each changed note's preview page. Don't edit inside that section: the workflow rewrites it on every push. How the site reads a note, what fails and how to fix it are in [tools/site/README.md](tools/site/README.md).
 
 ### Verification in the pull request
 

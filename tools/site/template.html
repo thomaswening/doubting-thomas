@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{TITLE}} · doubting-thomas</title>
-<link rel="stylesheet" href="{{ROOT}}assets/katex/katex.min.css">
+{{ROBOTS}}
+<link rel="stylesheet" href="{{ASSETS}}katex/katex.min.css">
 {{FONT_STYLESHEETS}}
-<link rel="stylesheet" href="{{ROOT}}assets/reader.css">
-<script src="{{ROOT}}assets/reader.js"></script>
+<link rel="stylesheet" href="{{ASSETS}}reader.css">
+<script src="{{ASSETS}}reader.js"></script>
 {{DIAGRAM_SCRIPT}}
 </head>
 <body>
+{{PREVIEW_BANNER}}
 <header class="bar" id="bar">
   <div class="bar-inner">
     <nav class="breadcrumbs" aria-label="Breadcrumbs">{{BREADCRUMBS}}</nav>
@@ -99,7 +101,7 @@
 {{CONTENT}}
   </article>
   <footer class="page-foot">
-    <a href="{{SOURCE_URL}}">Source on GitHub</a>
+    {{SOURCE_LINK}}
   </footer>
 </main>
 </body>
