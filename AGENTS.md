@@ -25,7 +25,9 @@ results/YYYY-MM-DD-<slug>.md   one file per test session
 templates/note.md         copy this to start a note
 templates/results.md      copy this to start a results file
 tools/check_docs.py       the link check (§9)
-.github/workflows/        CI: docs-check.yml runs the link check on every pull request
+tools/site/               builds the reading site from topics/ (§9)
+.github/workflows/        CI: docs-check.yml runs the link check on every pull request;
+                          site.yml builds the reading site and publishes it from main
 ```
 
 - `<area>` and `<note>` are lower-case kebab-case: `topics/numerics/ball-arithmetic.md`, `topics/cpp/move-semantics.md`.
@@ -231,6 +233,10 @@ python tools/check_docs.py . --markdown "topics/**/*.md" "templates/*.md" "*.md"
 - A proof that follows a textbook names the book and the theorem. Check each step against it.
 - A proof without a textbook source is marked as such in the pull request, so that Thomas checks it line by line.
 - Where a formula can be checked numerically (an identity, a matrix, a special case), do so with a throwaway script and report it.
+
+### The reading site
+
+**Every note builds into the reading site, and every formula renders there.** The site renders maths with KaTeX, GitHub with MathJax. A formula only one of them accepts shows up red on the other. The `site` workflow ([.github/workflows/site.yml](.github/workflows/site.yml)) builds the site on every pull request and fails on such a formula. It also publishes a preview of each open pull request and keeps a section **Read on the site** at the top of its description, with a link to each changed note's preview page. Don't edit inside that section: the workflow rewrites it on every push. How the site reads a note, what fails and how to fix it are in [tools/site/README.md](tools/site/README.md).
 
 ### Verification in the pull request
 

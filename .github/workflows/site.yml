@@ -1,0 +1,131 @@
+# Builds the reading site and publishes it on GitHub Pages: main at the root, and every
+# open pull request as a preview under pr/<number>/, linked from its description.
+# What each job does and how to fix a failure: tools/site/README.md
+name: site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/site/package-lock.json
+      - run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  describe:
+    # Forks get no preview: their token cannot edit the description.
+    if: >-
+      github.event_name == 'pull_request' && github.event.action != 'closed'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NUMBER: ${{ github.event.pull_request.number }}
+      REPOSITORY: ${{ github.repository }}
+      SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Link the preview pages in the description
+        run: |
+          gh api "repos/$REPOSITORY/pulls/$NUMBER/files" --paginate \
+            --jq '.[] | select(.status != "removed") | .filename' > "$RUNNER_TEMP/files.txt"
+          gh api "repos/$REPOSITORY/pulls/$NUMBER" --jq '.body // ""' > "$RUNNER_TEMP/body.md"
+          node tools/site/src/update-description.mjs --number "$NUMBER" --site-url "$SITE_URL" \
+            --files "$RUNNER_TEMP/files.txt" --body "$RUNNER_TEMP/body.md" --output "$RUNNER_TEMP/new-body.md"
+          if [ -f "$RUNNER_TEMP/new-body.md" ]; then
+            gh api --method PATCH "repos/$REPOSITORY/pulls/$NUMBER" -F "body=@$RUNNER_TEMP/new-body.md" --silent
+          fi
+
+  request-publish:
+    # A deployment must come from main, so a pull request asks main's workflow to rebuild
+    # everything. Closing a pull request does too, which removes its preview.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Run this workflow on main
+        run: |
+          if ! gh api "repos/$REPOSITORY/contents/.github/workflows/site.yml?ref=main" --silent 2>/dev/null; then
+            echo "::notice::The site workflow is not on main yet, so there is no preview to publish."
+            exit 0
+          fi
+          gh workflow run site.yml --ref main --repo "$REPOSITORY"
+
+  publish:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    defaults:
+      run:
+        working-directory: tools/site
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the previews are built from the pull requests' branches
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/site/package-lock.json
+      - run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build main and the previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node src/build-with-previews.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: tools/site/_site
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write # Pages verifies that the upload comes from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

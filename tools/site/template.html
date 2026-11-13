@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{TITLE}} · doubting-thomas</title>
+{{ROBOTS}}
+<link rel="stylesheet" href="{{ASSETS}}katex/katex.min.css">
+{{FONT_STYLESHEETS}}
+<link rel="stylesheet" href="{{ASSETS}}reader.css">
+<script src="{{ASSETS}}reader.js"></script>
+{{DIAGRAM_SCRIPT}}
+</head>
+<body>
+{{PREVIEW_BANNER}}
+<header class="bar" id="bar">
+  <div class="bar-inner">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">{{BREADCRUMBS}}</nav>
+    <button class="icon-button" id="contents-button" aria-expanded="false" aria-controls="contents-panel" title="Contents" {{CONTENTS_HIDDEN}}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="wide-only">Contents</span>
+    </button>
+    <button class="icon-button" id="settings-button" aria-expanded="false" aria-controls="settings-panel" title="Display settings">
+      <span class="type-sample" aria-hidden="true">Aa</span><span class="wide-only">Display</span>
+    </button>
+    <button class="icon-button" id="fullscreen-button" title="Full screen" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="panel" id="contents-panel" hidden aria-label="Contents">
+  <h2>Contents</h2>
+  <ul class="contents">
+{{CONTENTS}}
+  </ul>
+</nav>
+
+<section class="panel" id="settings-panel" hidden aria-label="Display settings">
+  <h2>Display</h2>
+  <div class="setting">
+    <span class="setting-label">Theme</span>
+    <div class="choices" data-preference="theme">
+      <button data-value="auto" aria-pressed="false">Auto</button>
+      <button data-value="light" aria-pressed="false"><span class="swatch swatch-light"></span>Light</button>
+      <button data-value="paper" aria-pressed="false"><span class="swatch swatch-paper"></span>Paper</button>
+      <button data-value="dark" aria-pressed="false"><span class="swatch swatch-dark"></span>Dark</button>
+      <button data-value="night" aria-pressed="false"><span class="swatch swatch-night"></span>Night</button>
+    </div>
+  </div>
+  <div class="setting">
+    <span class="setting-label">Contrast</span>
+    <div class="choices" data-preference="contrast">
+      <button data-value="normal" aria-pressed="false">Normal</button>
+      <button data-value="high" aria-pressed="false">High</button>
+    </div>
+  </div>
+  <div class="setting">
+    <span class="setting-label">Font</span>
+    <div class="choices" data-preference="font">
+      <button data-value="sans" aria-pressed="false" class="font-sample-sans">Sans</button>
+      <button data-value="hyperlegible" aria-pressed="false" class="font-sample-hyperlegible">Hyperlegible</button>
+      <button data-value="serif" aria-pressed="false" class="font-sample-serif">Serif</button>
+      <button data-value="literata" aria-pressed="false" class="font-sample-literata">Literata</button>
+    </div>
+  </div>
+  <div class="setting">
+    <label for="fontSize">Text size <output id="fontSize-output"></output></label>
+    <input type="range" id="fontSize" min="14" max="26" step="1">
+  </div>
+  <div class="setting">
+    <label for="lineHeight">Line spacing <output id="lineHeight-output"></output></label>
+    <input type="range" id="lineHeight" min="1.35" max="2.1" step="0.05">
+  </div>
+  <div class="setting wide-only">
+    <label for="textWidth">Text width <output id="textWidth-output"></output></label>
+    <input type="range" id="textWidth" min="45" max="100" step="1">
+  </div>
+  <div class="setting">
+    <label for="equationSpace">Space around equations <output id="equationSpace-output"></output></label>
+    <input type="range" id="equationSpace" min="0.3" max="2.5" step="0.1">
+  </div>
+  <div class="setting">
+    <span class="setting-label">Long equations</span>
+    <div class="choices" data-preference="longEquations">
+      <button data-value="shrink" aria-pressed="false">Shrink to fit</button>
+      <button data-value="scroll" aria-pressed="false">Scroll sideways</button>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <span>Saved in this browser</span>
+    <button class="link-button" id="reset-button">Reset</button>
+  </div>
+</section>
+
+<main class="page">
+  <header class="page-head">
+    <h1>{{TITLE}}</h1>
+    {{DATELINE}}
+  </header>
+  <article>
+{{CONTENT}}
+  </article>
+  <footer class="page-foot">
+    {{SOURCE_LINK}}
+  </footer>
+</main>
+</body>
+</html>
