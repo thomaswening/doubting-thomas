@@ -21,10 +21,15 @@ tags: [cpp, static-analysis, clang-tidy, sonarqube, ci, warnings, core-guideline
 ## Key claims
 
 - <a id="c1"></a>**C1.** Static analysis examines source code without executing it, so it can flag problems on code paths no test runs; dynamic tools such as sanitizers only see the paths that actually execute.
+
 - <a id="c2"></a>**C2.** Compiler warnings are the first layer of static analysis; flags such as `-Werror` (GCC, Clang) and `/WX` (MSVC) turn every warning into an error, so that code with warnings does not build.
+
 - <a id="c3"></a>**C3.** clang-tidy is the linter of the LLVM project: open source, run from the command line or CI with a committed `.clang-tidy` file that selects its checks, and able to return a failing exit code on findings.
+
 - <a id="c4"></a>**C4.** clang-tidy's check groups include `bugprone-*` (likely bugs), `cppcoreguidelines-*` (rules from the C++ Core Guidelines), `modernize-*` (replacing older idioms with modern C++) and `performance-*`.
+
 - <a id="c5"></a>**C5.** The C++ Core Guidelines are a public set of rules for writing safe, modern C++, edited by Bjarne Stroustrup and Herb Sutter; tools such as clang-tidy and Visual Studio's Code Analysis enforce parts of them.
+
 - <a id="c6"></a>**C6.** Static analysis reports possible problems and can give false positives, and it does not prove a program free of bugs; a project chooses which checks to enable and suppresses individual findings explicitly.
 
 ## Explanation

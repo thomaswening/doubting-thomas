@@ -23,15 +23,25 @@ tags: [c, string, null-terminated, strlen, snprintf, buffer-overflow, utf-8, poi
 ## Key claims
 
 - <a id="c1"></a>**C1.** A C string is a sequence of `char` ending in the first zero byte `'\0'`; the length is not stored anywhere, so functions find the end by searching for that byte.
+
 - <a id="c2"></a>**C2.** `strlen(s)` returns the number of bytes before the first `'\0'`, not counting it, and takes time proportional to that length; storing a string of length $n$ takes $n + 1$ bytes.
+
 - <a id="c3"></a>**C3.** A string literal such as `"abc"` is an array of 4 characters including the terminator (`char[4]` in C, `const char[4]` in C++); modifying a string literal is undefined behaviour.
+
 - <a id="c4"></a>**C4.** `sizeof` applied to an array gives the array's total size in bytes, but an array passed to a function is converted to a pointer to its first element, and `sizeof` of that parameter gives the size of a pointer, so a function cannot find out the size of a buffer it was given.
+
 - <a id="c5"></a>**C5.** `strcpy` and `strcat` write until the source's terminator without checking the destination's size; writing past the end of the destination is a buffer overflow and undefined behaviour.
+
 - <a id="c6"></a>**C6.** `snprintf(buf, size, fmt, ...)` writes at most `size - 1` characters plus a terminating `'\0'`, and returns the number of characters the full output would have had, so a return value of `size` or more means the output was truncated.
+
 - <a id="c7"></a>**C7.** `strncpy(dest, src, n)` does not write a terminator when `src` has `n` or more characters, so its result may not be a valid string.
+
 - <a id="c8"></a>**C8.** `a == b` on two `char*` or `char` arrays compares their addresses, not their contents; `strcmp(a, b)` compares contents and returns 0 when they are equal.
+
 - <a id="c9"></a>**C9.** `strlen` counts bytes, not characters: "ö" encoded in UTF-8 takes two bytes, so `strlen` of that string is 2.
+
 - <a id="c10"></a>**C10.** If `p` points to the first character of a string, `p + k` points to its character at index `k`, and any function given `p + k` sees the rest of the string from there up to the same terminator; no characters are copied. In C++, `s.c_str() + k` does the same for a `std::string s`.
+
 - <a id="c11"></a>**C11.** Adding a `char` to a string literal or a `char*` does not append: `"1.25" + 'E'` converts `'E'` to its code, 69, and moves the pointer 69 characters forward, past the end of the literal, which is undefined behaviour. The expression compiles; Clang warns, GCC 13 does not. `std::string("1.25") + 'E'` appends, because `std::string` defines `+`.
 
 ## Explanation

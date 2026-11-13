@@ -22,12 +22,19 @@ tags: [arbitrary-precision, error-bounds, flint, arb]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A ball $[m \pm r]$ represents every real number $x$ with $|x - m| \le r$; the value it stands for is guaranteed to be one of them.
+
 - <a id="c2"></a>**C2.** Ball arithmetic guarantees inclusion: for any operation, the exact result for any inputs inside the input balls lies inside the output ball, including the rounding error of computing the midpoint.
+
 - <a id="c3"></a>**C3.** The radius is an upper bound on the error, never an estimate: it may overstate the error, but it never understates it.
+
 - <a id="c4"></a>**C4.** A ball comparison such as `a < b` returns true only if it holds for every pair of points in the two balls. When the balls overlap, both `a < b` and `a ≥ b` return false, so false means "not proven", not "no".
+
 - <a id="c5"></a>**C5.** Ball arithmetic does not know when two operands are the same quantity: for $x = [m \pm r]$, computing $x - x$ as a subtraction of two balls gives $[0 \pm 2r]$, not exactly $0$ (the dependency problem).
+
 - <a id="c6"></a>**C6.** If every number in a result ball rounds to the same n significant digits, those n digits are proven correct. If not, the usual remedy is to repeat the computation at higher working precision.
+
 - <a id="c7"></a>**C7.** Agreement between two floating-point evaluations at different precisions does not prove any digits: $e^{10^{-50}} - 1$ evaluates to $0$ at both 30 and 38 digits, while its true value is about $10^{-50}$. Ball arithmetic at 30 digits returns roughly $[0 \pm 10^{-30}]$, which shows that no digit is known yet.
+
 - <a id="c8"></a>**C8.** In FLINT's `arb`, the working precision is given in bits and passed to each operation, not stored with the number; $n$ decimal digits need about $3.32\,n$ bits ($\log_2 10 \approx 3.32$).
 
 ## Explanation

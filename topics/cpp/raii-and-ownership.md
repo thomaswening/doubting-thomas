@@ -22,14 +22,23 @@ tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move, i
 ## Key claims
 
 - <a id="c1"></a>**C1.** The owner of a resource is the object whose destructor releases it; in well-written C++ every heap allocation has exactly one owner, or one group of `shared_ptr` owners.
+
 - <a id="c2"></a>**C2.** RAII (resource acquisition is initialisation) means acquiring a resource in an object's constructor and releasing it in its destructor, so that the release happens automatically when the object goes out of scope, also when the scope is left by an exception.
+
 - <a id="c3"></a>**C3.** A raw `new` must be paired with exactly one `delete` on every path out of the code, including early returns and exceptions; forgetting it leaks, and doing it twice or using the object afterwards is undefined behaviour. Wrapping the allocation in an owning object removes the need for a hand-written `delete`.
+
 - <a id="c4"></a>**C4.** Any C++ class can be used as a plain value (`Poly p(ctx);`), not only small types: the object then lives in the enclosing scope and its destructor runs when that scope ends, with no `new` and no pointer.
+
 - <a id="c5"></a>**C5.** Standard containers such as `std::vector` and `std::string` own their elements and their heap memory, and release them in their destructor.
+
 - <a id="c6"></a>**C6.** `std::unique_ptr<T>` owns one heap object and deletes it in its destructor; it cannot be copied, only moved with `std::move`, which transfers ownership and leaves the source empty. It is created with `std::make_unique<T>(args...)`.
+
 - <a id="c7"></a>**C7.** `std::shared_ptr<T>` keeps a reference count and deletes the object when the last `shared_ptr` to it is destroyed; two objects holding `shared_ptr`s to each other are never freed, a cycle that `std::weak_ptr` is used to break.
+
 - <a id="c8"></a>**C8.** If a class owning a resource can be copied with the default copy, both copies free the same resource; such a class deletes its copy constructor and copy assignment (`= delete`) or defines them to copy the resource itself.
+
 - <a id="c9"></a>**C9.** A function that returns a `std::unique_ptr<T>` or an owning value hands ownership to the caller, and the type says so; a function that returns a raw `T*` does not say whether the caller must free it, which only its documentation can tell.
+
 - <a id="c10"></a>**C10.** `std::ifstream` and `std::ofstream` open their file in the constructor and close it in the destructor, so a stream declared as a local variable, `std::ifstream file(path);`, needs neither `new` nor a `close()` call. By default a failed open does not throw: the stream is left in a failed state, which `if (!file)` detects.
 
 ## Explanation
