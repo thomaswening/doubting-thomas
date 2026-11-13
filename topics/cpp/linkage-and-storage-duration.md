@@ -14,23 +14,37 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 ## TL;DR
 
 - A **translation unit** is one `.cpp` file with its `#include`s pasted in. Each is compiled on its own, and the linker joins them.
+
 - **Linkage** says whether a name in one translation unit means the same thing as that name in another. **External** linkage: shared by the whole program. **Internal** linkage: private to its translation unit.
+
 - An **unnamed namespace**, `namespace { … }`, gives everything in it internal linkage. It is the C++ way to write file-local helpers, like a `file class` in C#.
+
 - An unnamed namespace usually sits **inside** the project's namespace. Linkage is the same either way, but code in that namespace then finds the helpers first, and the helpers can use the namespace's names without a prefix.
+
 - **Storage duration** says when an object is created and destroyed. Locals have automatic duration; globals and `static` locals live for the whole program.
+
 - The keyword `static` means three different things: internal linkage at namespace scope (outside any function or class, including the global scope outside every namespace), static duration on a local, and "shared by all objects" on a class member.
+
 - A `static` variable defined in a header gives every file that includes it a copy of its own. An `inline` variable gives one, shared.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A translation unit is a source file after preprocessing, with the contents of every `#include` inserted; the compiler compiles each translation unit separately, and the linker combines the results into one program.
+
 - <a id="c2"></a>**C2.** A name with external linkage refers to the same entity in every translation unit; functions and non-`const` variables declared at namespace scope have external linkage by default, so two translation units that both define the same such function cause a multiple-definition error at link time.
+
 - <a id="c3"></a>**C3.** Everything declared in an unnamed namespace, `namespace { … }`, has internal linkage: it is visible only in its own translation unit, and another translation unit may define something with the same name without a clash. Declaring a namespace-scope function or variable `static` has the same effect, but works only for functions and variables, not for types.
+
 - <a id="c4"></a>**C4.** In C++, a namespace-scope variable declared `const` or `constexpr`, and not `inline` or `extern`, has internal linkage by default; in C, a `const` variable at file scope has external linkage.
+
 - <a id="c5"></a>**C5.** A namespace-scope `static` variable defined in a header is a separate object in every translation unit that includes the header, so a change made in one file is not seen in another; an `inline` variable (C++17), such as `inline int shared = 0;`, is a single object for the whole program.
+
 - <a id="c6"></a>**C6.** A local variable declared `static` has static storage duration: it is initialised the first time control passes through its declaration, keeps its value between calls, and is destroyed when the program ends. Since C++11 that initialisation is thread-safe.
+
 - <a id="c7"></a>**C7.** Linkage and storage duration are independent: a `static` local has static storage duration but no linkage, a variable in an unnamed namespace has static storage duration and internal linkage, and an ordinary local has automatic storage duration and no linkage.
+
 - <a id="c8"></a>**C8.** A `static` data member or member function of a class belongs to the class, not to any object, like a `static` member in C#.
+
 - <a id="c9"></a>**C9.** An unnamed namespace behaves like a namespace with a unique name plus a `using` directive for it in the enclosing namespace. So an unnamed namespace inside `namespace pf` gives the same internal linkage as one at global scope, but its names are found as if declared in `pf`: code in `pf` finds them before any global function of the same name, and the helpers use `pf`'s names without `pf::`. At global scope, a helper with the same name and parameters as a global function makes an unqualified call ambiguous.
 
 ## Explanation
@@ -193,9 +207,13 @@ A function from another file is normally used through its header, so the second 
 ## Pitfalls
 
 - Putting `static int counter;` in a header to share it. Every file gets its own ([C5](#c5)). Use `inline int counter;`.
+
 - Reading `static` on a local as "compile-time constant". It is about lifetime ([C6](#c6)); a compile-time constant is `constexpr` ([const and constexpr](const-and-constexpr.md)).
+
 - Giving file-local helpers external linkage. It works until another file has a helper with the same name, then the link fails ([C2](#c2), [C3](#c3)).
+
 - Assuming C's rule for `const` globals in C++, or the reverse ([C4](#c4)).
+
 - Thinking an unnamed namespace inside `pf` makes its helpers visible to other files that use `pf`. It doesn't: linkage stays internal, and only lookup within this file changes ([C9](#c9)).
 
 ## Sources

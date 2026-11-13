@@ -14,17 +14,25 @@ tags: [c, declarator, declaration, definition, typedef, storage-duration, initia
 ## TL;DR
 
 - A C declaration has a base type on the left and a declarator around the name. Read it from the name outwards: `int a[4];` is "`a` is an array of 4 `int`".
+
 - `typedef` in front of a variable declaration turns the would-be variable name into a name for its type. `typedef int quad[4];` creates no object.
+
 - A definition in a block, without `static`, reserves storage for the whole object until the block ends. It calls no `malloc` and initialises nothing.
+
 - A pointer is an object of its own that holds only an address. Defining one creates nothing for it to point to.
+
 - Brace lists initialise arrays and structs. Nested aggregates take nested braces: `frac_struct y[1] = {{1, 2}};`. Members left out become zero.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A C declaration consists of a base type and a declarator: the declarator surrounds the declared name and adds "array of", "pointer to" or "function returning", read from the name outwards, so `int a[4];` declares `a` as an array of four `int` and `int *p;` declares `p` as a pointer to `int`.
+
 - <a id="c2"></a>**C2.** A `typedef` declaration has the form of a variable declaration with `typedef` in front, and makes the would-be variable name an alias for the would-be variable's type: `typedef int quad[4];` declares no object and makes `quad` mean "array of four `int`".
+
 - <a id="c3"></a>**C3.** A declaration such as `int a[4];` inside a block, without `static`, defines an object with automatic storage duration: it reserves storage for the whole object, which lives until the block ends, but leaves its contents indeterminate unless an initialiser is given. Without an initialiser, an object defined at file scope or with `static` is zero-initialised instead. Neither kind of definition calls `malloc`: the implementation provides the storage itself. The C standard does not mention a stack; putting automatic objects on the stack is what implementations typically do.
+
 - <a id="c4"></a>**C4.** Defining a pointer creates only the pointer, an object that holds an address: before `*p` or `p->m` may be used, `p` must point to an object with storage of its own, which may be automatic, static or allocated (for instance from `malloc`).
+
 - <a id="c5"></a>**C5.** Arrays and structs are initialised with brace-enclosed lists whose values go to the elements, or to the members in declaration order; a nested aggregate takes its own pair of braces, as in `frac_struct y[1] = {{1, 2}};`, where the outer pair initialises the array and the inner pair its single struct element. C allows inner braces to be omitted (brace elision). Elements and members left out of a brace list are zero-initialised.
 
 ## Explanation
@@ -178,8 +186,11 @@ Expected output (with `-Wextra`, GCC and Clang also warn that `{{3}}` leaves `de
 ## Pitfalls
 
 - Reading an automatic object before giving it a value: `int a[4]; printf("%d", a[0]);` reads an indeterminate value ([C3](#c3)).
+
 - Expecting a pointer to come with an object: after `frac_struct *w;`, `w->num = 1;` writes through an indeterminate address ([C4](#c4)).
+
 - Calling `malloc` for every struct "because it is behind a pointer". A pointer to an automatic object needs none ([C4](#c4)).
+
 - Reading `typedef int quad[4];` as defining an array. It only names a type ([C2](#c2)).
 
 ## Exercises

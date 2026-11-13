@@ -14,21 +14,33 @@ tags: [cpp, main, argc, argv, exit-code, exit-status, shell, ci]
 ## TL;DR
 
 - `int main(int argc, char** argv)` receives the command line as C strings. `argc` counts them. `argv[0]` is the program's own name and `argv[1]` the first real argument.
+
 - C#'s `Main(string[] args)` leaves the program name out, so `args[0]` there is `argv[1]` here.
+
 - There is no `main(std::vector<std::string>)`. Convert with `std::vector<std::string> args(argv, argv + argc);`.
+
 - The value `main` returns is the program's **exit status**. Falling off the end of `main` returns 0.
+
 - By convention 0 means success and anything else failure. `diff` and `grep` refine it: 1 for a negative answer, 2 for trouble.
+
 - Shells, CTest and CI all read this number. A non-zero exit fails a test or a CI step.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** The two standard forms are `int main()` and `int main(int argc, char* argv[])`, the latter also written `char** argv`; `argc` is the number of entries in `argv`, and `argv[argc]` is a null pointer.
+
 - <a id="c2"></a>**C2.** `argv[0]` holds the name the program was started with (or an empty string), so the first real argument is `argv[1]`; C#'s `Main(string[] args)` excludes the program name, so the first argument is `args[0]`.
+
 - <a id="c3"></a>**C3.** `std::vector<std::string> args(argv, argv + argc);` copies all command-line arguments, program name included, into a vector of strings.
+
 - <a id="c4"></a>**C4.** The value returned from `main` becomes the process's exit status; if control reaches the end of `main` without a `return`, the effect is `return 0;`, a rule that applies to `main` only.
+
 - <a id="c5"></a>**C5.** By convention exit status 0 means success and any other value failure; `diff` and `grep` return 1 for a negative result (the files differ, nothing matched) and 2 for an error such as a missing file or wrong usage.
+
 - <a id="c6"></a>**C6.** On Linux and other POSIX systems only the low 8 bits of the exit status reach the parent process, so a program that exits with 256 is seen as having exited with 0.
+
 - <a id="c7"></a>**C7.** `std::exit(code)` ends the program without destroying the local objects of the functions still running, so their destructors do not run; returning from `main` destroys `main`'s locals first.
+
 - <a id="c8"></a>**C8.** Bash stores the last command's exit status in `$?`, PowerShell stores a native program's in `$LASTEXITCODE`, and CTest and CI systems such as GitHub Actions count a test or step as failed when its process exits with a non-zero status.
 
 ## Explanation
@@ -106,8 +118,11 @@ int main(int argc, char** argv) try {
 ## Pitfalls
 
 - Taking `argv[0]` as the first argument, out of C# habit ([C2](#c2)).
+
 - Returning 256, or −1, to signal an error on Linux. The parent sees 0 and 255 ([C6](#c6)).
+
 - Calling `std::exit` deep inside the program to stop on an error, and losing what destructors would have written or removed ([C7](#c7)).
+
 - A test program that prints "FAILED" but returns 0. CTest and CI only look at the exit status ([C8](#c8)).
 
 ## Sources

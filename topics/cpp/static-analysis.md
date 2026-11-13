@@ -14,17 +14,25 @@ tags: [cpp, static-analysis, clang-tidy, sonarqube, ci, warnings, core-guideline
 ## TL;DR
 
 - **Static analysis** reads source code without running it and reports likely bugs and style problems. Sanitizers do the opposite: they check the running program.
+
 - C++ has three layers: **compiler warnings** (made errors with `-Werror` or `/WX`), a **linter** such as **clang-tidy**, and IDE plugins such as **SonarQube for IDE** or Visual Studio's Code Analysis.
+
 - clang-tidy is free, open source, needs no server or account, runs the same on Windows, macOS and Linux, and can fail a CI build. That makes it a good gate for every change.
+
 - IDE plugins give feedback while typing. They are a useful addition, not a substitute for a check that CI enforces.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** Static analysis examines source code without executing it, so it can flag problems on code paths no test runs; dynamic tools such as sanitizers only see the paths that actually execute.
+
 - <a id="c2"></a>**C2.** Compiler warnings are the first layer of static analysis; flags such as `-Werror` (GCC, Clang) and `/WX` (MSVC) turn every warning into an error, so that code with warnings does not build.
+
 - <a id="c3"></a>**C3.** clang-tidy is the linter of the LLVM project: open source, run from the command line or CI with a committed `.clang-tidy` file that selects its checks, and able to return a failing exit code on findings.
+
 - <a id="c4"></a>**C4.** clang-tidy's check groups include `bugprone-*` (likely bugs), `cppcoreguidelines-*` (rules from the C++ Core Guidelines), `modernize-*` (replacing older idioms with modern C++) and `performance-*`.
+
 - <a id="c5"></a>**C5.** The C++ Core Guidelines are a public set of rules for writing safe, modern C++, edited by Bjarne Stroustrup and Herb Sutter; tools such as clang-tidy and Visual Studio's Code Analysis enforce parts of them.
+
 - <a id="c6"></a>**C6.** Static analysis reports possible problems and can give false positives, and it does not prove a program free of bugs; a project chooses which checks to enable and suppresses individual findings explicitly.
 
 ## Explanation
@@ -89,7 +97,9 @@ clang-tidy -p build src/term.cpp
 ## Pitfalls
 
 - Turning on every check at once. Some checks contradict each other or the project's style; choose groups and switch off single checks deliberately ([C6](#c6)).
+
 - Treating a clean analysis as proof of correctness. It is a filter, not a proof ([C6](#c6)).
+
 - Relying on an IDE plugin as the project's rule. Only checks that CI runs are enforced for everyone.
 
 ## Sources

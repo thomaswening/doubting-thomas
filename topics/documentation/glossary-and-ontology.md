@@ -14,21 +14,33 @@ tags: [glossary, ontology, skos, owl, rdf, controlled-vocabulary]
 ## TL;DR
 
 - A **glossary** defines terms in prose for people. An **ontology** writes concepts and their relations in a formal language that programs can read.
+
 - **SKOS** (W3C, 2009) is the light option: concepts with labels, definitions and *broader*, *narrower* and *related* links.
+
 - **OWL** is the heavy option: classes and logical axioms that a **reasoner** can draw conclusions from and check for contradictions.
+
 - SKOS's *broader* is a loose hierarchy, not "is a subclass of". Only OWL says "every RATFUN is a coefficient" in a way a machine can check.
+
 - An ontology pays off when a **program reads the vocabulary**, when it is **too large to follow by eye**, or when **several projects or languages share it**. Before that it is cost without a reader.
+
 - A glossary with **fixed labels** (Kind of, See also) can be converted to SKOS later by a short script, so nothing is lost by waiting.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A glossary is written for human readers, as prose definitions. An ontology states concepts and their relations in a formal, machine-readable language.
+
 - <a id="c2"></a>**C2.** SKOS (Simple Knowledge Organization System) became a W3C Recommendation in 2009. It describes vocabularies as concepts with labels (`skos:prefLabel`, `skos:altLabel`), documentation (`skos:definition`, `skos:scopeNote`) and relations (`skos:broader`, `skos:narrower`, `skos:related`).
+
 - <a id="c3"></a>**C3.** `skos:broader` states a hierarchical link with no formal meaning beyond that. It is not a subclass relation. It is not transitive either: `skos:broaderTransitive` is the property that covers indirect links.
+
 - <a id="c4"></a>**C4.** SKOS's mapping properties (`skos:exactMatch`, `skos:closeMatch`, `skos:broadMatch`, `skos:narrowMatch`, `skos:relatedMatch`) link concepts in different vocabularies. This is what makes a SKOS vocabulary shareable across projects.
+
 - <a id="c5"></a>**C5.** OWL (Web Ontology Language) defines classes, properties and axioms such as `rdfs:subClassOf` and `owl:disjointWith`. A reasoner uses them to infer new facts and to detect contradictions.
+
 - <a id="c6"></a>**C6.** SKOS and OWL are both written in RDF, as subject–predicate–object triples, often in the Turtle syntax.
+
 - <a id="c7"></a>**C7.** An ontology pays off when a program consumes the vocabulary, when the vocabulary is too large for people to keep consistent, or when it must be shared or mapped across projects or languages. A small glossary read only by people gains nothing from one.
+
 - <a id="c8"></a>**C8.** If every glossary relation uses a fixed label, the glossary can be converted to SKOS by a script, so choosing a glossary now does not rule out an ontology later.
 
 ## Explanation
@@ -163,8 +175,11 @@ Output (run on .NET 10.0.401):
 ## Pitfalls
 
 - **Reading `skos:broader` as "is a".** It also covers "part of" and any other hierarchy ([C3](#c3)). Only OWL's `rdfs:subClassOf` means "is a" with consequences.
+
 - **Assuming `skos:broader` chains.** If A is broader than B and B broader than C, SKOS does not state that A is broader than C. That is `skos:broaderTransitive`.
+
 - **Building the ontology first.** Without a program that reads it, an ontology is a second copy of the glossary that drifts ([C7](#c7)).
+
 - **Free-text relations.** "Related to coefficient, sort of" can't be converted by a script. Fixed labels can ([C8](#c8)).
 
 ## Sources

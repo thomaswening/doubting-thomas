@@ -15,9 +15,15 @@ tags: []
 
 - <The gist in three to six bullets.>
 
+- <An empty line between two bullets, here and in Key claims, Good habits and Pitfalls.>
+
 ## Key claims
 
 - <a id="c1"></a>**C1.** <A statement that is true on its own and can be checked.>
+
+- <a id="c2"></a>**C2.** <A claim whose main formula is too long to read inline, with an empty line before the next claim:>
+
+  $`\displaystyle \frac{x^2 - 1}{x + 1} = x - 1`$
 
 ## Explanation
 

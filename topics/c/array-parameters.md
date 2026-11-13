@@ -14,27 +14,45 @@ tags: [c, cpp, array, pointer, decay, parameter, subscript, pointer-arithmetic]
 ## TL;DR
 
 - Two separate rules turn arrays into pointers. An array used in an expression *decays* to a pointer to its first element: a rule about expressions. A parameter declared as an array is *adjusted* to a pointer: a rule about declarations.
+
 - `a[i]` is defined as `*(a + i)`: pointer arithmetic, then a dereference. So `[]` works on any pointer. On an array it works only because the array decays first.
+
 - Inside a function, `sizeof` of an array parameter is the size of a pointer. The length must be passed separately.
+
 - Arrays cannot be copied, assigned, passed or returned by value. A struct that contains an array can.
+
 - Together, decay and adjustment make `f(a)` pass the address of the caller's first element. `f` can therefore change the caller's array. The [one-element array typedef](one-element-array-typedef.md) of GMP and FLINT is built on exactly this.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C and C++, a function parameter declared with type "array of `T`" is adjusted to "pointer to `T`", and any size written in the brackets is ignored: `void f(int a[10]);`, `void f(int a[]);` and `void f(int* a);` declare the same function.
+
 - <a id="c2"></a>**C2.** In the scope that declares an array, `sizeof` applied to it gives the size of the whole array; inside a function, `sizeof` applied to a parameter declared as an array gives the size of a pointer, not of the caller's array, so the function cannot find out the array's length, which must be passed separately.
+
 - <a id="c3"></a>**C3.** An expression of array type is converted to a pointer to the array's first element (array-to-pointer conversion, or decay). In C17 the only exceptions are an array that is the operand of `sizeof` or unary `&`, and a string literal used to initialise an array. C23 adds the `typeof` operators; C++ adds a few more, such as binding the array to a reference.
+
 - <a id="c4"></a>**C4.** An array cannot be initialised from another array, assigned to, passed by value or returned from a function: with two arrays, `int b[3] = a;` and `b = a;` do not compile. A struct that contains an array can be initialised from another struct of its type, assigned, passed and returned; the array is copied with it.
+
 - <a id="c5"></a>**C5.** *(moved 2026-10-27 to [pointers to arrays, C1](pointers-to-arrays.md#c1), with the rest of the advanced material)*
+
 - <a id="c6"></a>**C6.** *(moved 2026-10-27 to [pointers to arrays, C4](pointers-to-arrays.md#c4))*
+
 - <a id="c7"></a>**C7.** *(moved 2026-10-28 to [the one-element array typedef, C1](one-element-array-typedef.md#c1))*
+
 - <a id="c8"></a>**C8.** *(moved 2026-10-28 to [the one-element array typedef, C2](one-element-array-typedef.md#c2))*
+
 - <a id="c9"></a>**C9.** *(moved 2026-10-28 to [the one-element array typedef, C3](one-element-array-typedef.md#c3))*
+
 - <a id="c10"></a>**C10.** *(moved 2026-10-28 to [the one-element array typedef, C4](one-element-array-typedef.md#c4))*
+
 - <a id="c11"></a>**C11.** *(moved 2026-10-28 to [declarations, objects and initialisation, C2](declarations-and-objects.md#c2))*
+
 - <a id="c12"></a>**C12.** *(moved 2026-10-28 to [declarations, objects and initialisation, C3](declarations-and-objects.md#c3))*
+
 - <a id="c13"></a>**C13.** Parameter adjustment ([C1](#c1)) is a rule about declarations, applied once to the function's declared type, while array-to-pointer conversion ([C3](#c3)) is a rule about expressions, applied wherever an array is used as a value; passing an array to an array parameter involves both, and the decayed argument then has exactly the adjusted parameter's type.
+
 - <a id="c14"></a>**C14.** *(moved 2026-10-28 to [declarations, objects and initialisation, C5](declarations-and-objects.md#c5), generalised to any array of structs)*
+
 - <a id="c15"></a>**C15.** In C, the subscript expression `E1[E2]` is defined as `*((E1) + (E2))`: pointer arithmetic followed by a dereference, so it applies to any pointer, not only to arrays. For an array `a`, `a[i]` works because `a` first decays to `&a[0]`; for a pointer `p`, `p[0]` is the same as `*p`; `p[i]` is the object `i` elements after the one `p` points to.
 
 ## Explanation
@@ -179,8 +197,11 @@ Expected output (GCC and Clang also warn that `sizeof a` gives the size of a poi
 ## Pitfalls
 
 - Using `sizeof a / sizeof a[0]` to count the elements of an array parameter. It divides the size of a pointer by the size of an element ([C2](#c2)).
+
 - Writing `b = a;` to copy an array. It does not compile ([C4](#c4)). Use `memcpy`, or wrap the array in a struct.
+
 - Returning a local array from a function. Arrays cannot be returned ([C4](#c4)). Pass the destination as a parameter instead.
+
 - Trusting `[]` to check bounds. `p[i]` only computes an address. Reading past the end is undefined behaviour ([C15](#c15)).
 
 ## Exercises

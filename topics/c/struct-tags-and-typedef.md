@@ -14,18 +14,27 @@ tags: [c, struct, typedef, incomplete-type, forward-declaration]
 ## TL;DR
 
 - In C, the name after `struct` is a **tag**, not a type name: the type is called `struct point`, and you must write both words.
+
 - `typedef struct point point;` adds the short name `point` as an alias for `struct point`. That is why the name appears twice.
+
 - The two can share a spelling because C keeps tags and ordinary names in **separate name spaces**.
+
 - In C++ a struct's name is a type name by itself, so the typedef is unnecessary there but harmless; headers meant for both languages keep it.
+
 - `typedef struct x x;` without a body also **forward-declares** an incomplete type, which is the basis of opaque handles.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C, `struct point { int x, y; };` declares a type whose name is `struct point`; a later declaration `point p;` is an error unless a typedef named `point` exists.
+
 - <a id="c2"></a>**C2.** `typedef struct point point;` makes the identifier `point` an alias for the type `struct point`; it does not create a new, distinct type.
+
 - <a id="c3"></a>**C3.** C keeps struct, union and enum tags in a name space separate from ordinary identifiers (variables, functions, typedef names), so a tag and a typedef may have the same spelling without conflict.
+
 - <a id="c4"></a>**C4.** In C++, the name of a class or struct is usable as a type name without the `struct` keyword, and a `typedef struct point point;` that names the same type is allowed, so a header using this idiom compiles as both C and C++.
+
 - <a id="c5"></a>**C5.** A struct declared without a body, as in `struct x;` or `typedef struct x x;`, is an incomplete type: code may declare and pass pointers to it, but may not create an object of it, access its members, or apply `sizeof` to it.
+
 - <a id="c6"></a>**C6.** An anonymous struct given a name only by typedef, `typedef struct { int x, y; } point;`, has no tag, so it cannot be forward-declared and cannot contain a pointer to its own type by name.
 
 ## Explanation
@@ -97,7 +106,9 @@ size_t n = sizeof(secret);  /* error: invalid application of sizeof to incomplet
 ## Pitfalls
 
 - Reading `typedef struct point point;` as declaring two things called `point` of different kinds that might clash. They live in different name spaces ([C3](#c3)).
+
 - Using the anonymous form `typedef struct { ... } point;` for a type that must be forward-declared or must point to itself, such as a list node ([C6](#c6)).
+
 - Assuming a typedef creates a distinct type that the compiler checks: an alias and the original are interchangeable ([C2](#c2)).
 
 ## Sources

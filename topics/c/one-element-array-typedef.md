@@ -14,17 +14,25 @@ tags: [c, cpp, array, pointer, typedef, decay, parameter, gmp, flint]
 ## TL;DR
 
 - GMP and FLINT define their `_t` types as `typedef S T[1];`: "array of one `S`".
+
 - As a variable or struct member, `T x;` holds one whole `S` inline, with no `malloc`.
+
 - As a parameter, `T x` is adjusted to `S*`. At a call, `x` decays to `&x[0]`. So `f(x)` passes the address of the caller's struct without `&`. `f` works on that struct.
+
 - The same spelling `T` is a pointer inside the function and an array outside. A parameter can therefore be stored in an `S*`, but cannot initialise another `T`.
+
 - A plain `S x;` needs `&x` at every call. `typedef S* T;` creates no `S`. The array form gives inline storage *and* calls without `&`.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** With `typedef S name_t[1];`, as GMP and FLINT define their `_t` types, a variable or struct member of type `name_t` is an array object that holds one `S` inline, with no separate allocation, while a parameter of type `name_t` is an `S*`; callers therefore pass such a variable without `&`, and the function works on the caller's object.
+
 - <a id="c2"></a>**C2.** Because a parameter of type `name_t` from [C1](#c1) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array can only be initialised from a brace-enclosed list (or, for a character array, a string literal). C does not dereference the pointer to copy the `S` implicitly either.
+
 - <a id="c3"></a>**C3.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address and creates no `S`; before it is dereferenced it must point to an `S` with storage of its own, which may be automatic, static or allocated (for instance from `malloc`). The one-element array of [C1](#c1) gives the `S` its storage in the variable itself, and still passes a pointer at every call.
+
 - <a id="c4"></a>**C4.** In FLINT, `fmpz_mpoly_ctx_struct` and `fmpz_mpoly_struct` are typedef names for struct types and are written without the `struct` keyword; `fmpz_mpoly_ctx_t` (the context) and `fmpz_mpoly_t` (a polynomial) are two different types, each an array of one of its own struct, built by the same idiom.
+
 - <a id="c5"></a>**C5.** Defining a GMP or FLINT `_t` variable reserves storage for its struct but initialises nothing: the library's init function, such as `mpz_init`, must run before first use, and its clear function, such as `mpz_clear`, after last use. The clear function frees the memory the library attached to the struct, not the struct itself.
 
 ## Explanation
@@ -260,11 +268,17 @@ Expected output on a platform with 8-byte `long`:
 ## Pitfalls
 
 - Using an `mpz_t` or `fmpz_mpoly_t` before its init function has run. The definition reserved storage but initialised nothing ([C5](#c5)).
+
 - Expecting a pointer typedef to come with an object: after `frac_p w;`, `w->num = 1;` writes through an indeterminate address ([C3](#c3)).
+
 - Writing `x = y;` with two `mpz_t` or `fmpz_mpoly_t` variables. It does not compile, because they are arrays ([array parameters, C4](array-parameters.md#c4)). The library's set function (`mpz_set`, `fmpz_mpoly_set`) does the copy.
+
 - Copying the struct directly, `*x = *y;`, or copying a C++ class that has such a member with the default copy. That copies only the struct, which holds pointers to the library's heap memory. Both copies then free the same memory ([copy and move, C2](../cpp/copy-and-move.md#c2); [RAII and ownership, C8](../cpp/raii-and-ownership.md#c8)).
+
 - Returning an `fmpz_mpoly_t` from a function. Arrays cannot be returned ([array parameters, C4](array-parameters.md#c4)). The library convention is to pass the result as the first parameter, as `frac_mul` does.
+
 - Taking `&ctx` of an `fmpz_mpoly_ctx_t` local and passing it where an `fmpz_mpoly_ctx_struct*` is expected. `&ctx` is a pointer to an array of one struct, which has a different type ([pointers to arrays, C1](pointers-to-arrays.md#c1)). Pass `ctx`.
+
 - Storing the parameter's pointer and letting the caller's struct die first: the stored pointer dangles ([C2](#c2)).
 
 ## Exercises

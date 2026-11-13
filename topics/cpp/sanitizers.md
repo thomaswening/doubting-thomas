@@ -14,20 +14,31 @@ tags: [cpp, c, undefined-behaviour, asan, ubsan, tsan, testing, ci]
 ## TL;DR
 
 - C and C++ do not check array bounds, freed memory or signed overflow at run time. Breaking those rules is **undefined behaviour**: the program may crash, print garbage, or seem to work.
+
 - .NET checks these things on every access and throws an exception. C++ only checks them when you build with a **sanitizer**.
+
 - A sanitizer is a compiler option that inserts run-time checks into the program. When a check fails, it stops the program and reports the file, the line and the kind of error.
+
 - **AddressSanitizer** finds memory errors, **UndefinedBehaviorSanitizer** finds arithmetic and type errors, and **ThreadSanitizer** finds data races.
+
 - Sanitized builds are slower, so they are used for tests and CI, not for releases. They only find errors on code paths the tests actually run.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C and C++, reading or writing outside an array's bounds, using memory after it has been freed, and overflowing a signed integer are undefined behaviour: the language standard places no requirement at all on what the program then does.
+
 - <a id="c2"></a>**C2.** Undefined behaviour often does not crash immediately; a program with it can produce correct-looking output, and the optimiser may assume undefined behaviour never happens, so it can change what other, correct-looking code does.
+
 - <a id="c3"></a>**C3.** A sanitizer is enabled at compile time (for example `-fsanitize=address` with GCC and Clang, `/fsanitize=address` with MSVC) and works by inserting run-time checks into the compiled program; it finds errors only on paths the program actually executes.
+
 - <a id="c4"></a>**C4.** AddressSanitizer (ASan) detects out-of-bounds accesses to heap, stack and global memory, use after free, and double free; on Linux it also reports memory leaks when the program exits.
+
 - <a id="c5"></a>**C5.** UndefinedBehaviorSanitizer (UBSan) detects errors such as signed integer overflow, shifts by an invalid amount and misaligned pointers; it is available with GCC and Clang but not with MSVC.
+
 - <a id="c6"></a>**C6.** ThreadSanitizer (TSan) detects data races, where two threads access the same memory without synchronisation and at least one of them writes; it cannot be combined with AddressSanitizer in one build.
+
 - <a id="c7"></a>**C7.** In C++, overflow of an unsigned integer is defined and wraps around modulo $2^n$, where $n$ is its width in bits, while overflow of a signed integer is undefined behaviour.
+
 - <a id="c8"></a>**C8.** A sanitized build typically runs about twice as slowly as a normal one with AddressSanitizer, and several times more slowly with ThreadSanitizer, so sanitizers are used in tests and CI rather than in released programs.
 
 ## Explanation
@@ -98,8 +109,11 @@ target_link_options(app PRIVATE -fsanitize=address,undefined)
 ## Pitfalls
 
 - "It printed the right answer, so there is no bug." Undefined behaviour often gives the right answer until the compiler, the optimisation level or the input changes ([C2](#c2)).
+
 - A clean sanitizer run proves only that the paths the tests ran were clean ([C3](#c3)).
+
 - Sanitizers check code compiled with them. A library built without the flag, such as a prebuilt C library, is not checked inside.
+
 - Unsigned overflow is not a bug to the sanitizer, because it is defined ([C7](#c7)). A `size_t` that wraps below zero to a huge number is still a bug in your logic.
 
 ## Sources

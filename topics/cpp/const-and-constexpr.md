@@ -14,19 +14,29 @@ tags: [cpp, const, constexpr, readonly, constant-expression, member-function]
 ## TL;DR
 
 - `const` on a variable means it cannot be changed after it is initialised. Its value may come from the running program. It is C#'s `readonly`.
+
 - `constexpr` on a variable means its value is computed by the compiler. Only such values can size an array or fill a template argument. It is C#'s `const`.
+
 - A `constexpr` variable is also `const`. The reverse holds only for integer `const`s initialised with a compile-time value, which is why older code got away with `const int` for sizes.
+
 - `const` after a member function's parameter list, as in `bool identical() const`, promises that the function does not change its object. Only such functions can be called on a `const` object or through a `const` reference.
+
 - `const` on a returned value of a built-in type, as in `const bool f()`, means nothing. gcc warns about it.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A `const` variable must be initialised and can never be modified afterwards, but its initial value may be known only at run time: `const int count = argc;` is valid.
+
 - <a id="c2"></a>**C2.** A `constexpr` variable must be initialised with a constant expression, which the compiler evaluates during compilation; every `constexpr` variable is implicitly `const`.
+
 - <a id="c3"></a>**C3.** Only constant expressions may be used where the compiler needs a value, such as an array size or a template argument (`std::array<char, N>`). A `constexpr` variable can always be used in a constant expression. A `const` variable can be used in one only if it has integral or enumeration type and was initialised with a constant expression: `const int n = 5;` qualifies, `const double d = 2.5;` does not.
+
 - <a id="c4"></a>**C4.** C++'s `const` variable corresponds to C#'s `readonly` (fixed after initialisation, value possibly computed at run time), and C++'s `constexpr` variable to C#'s `const` (value fixed at compile time).
+
 - <a id="c5"></a>**C5.** A member function declared with `const` after its parameter list, such as `int get() const;`, may not modify the object's data members (other than those declared `mutable`), and it is the only kind of member function that can be called on a `const` object or through a `const T&` or `const T*`.
+
 - <a id="c6"></a>**C6.** `const` on a return type returned by value has no effect for built-in types: `const bool f();` returns a plain `bool` that the caller may copy into a non-const variable. gcc warns with `-Wignored-qualifiers`, which `-Wextra` enables.
+
 - <a id="c7"></a>**C7.** In `constexpr const char* names[] = {"g", "u"};` the `constexpr` applies to the array variable `names`, making it and its elements constant, while the `const` in `const char*` belongs to the element type and makes the characters the pointers point to read-only.
 
 ## Explanation
@@ -127,8 +137,11 @@ constexpr const char* kSpeciesNames[18] = {"tbar", "bbar", /* ... */ "H"};
 ## Pitfalls
 
 - Writing `const` where a compile-time value is needed, then being surprised that it works for `int` and fails for `double` ([C3](#c3)). Write `constexpr`.
+
 - Forgetting `const` on a member function that only reads. It then cannot be called on a `const` argument, and the error appears far from the function ([C5](#c5)).
+
 - Reading `const bool identical()` as "a function that doesn't change the object". That promise is the `const` *after* the parameters; the one before the return type does nothing ([C6](#c6)).
+
 - Assuming `const` means "known at compile time", as C#'s `const` does. In C++, that is `constexpr` ([C4](#c4)).
 
 ## Sources

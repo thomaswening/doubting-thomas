@@ -14,20 +14,31 @@ tags: [cpp, reference, pointer, const-reference, ref, in, dangling]
 ## TL;DR
 
 - A **reference** `T&` is a second name for an object that already exists. It must be set when declared, always refers to the same object, and cannot be null.
+
 - A **pointer** `T*` holds an address. It can be null, be pointed elsewhere, and must be followed with `*` or `->`.
+
 - `const T&` is the normal way to pass an object a function only reads: no copy is made and the function cannot change it. It is C#'s `in` parameter.
+
 - `T&` as a parameter lets the function change the caller's object, like C#'s `ref`.
+
 - Prefer a reference when an object must be there. Use a pointer only where "no object" is a valid answer.
+
 - `auto` copies: `auto h = grid.header();` makes a copy, `const auto& h = grid.header();` does not.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A reference must be initialised when it is declared and refers to that same object for its whole life; assigning to a reference assigns to the object it refers to and never makes the reference refer to another object.
+
 - <a id="c2"></a>**C2.** A valid reference always refers to an object, while a pointer may be null (`nullptr`); a parameter that must receive an object is therefore declared as a reference, and a pointer is used where "no object" is a meaningful value.
+
 - <a id="c3"></a>**C3.** Passing an argument by `const T&` neither copies it nor allows the function to modify it; a `const T&` parameter also accepts temporaries, such as a string literal passed to a `const std::string&`.
+
 - <a id="c4"></a>**C4.** A non-const reference `T&` cannot bind to a temporary: with `void shout(std::string& s);`, the call `shout("hello")` does not compile.
+
 - <a id="c5"></a>**C5.** A reference does not keep its object alive: a reference to a local variable returned from a function, or a reference to a member of an object that is later destroyed, dangles, and using it is undefined behaviour.
+
 - <a id="c6"></a>**C6.** As parameters, C++'s `T&` corresponds to C#'s `ref T`, and `const T&` to C#'s `in T`; a `const auto&` local bound to a member corresponds to a C# `ref readonly` local.
+
 - <a id="c7"></a>**C7.** `auto` deduces a type without its reference and top-level `const`, so `auto x = f();` makes a copy even if `f` returns a reference; `const auto& x = f();` refers to the returned object without copying it.
 
 ## Explanation
@@ -108,8 +119,11 @@ if (const std::string* name = find_name(7)) {
 ## Pitfalls
 
 - Expecting `alias = other;` to make `alias` refer to `other`. It copies `other` into the object `alias` names ([C1](#c1)).
+
 - Returning a reference to one of the function's own local variables, as in `const std::string& f() { std::string s = "x"; return s; }`. `s` is destroyed when `f` returns, so the caller receives a reference to an object that no longer exists. It compiles, with only a warning ([C5](#c5)). A reference to an object that is still alive, as in `const auto& b = a;` with `a` in the same scope, is fine.
+
 - Writing `auto x = obj.big_member();` and modifying `x`, expecting `obj` to change. `auto` made a copy ([C7](#c7)).
+
 - Using a pointer parameter "to avoid a copy". A `const T&` does that and cannot be null ([C2](#c2), [C3](#c3)).
 
 ## Sources

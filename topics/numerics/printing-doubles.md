@@ -14,20 +14,31 @@ tags: [ieee-754, double, round-trip, significant-digits, decimal-exponent, signe
 ## TL;DR
 
 - A `double` is binary. Most decimal numbers, such as 0.1, have no exact `double`, so printing one means choosing how many decimal digits to show.
+
 - **17 significant digits are always enough**: reading the 17-digit text back gives exactly the same `double`. 15 are not always enough.
+
 - Many values need fewer digits. .NET's `ToString()` and C++'s `std::to_chars` print the *shortest* text that reads back exactly.
+
 - To find a value's decimal exponent, read it from the printed text, not from `log10`, which can be off by one at powers of ten.
+
 - `-0.0` exists. It equals `0.0`, so `x < 0` misses it; `std::signbit` finds it.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** An IEEE-754 `double` has 64 bits: 1 sign bit, 11 exponent bits and 52 stored bits of the significand, which with an implicit leading 1 give 53 significant bits, about 16 decimal digits. C#'s `double` is the same format.
+
 - <a id="c2"></a>**C2.** Printing any finite `double` with 17 significant decimal digits and reading the text back yields exactly the original `double` (C++ `std::numeric_limits<double>::max_digits10` is 17); with 15 digits this fails for some values, for example `0.1 + 0.2` prints as `0.3`, which reads back as a different `double`.
+
 - <a id="c3"></a>**C3.** The 17 digits are not the exact value either: the `double` nearest 0.1 is 0.1000000000000000055511151231257827…, which 17 digits show as `0.10000000000000001`.
+
 - <a id="c4"></a>**C4.** Shortest round-trip formatting prints the fewest digits that still read back as the same `double`, so the `double` nearest 0.1 prints as `0.1`; .NET's `double.ToString()` does this since .NET Core 3.0, and so does C++17's `std::to_chars` when no precision is given.
+
 - <a id="c5"></a>**C5.** C's `%E` writes a nonzero value as $d.ddd \times 10^{k}$ with one nonzero digit before the point, while the normalised form $0.d_1 d_2 \ldots \times 10^{e}$ with $d_1 \neq 0$ has the point before the first digit; the two exponents are related by $e = k + 1$.
+
 - <a id="c6"></a>**C6.** `std::log10` cannot reliably give a `double`'s decimal exponent: the `double` written `1e23` is slightly less than $10^{23}$ (it prints as `9.9999999999999992E+22`), yet `std::log10` of it returns exactly 23.0. Reading the exponent from `%.16E` text gives the exponent of the printed 17-digit value.
+
 - <a id="c7"></a>**C7.** `-0.0` is a `double` with only the sign bit set: `-0.0 == 0.0` is true and `-0.0 < 0.0` is false, but `std::signbit(-0.0)` is true and `printf("%f", -0.0)` prints `-0.000000`.
+
 - <a id="c8"></a>**C8.** Fortran's list-directed output (`write(unit, *) x`) leaves the layout to the compiler. gfortran 13.3 on x86-64 writes a `double` with 17 significant digits in a field of 26 columns: plain decimal with $17 - e$ decimals when $0 \le e \le 17$, otherwise exponent notation with a three-digit exponent such as `8.6988206403525968E-003`.
 
 ## Explanation
@@ -153,9 +164,13 @@ decimals: 17 − e     →  15      →  13.354993539365465
 ## Pitfalls
 
 - Printing with 15 or 16 digits and expecting to read back the same `double` ([C2](#c2)).
+
 - Reading 17 printed digits as the exact value. They identify the `double`; its exact decimal expansion is longer ([C3](#c3)).
+
 - Computing a decimal exponent with `floor(log10(x))` near a power of ten ([C6](#c6)).
+
 - Testing the sign with `x < 0` when `-0.0` must print as negative ([C7](#c7)).
+
 - Mixing up $d.ddd \times 10^{k}$ and $0.ddd \times 10^{e}$ and getting the exponent off by one ([C5](#c5)).
 
 ## Exercises
