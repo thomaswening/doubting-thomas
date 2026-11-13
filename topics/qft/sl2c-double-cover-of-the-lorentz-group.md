@@ -14,9 +14,13 @@ tags: [lorentz-group, sl2c, su2, double-cover, spinors, spinor-helicity]
 ## TL;DR
 
 - **A four-vector is a Hermitian 2×2 matrix.** Write $`x = (x^0, \mathbf{x})`$ as $`X = x^0 I + \mathbf{x} \cdot \boldsymbol{\sigma}`$. Then $`\det X = (x^0)^2 - |\mathbf{x}|^2`$ is the Minkowski square of $x$.
+
 - **A complex 2×2 matrix with determinant 1 acts on it by $`X \mapsto A X A^\dagger`$.** The result is again Hermitian with the same determinant. So every $`A \in SL(2,\mathbb{C})`$ gives a Lorentz transformation $`\Lambda(A)`$.
+
 - **The map $`A \mapsto \Lambda(A)`$ respects multiplication, hits every proper orthochronous Lorentz transformation, and sends exactly $A$ and $-A$ to the same one.** So $`SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\}`$ as groups.
+
 - **Unitary $A$ give rotations, Hermitian $A$ give boosts.** $`e^{-i\theta\sigma_3/2}`$ rotates by $`\theta`$ about $z$. $`e^{\eta\sigma_3/2}`$ boosts along $z$ with rapidity $`\eta`$.
+
 - **The rotation by $`2\pi`$ is $-I$ in SL(2,ℂ).** It is the identity on four-vectors but flips the sign of anything on which $A$ acts directly. Those objects are spinors, the subject of the [next note](weyl-spinor-representations.md).
 
 ## Key claims
@@ -248,8 +252,11 @@ a column times its conjugate transpose. Under $A$, $`P \mapsto A P A^\dagger = (
 ## Pitfalls
 
 - **"SL(2,ℂ) is the Lorentz group."** It is not. It is twice as large: $A$ and $-A$ are different elements with the same Lorentz transformation ([C6](#c6)).
+
 - **"Unitary means Lorentz."** Only unitary $A$ give rotations ([C7](#c7)). Boosts come from Hermitian $A$, which are not unitary. This is why the spinor representations of the Lorentz group cannot be unitary, unlike those of the rotation group.
+
 - **Confusing $`A X A^\dagger`$ with $A X A^{-1}$.** For unitary $A$ they agree. For a boost they do not, and $A X A^{-1}$ would not keep $X$ Hermitian.
+
 - **Forgetting that $`\det(-A) = \det A`$ only in even dimension.** For 2×2 matrices it holds, which is why the kernel is $`\{\pm I\}`$ and not just $`\{I\}`$.
 
 ## Exercises

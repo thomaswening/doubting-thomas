@@ -14,9 +14,13 @@ tags: [lorentz-group, sl2c, weyl-spinors, chirality, parity, spinor-helicity]
 ## TL;DR
 
 - **SL(2,ℂ) acts on $`\mathbb{C}^2`$ in two inequivalent ways.** A left-handed Weyl spinor transforms as $`\psi \mapsto A\psi`$, a right-handed one as $`\chi \mapsto (A^\dagger)^{-1}\chi`$. They are the $`(\tfrac12, 0)`$ and $`(0, \tfrac12)`$ representations.
+
 - **Rotations can't tell them apart, boosts can.** For unitary $A$ the two rules agree. For a boost they scale the spinor in opposite directions.
+
 - **The antisymmetric product $`\psi^T \varepsilon \chi = \psi_1\chi_2 - \psi_2\chi_1`$ is Lorentz invariant**, because $`A^T \varepsilon A = \varepsilon`$ for $`\det A = 1`$. This is the future angle bracket $`\langle ij \rangle`$.
+
 - **Complex conjugation turns left into right**, up to $`\varepsilon`$. **Parity swaps them.** So QED, which respects parity, needs both: the Dirac spinor is a left-handed and a right-handed Weyl spinor stacked.
+
 - **A four-vector is one left-handed and one right-handed index.** A light-like vector is a single spinor times its conjugate, $`P = \lambda\lambda^\dagger`$. That is the starting point of spinor helicity.
 
 ## Key claims
@@ -246,8 +250,11 @@ This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is
 ## Pitfalls
 
 - **Pairing two left-handed spinors by $`\chi^\dagger\psi`$.** This product is not invariant: $`\chi^\dagger\psi \mapsto \chi^\dagger A^\dagger A\psi`$, and $`A^\dagger A \ne I`$ for a boost. The invariant pairings are $`\psi^T\varepsilon\phi`$ for two of the same kind ([C2](#c2)) and $`\chi^\dagger\psi`$ for one of each kind ([C1](#c1)).
+
 - **"Left and right differ by a rotation of basis."** They don't: no change of basis turns one into the other ([C4](#c4)). Only complex conjugation does ([C3](#c3)), which is not a linear change of basis.
+
 - **Sign conventions for $`\varepsilon`$.** Books differ on whether $`\varepsilon^{12}`$ or $`\varepsilon_{12}`$ is $+1$, and on whether indices are contracted with the first or second index of $`\varepsilon`$. Srednicki sets $`\varepsilon^{12} = \varepsilon_{21} = +1`$ and contracts with the second index (eq. 35.1). This note uses the matrix $`\varepsilon`$ only and avoids index positions. Spinor-helicity signs such as $`\langle ij\rangle[ji] = \pm s_{ij}`$ trace back to this choice.
+
 - **$`\mathbf{N}`$ and $`\mathbf{N}^\dagger`$ are not Hermitian conjugates of each other as matrices in a given representation.** In $`\rho_L`$, $`\mathbf{N} = \boldsymbol{\sigma}/2`$ but $`\mathbf{N}^\dagger = 0`$. The names refer to the operators in a unitary representation of the full theory, where boosts are Hermitian. On finite-dimensional spinors, the boost generators $`\pm i\boldsymbol{\sigma}/2`$ are anti-Hermitian.
 
 ## Exercises
