@@ -22,12 +22,19 @@ tags: [c, plugin, interface, vtable, com, abi, versioning, callbacks]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A struct whose fields are function pointers lets code call functions chosen at run time by whoever filled the struct; the caller needs neither the functions' names nor a link to the code behind them, much as code calling a C# interface needs no knowledge of the implementing class.
+
 - <a id="c2"></a>**C2.** A plug-in loaded at run time typically exports a single entry function, which the host finds by name (`GetProcAddress` on Windows, `dlsym` elsewhere); the host passes it a table of the host's services, and it returns a table, or a description containing one, of what the plug-in provides.
+
 - <a id="c3"></a>**C3.** Functions in such a table usually take a handle or context pointer as a parameter, to say which object they act on; the handle plays the role of `this`.
+
 - <a id="c4"></a>**C4.** To extend a table without breaking plug-ins already compiled against it, new fields are added only at the end, never inserted or reordered, and the table records its size or version so that code compiled against a newer header can check whether a field exists before calling it.
+
 - <a id="c5"></a>**C5.** Calling a null function pointer is undefined behaviour, so a table with optional entries must document which may be null, and callers must check those entries before calling them.
+
 - <a id="c6"></a>**C6.** C++ compilers commonly implement virtual functions with a table of function pointers per class (the vtable) and a hidden pointer to it in each object; the C++ standard does not specify this layout, which is one reason C++ classes do not form a stable boundary between compilers, while a C struct of function pointers does.
+
 - <a id="c7"></a>**C7.** A COM interface pointer points to an object whose first field points to a table of function pointers with a fixed layout, beginning with `QueryInterface`, `AddRef` and `Release`; because that layout is defined at the binary level, COM objects can be used across compilers and languages, .NET included.
+
 - <a id="c8"></a>**C8.** A function that other code reaches only through a table of function pointers can be declared `static` (internal linkage), because the caller gets its address from the table, not by name; only the plug-in's entry function must be visible by name.
 
 ## Explanation

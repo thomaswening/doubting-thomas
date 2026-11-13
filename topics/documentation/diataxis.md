@@ -22,12 +22,19 @@ tags: [diataxis, user-documentation, tutorials, how-to, reference, explanation]
 ## Key claims
 
 - <a id="c1"></a>**C1.** Diátaxis divides user documentation into four kinds: tutorials, how-to guides, reference and explanation.
+
 - <a id="c2"></a>**C2.** The four kinds come from two distinctions: action versus cognition (doing versus knowing), and acquisition versus application (learning versus working).
+
 - <a id="c3"></a>**C3.** A tutorial is action for acquisition, a how-to guide action for application, reference cognition for application, explanation cognition for acquisition.
+
 - <a id="c4"></a>**C4.** A tutorial is a lesson. The author chooses the path and guarantees it works. The reader learns by doing it, not by being told about every alternative.
+
 - <a id="c5"></a>**C5.** A how-to guide assumes the reader already knows what they want to achieve. It gives the steps towards one goal and leaves teaching to the tutorials.
+
 - <a id="c6"></a>**C6.** Reference describes the product accurately and completely, structured like the product itself, e.g. one entry per function. It describes and does not instruct or explain.
+
 - <a id="c7"></a>**C7.** Explanation answers "why": background, design reasons and alternatives. It is the only kind that is read away from the product rather than while using it.
+
 - <a id="c8"></a>**C8.** Content of one kind placed in a document of another kind serves neither reader. The fix is to move it into a document of its own kind and link to it.
 
 ## Explanation

@@ -24,13 +24,21 @@ tags: [cpp, linkage, translation-unit, static, unnamed-namespace, storage-durati
 ## Key claims
 
 - <a id="c1"></a>**C1.** A translation unit is a source file after preprocessing, with the contents of every `#include` inserted; the compiler compiles each translation unit separately, and the linker combines the results into one program.
+
 - <a id="c2"></a>**C2.** A name with external linkage refers to the same entity in every translation unit; functions and non-`const` variables declared at namespace scope have external linkage by default, so two translation units that both define the same such function cause a multiple-definition error at link time.
+
 - <a id="c3"></a>**C3.** Everything declared in an unnamed namespace, `namespace { … }`, has internal linkage: it is visible only in its own translation unit, and another translation unit may define something with the same name without a clash. Declaring a namespace-scope function or variable `static` has the same effect, but works only for functions and variables, not for types.
+
 - <a id="c4"></a>**C4.** In C++, a namespace-scope variable declared `const` or `constexpr`, and not `inline` or `extern`, has internal linkage by default; in C, a `const` variable at file scope has external linkage.
+
 - <a id="c5"></a>**C5.** A namespace-scope `static` variable defined in a header is a separate object in every translation unit that includes the header, so a change made in one file is not seen in another; an `inline` variable (C++17), such as `inline int shared = 0;`, is a single object for the whole program.
+
 - <a id="c6"></a>**C6.** A local variable declared `static` has static storage duration: it is initialised the first time control passes through its declaration, keeps its value between calls, and is destroyed when the program ends. Since C++11 that initialisation is thread-safe.
+
 - <a id="c7"></a>**C7.** Linkage and storage duration are independent: a `static` local has static storage duration but no linkage, a variable in an unnamed namespace has static storage duration and internal linkage, and an ordinary local has automatic storage duration and no linkage.
+
 - <a id="c8"></a>**C8.** A `static` data member or member function of a class belongs to the class, not to any object, like a `static` member in C#.
+
 - <a id="c9"></a>**C9.** An unnamed namespace behaves like a namespace with a unique name plus a `using` directive for it in the enclosing namespace. So an unnamed namespace inside `namespace pf` gives the same internal linkage as one at global scope, but its names are found as if declared in `pf`: code in `pf` finds them before any global function of the same name, and the helpers use `pf`'s names without `pf::`. At global scope, a helper with the same name and parameters as a global function makes an unqualified call ambiguous.
 
 ## Explanation

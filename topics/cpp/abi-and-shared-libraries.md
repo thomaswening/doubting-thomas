@@ -22,11 +22,17 @@ tags: [cpp, c, abi, linking, dll, shared-library, static-library, extern-c, pinv
 ## Key claims
 
 - <a id="c1"></a>**C1.** A static library is an archive of compiled object files; at link time the linker copies the code the program needs into the executable, so the library file is not needed to run the program.
+
 - <a id="c2"></a>**C2.** A shared library is loaded when the program starts or on request at run time (`LoadLibrary` on Windows, `dlopen` on Linux and macOS), and the program needs the file to be present when it runs.
+
 - <a id="c3"></a>**C3.** An ABI (application binary interface) is the contract between separately compiled code at the machine level: calling convention, the names of symbols (name mangling), the size and layout of types, and how exceptions propagate.
+
 - <a id="c4"></a>**C4.** The C++ standard does not define an ABI. Different compilers, or different standard libraries, may lay out classes and standard types differently and mangle names differently, so C++ types passed between binaries built with different toolchains or settings can break; MSVC's Debug and Release builds of `std::vector` and `std::string`, for example, differ in layout.
+
 - <a id="c5"></a>**C5.** Each platform has one C ABI that its compilers follow for C functions and C types, so a function declared `extern "C"` and using only C types can be called across compilers.
+
 - <a id="c6"></a>**C6.** `extern "C"` in C++ gives a function C linkage: its symbol is not name-mangled, so a C program, another compiler, or .NET's P/Invoke can find and call it by its plain name.
+
 - <a id="c7"></a>**C7.** A .NET assembly contains IL and metadata describing its types (any pre-compiled native code, as in ReadyToRun images, comes alongside the IL rather than replacing it), and the runtime decides type layout and compiles IL on the target machine, so assemblies can be used across .NET languages and compilers without an ABI problem of the C++ kind.
 
 ## Explanation

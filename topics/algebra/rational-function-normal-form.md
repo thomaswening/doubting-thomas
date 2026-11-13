@@ -21,12 +21,19 @@ tags: [rational-functions, gcd, canonical-form, computer-algebra]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A rational function is a quotient $p/q$ of polynomials with $q \ne 0$. Two of them are equal, $p/q = r/s$, if and only if $ps = qr$ as polynomials.
+
 - <a id="c2"></a>**C2.** Multiplying numerator and denominator by the same non-zero polynomial gives the same rational function, so every rational function has infinitely many representations, and comparing representations character by character does not decide equality.
+
 - <a id="c3"></a>**C3.** Dividing $p$ and $q$ by $\gcd(p, q)$ gives a reduced fraction. Over the rationals, the reduced fraction is unique up to multiplying numerator and denominator by the same non-zero constant.
+
 - <a id="c4"></a>**C4.** Requiring, in addition, that the denominator be primitive with a positive leading coefficient in a fixed monomial order makes the representation unique: a normal form. The numerator then carries any rational constants, for example $\dfrac{2x + 2}{-4y} = \dfrac{-\tfrac12 x - \tfrac12}{y}$.
+
 - <a id="c5"></a>**C5.** A common factor can be invisible in the expanded form: $\dfrac{x^2 - 1}{x^2 + 2x + 1}$ reduces to $\dfrac{x - 1}{x + 1}$, which only a polynomial GCD finds.
+
 - <a id="c6"></a>**C6.** In normal form, two rational functions are equal if and only if their numerators and their denominators are identical, and a rational function is zero if and only if its numerator is the zero polynomial.
+
 - <a id="c7"></a>**C7.** Cancelling a common factor changes where the expression is defined but not the rational function: $\dfrac{x^2 - 1}{x - 1}$ and $x + 1$ are equal as rational functions, although the first expression can't be evaluated at $x = 1$.
+
 - <a id="c8"></a>**C8.** Adding fractions without reducing makes them grow: $\frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$ multiplies the denominators every time, so a long sum is normalised step by step, or put over the least common multiple of the denominators.
 
 ## Explanation

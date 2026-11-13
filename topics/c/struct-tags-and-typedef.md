@@ -22,10 +22,15 @@ tags: [c, struct, typedef, incomplete-type, forward-declaration]
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C, `struct point { int x, y; };` declares a type whose name is `struct point`; a later declaration `point p;` is an error unless a typedef named `point` exists.
+
 - <a id="c2"></a>**C2.** `typedef struct point point;` makes the identifier `point` an alias for the type `struct point`; it does not create a new, distinct type.
+
 - <a id="c3"></a>**C3.** C keeps struct, union and enum tags in a name space separate from ordinary identifiers (variables, functions, typedef names), so a tag and a typedef may have the same spelling without conflict.
+
 - <a id="c4"></a>**C4.** In C++, the name of a class or struct is usable as a type name without the `struct` keyword, and a `typedef struct point point;` that names the same type is allowed, so a header using this idiom compiles as both C and C++.
+
 - <a id="c5"></a>**C5.** A struct declared without a body, as in `struct x;` or `typedef struct x x;`, is an incomplete type: code may declare and pass pointers to it, but may not create an object of it, access its members, or apply `sizeof` to it.
+
 - <a id="c6"></a>**C6.** An anonymous struct given a name only by typedef, `typedef struct { int x, y; } point;`, has no tag, so it cannot be forward-declared and cannot contain a pointer to its own type by name.
 
 ## Explanation

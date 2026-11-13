@@ -21,12 +21,19 @@ tags: [polynomials, factorisation, irreducibility, computer-algebra]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A non-constant polynomial $p$ is irreducible over a field $K$ if $p = ab$ with $a, b$ having coefficients in $K$ implies that $a$ or $b$ is a constant.
+
 - <a id="c2"></a>**C2.** Irreducibility depends on the field: $x^2 - 2$ is irreducible over $\mathbb{Q}$ but equals $(x - \sqrt2)(x + \sqrt2)$ over $\mathbb{R}$; $x^2 + 1$ is irreducible over $\mathbb{R}$ but equals $(x - i)(x + i)$ over $\mathbb{C}$.
+
 - <a id="c3"></a>**C3.** Every non-constant polynomial in any number of variables with rational coefficients is a product of irreducible polynomials, and this factorisation is unique up to the order of the factors and multiplying factors by non-zero constants.
+
 - <a id="c4"></a>**C4.** Every polynomial of degree 1 is irreducible. A polynomial of degree 2 or 3 in one variable is reducible over $\mathbb{Q}$ if and only if it has a rational root.
+
 - <a id="c5"></a>**C5.** Rational root test: if $p/q$ in lowest terms is a root of $a_n x^n + \dots + a_1 x + a_0$ with integer coefficients, then $p$ divides $a_0$ and $q$ divides $a_n$.
+
 - <a id="c6"></a>**C6.** By Gauss's lemma, a primitive polynomial with integer coefficients is irreducible over $\mathbb{Q}$ if and only if it can't be split into two non-constant factors with integer coefficients. So factoring over $\mathbb{Q}$ reduces to factoring the primitive part over $\mathbb{Z}$.
+
 - <a id="c7"></a>**C7.** Checking that the product of the factors equals the input proves the factorisation is correct, but not that each factor is irreducible: $(x^2 - 1)(x + 2)$ multiplies back to $x^3 + 2x^2 - x - 2$, yet $x^2 - 1 = (x - 1)(x + 1)$ splits further.
+
 - <a id="c8"></a>**C8.** In several variables, $x^2 - y^2 = (x - y)(x + y)$ is reducible over $\mathbb{Q}$, while $x^2 + y^2$ is irreducible over $\mathbb{Q}$ and $\mathbb{R}$ and only splits over $\mathbb{C}$, as $(x + iy)(x - iy)$.
 
 ## Explanation

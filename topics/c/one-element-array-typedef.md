@@ -22,9 +22,13 @@ tags: [c, cpp, array, pointer, typedef, decay, parameter, gmp, flint]
 ## Key claims
 
 - <a id="c1"></a>**C1.** With `typedef S name_t[1];`, as GMP and FLINT define their `_t` types, a variable or struct member of type `name_t` is an array object that holds one `S` inline, with no separate allocation, while a parameter of type `name_t` is an `S*`; callers therefore pass such a variable without `&`, and the function works on the caller's object.
+
 - <a id="c2"></a>**C2.** Because a parameter of type `name_t` from [C1](#c1) is an `S*`, it can be stored in a variable or member of type `S*`, which keeps only the address; it cannot initialise a variable or member of type `name_t`, because an array can only be initialised from a brace-enclosed list (or, for a character array, a string literal). C does not dereference the pointer to copy the `S` implicitly either.
+
 - <a id="c3"></a>**C3.** A pointer typedef such as `typedef S* name_t;` would also let callers pass without `&`, but a variable of that type holds only an address and creates no `S`; before it is dereferenced it must point to an `S` with storage of its own, which may be automatic, static or allocated (for instance from `malloc`). The one-element array of [C1](#c1) gives the `S` its storage in the variable itself, and still passes a pointer at every call.
+
 - <a id="c4"></a>**C4.** In FLINT, `fmpz_mpoly_ctx_struct` and `fmpz_mpoly_struct` are typedef names for struct types and are written without the `struct` keyword; `fmpz_mpoly_ctx_t` (the context) and `fmpz_mpoly_t` (a polynomial) are two different types, each an array of one of its own struct, built by the same idiom.
+
 - <a id="c5"></a>**C5.** Defining a GMP or FLINT `_t` variable reserves storage for its struct but initialises nothing: the library's init function, such as `mpz_init`, must run before first use, and its clear function, such as `mpz_clear`, after last use. The clear function frees the memory the library attached to the struct, not the struct itself.
 
 ## Explanation

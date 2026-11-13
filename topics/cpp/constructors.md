@@ -23,14 +23,23 @@ tags: [cpp, constructor, explicit, conversion, initialiser-list, default, delete
 ## Key claims
 
 - <a id="c1"></a>**C1.** A constructor that can be called with a single argument and is not marked `explicit` is a converting constructor: the compiler uses it on its own to turn a value of the argument's type into the class type, for example when passing `2.5` to a parameter of class type, though it applies at most one such user-defined conversion in a row.
+
 - <a id="c2"></a>**C2.** On a constructor callable with one argument, `explicit` forbids its use as an implicit conversion, so the object must be created visibly, as in `Meters(3.0)` or `static_cast<Meters>(3.0)`. On a constructor that needs two or more arguments, `explicit` only forbids copy-list-initialisation such as `Point p = {1, 2};` or `f({1, 2})`.
+
 - <a id="c3"></a>**C3.** C# never converts a value implicitly through a constructor; user-defined conversions exist only where the type declares `implicit operator` or `explicit operator`. A non-`explicit` one-argument C++ constructor plays the role of a C# `implicit operator`, and a C++ `explicit operator T()` corresponds to a C# `explicit operator` that needs a cast.
+
 - <a id="c4"></a>**C4.** The member initialiser list initialises each member it names before the constructor body runs. A member it does not name, and that has no default member initialiser (`int n = 0;`), is default-initialised: a class-type member by its default constructor, a built-in member such as `int` or a pointer left with an indeterminate value.
+
 - <a id="c5"></a>**C5.** Members are initialised in the order of their declaration in the class, after the base classes, regardless of the order in the member initialiser list, and are destroyed in the reverse order.
+
 - <a id="c6"></a>**C6.** A `const` member, a reference member, and a member whose type has no default constructor must be initialised in the member initialiser list or by a default member initialiser; assigning to them in the constructor body does not compile. A C# `readonly` field, by contrast, may be assigned in the constructor body.
+
 - <a id="c7"></a>**C7.** The compiler declares a default constructor implicitly only for a class that declares no constructors; declaring any constructor removes it, and `T() = default;` brings it back.
+
 - <a id="c8"></a>**C8.** `= delete` can be applied to any function, constructors and copy operations included; the deleted function still takes part in overload resolution, and a call that selects it is a compile error.
+
 - <a id="c9"></a>**C9.** A delegating constructor names another constructor of the same class as the only entry of its member initialiser list, as in `Point() : Point(0, 0) {}`; the target constructor runs completely, then the delegating constructor's body runs.
+
 - <a id="c10"></a>**C10.** `T b = a;` and `T b(a);` initialise a new object and call a constructor, although the first is written with `=`; `b = a;` on an object that already exists calls the assignment operator `operator=`.
 
 ## Explanation

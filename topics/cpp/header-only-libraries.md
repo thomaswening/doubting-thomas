@@ -22,10 +22,15 @@ tags: [cpp, header-only, inline, odr, templates, abi]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A header-only library provides all of its code in headers, so using it needs only an `#include`; there is no separate library file to build or link.
+
 - <a id="c2"></a>**C2.** Code from a header-only library is compiled into the user's own binary by the user's compiler and settings, so no binary interface exists between the library and the user's code, and the library cannot cause an ABI mismatch with it.
+
 - <a id="c3"></a>**C3.** A function that is not `inline`, defined in a header included by two source files of one program, is defined twice, and the link fails with a multiple-definition error; marking it `inline` allows one identical definition per source file.
+
 - <a id="c4"></a>**C4.** Member functions defined inside a class body are implicitly `inline`, and function templates may be defined in headers without `inline`; templates generally must be, because the compiler needs their definition wherever they are used.
+
 - <a id="c5"></a>**C5.** Header-only libraries cost compile time, since every source file that includes them compiles their code again, and any change to them recompiles every including file.
+
 - <a id="c6"></a>**C6.** Distributing a library as source the user compiles, whether headers or `.cpp` files, avoids the ABI problem; distributing it pre-compiled reintroduces it unless its interface is restricted to C.
 
 ## Explanation

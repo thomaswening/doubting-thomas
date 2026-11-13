@@ -22,12 +22,19 @@ tags: [c, cpp, array, pointer, declarator, multidimensional-array, const]
 ## Key claims
 
 - <a id="c1"></a>**C1.** For an array `int arr[4]`, `arr` used in an expression is an `int*` to the first element, while `&arr` is an `int (*)[4]`, a pointer to the whole array; both hold the same address but have different types.
+
 - <a id="c2"></a>**C2.** `int (*p)[4]` declares `p` as a pointer to an array of four `int`, while `int *q[4]` declares `q` as an array of four pointers to `int`, because in a declarator `[]` binds tighter than `*` unless parentheses group the `*` with the name first.
+
 - <a id="c3"></a>**C3.** Adding 1 to a pointer moves it by the size of the type it points to: for `int arr[4]` with 4-byte `int`, `arr + 1` lies 4 bytes past `arr`, while `&arr + 1` lies 16 bytes past it.
+
 - <a id="c4"></a>**C4.** Only the outermost array level of a parameter is adjusted: a parameter declared `int m[3][4]` has type `int (*)[4]`, a pointer to arrays of four `int`.
+
 - <a id="c5"></a>**C5.** A multidimensional array such as `int m[3][4]` is an array of three arrays of four `int`, stored contiguously row after row (row-major order), so `m[i][j]` lies `(i * 4 + j) * sizeof(int)` bytes from the start.
+
 - <a id="c6"></a>**C6.** A function taking `int (*m)[4]` knows the row length but not the number of rows, which must be passed separately; a parameter of type `int (*m)[3][4]` keeps both lengths but accepts only arrays of exactly three rows of four.
+
 - <a id="c7"></a>**C7.** Passing an `int m[3][4]` where an `int**` is expected is a constraint violation in C and an error in C++: `m` contains no pointers, and the decayed `int (*)[4]` is a different type from `int**`. GCC 14 and later reject it in C by default; GCC 13 and Clang 18 only warn, and the resulting program reads `int` values as addresses.
+
 - <a id="c8"></a>**C8.** A `const` qualifier applied to an array type qualifies its elements, so with `typedef S name_t[1];` a parameter declared `const name_t a` is adjusted to `const S *a`, a pointer through which the caller's `S` can be read but not changed.
 
 ## Explanation

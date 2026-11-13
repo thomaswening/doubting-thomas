@@ -23,11 +23,17 @@ tags: [cpp, reference, pointer, const-reference, ref, in, dangling]
 ## Key claims
 
 - <a id="c1"></a>**C1.** A reference must be initialised when it is declared and refers to that same object for its whole life; assigning to a reference assigns to the object it refers to and never makes the reference refer to another object.
+
 - <a id="c2"></a>**C2.** A valid reference always refers to an object, while a pointer may be null (`nullptr`); a parameter that must receive an object is therefore declared as a reference, and a pointer is used where "no object" is a meaningful value.
+
 - <a id="c3"></a>**C3.** Passing an argument by `const T&` neither copies it nor allows the function to modify it; a `const T&` parameter also accepts temporaries, such as a string literal passed to a `const std::string&`.
+
 - <a id="c4"></a>**C4.** A non-const reference `T&` cannot bind to a temporary: with `void shout(std::string& s);`, the call `shout("hello")` does not compile.
+
 - <a id="c5"></a>**C5.** A reference does not keep its object alive: a reference to a local variable returned from a function, or a reference to a member of an object that is later destroyed, dangles, and using it is undefined behaviour.
+
 - <a id="c6"></a>**C6.** As parameters, C++'s `T&` corresponds to C#'s `ref T`, and `const T&` to C#'s `in T`; a `const auto&` local bound to a member corresponds to a C# `ref readonly` local.
+
 - <a id="c7"></a>**C7.** `auto` deduces a type without its reference and top-level `const`, so `auto x = f();` makes a copy even if `f` returns a reference; `const auto& x = f();` refers to the returned object without copying it.
 
 ## Explanation

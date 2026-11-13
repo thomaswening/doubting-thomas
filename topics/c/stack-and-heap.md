@@ -22,11 +22,17 @@ tags: [c, cpp, memory, malloc, free, raii, destructor, garbage-collection]
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C, an object declared inside a block without `static` (automatic storage, usually on the stack) is destroyed automatically when the block is left; this includes structs and arrays held by value.
+
 - <a id="c2"></a>**C2.** Memory obtained from `malloc`, `calloc` or `realloc` stays allocated until it is passed to `free`; C has no garbage collector and never frees it on its own.
+
 - <a id="c3"></a>**C3.** Heap memory that is no longer reachable and was never freed is a memory leak; calling `free` twice on the same pointer, or reading or writing memory after it was freed, is undefined behaviour.
+
 - <a id="c4"></a>**C4.** When a pointer variable goes out of scope, only the pointer is destroyed; the heap memory it pointed to remains allocated.
+
 - <a id="c5"></a>**C5.** Returning a pointer to a function's local variable gives a dangling pointer, because the local is destroyed when the function returns.
+
 - <a id="c6"></a>**C6.** In C++, an object's destructor runs automatically and deterministically when the object goes out of scope, including when the scope is left by an exception, so a class that frees its resource in its destructor cannot leak it (RAII).
+
 - <a id="c7"></a>**C7.** The .NET garbage collector frees managed heap memory at an unspecified time after it becomes unreachable, whereas a C++ destructor runs at a known point, the end of the owner's scope; .NET's `using` and `Dispose` give deterministic release for non-memory resources only when the code asks for it.
 
 ## Explanation
