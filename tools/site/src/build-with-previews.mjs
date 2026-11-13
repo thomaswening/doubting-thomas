@@ -4,11 +4,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
-import { buildSite, DEFAULT_OUTPUT_FOLDER, reportMathErrors, REPOSITORY_ROOT } from "./build.mjs";
+import { buildSite, DEFAULT_OUTPUT_FOLDER, reportMathErrors } from "./build.mjs";
 import { PREVIEW_FOLDER, TOPICS_FOLDER } from "./links.mjs";
+import { openPullRequestNumbers, run } from "./pull-requests.mjs";
 
-const OPEN_PULL_REQUEST_LIMIT = "100";
 const EXIT_MATH_ERRORS = 1;
 
 function main() {
@@ -16,14 +15,6 @@ function main() {
   reportMathErrors(mainErrors);
   for (const number of openPullRequestNumbers()) buildPreview(number);
   return mainErrors.length === 0 ? 0 : EXIT_MATH_ERRORS;
-}
-
-/** Open pull requests from branches of this repository; forks get no preview. */
-function openPullRequestNumbers() {
-  const listing = run("gh", ["pr", "list", "--state", "open", "--limit", OPEN_PULL_REQUEST_LIMIT, "--json", "number,isCrossRepository"]);
-  return JSON.parse(listing)
-    .filter((pullRequest) => !pullRequest.isCrossRepository)
-    .map((pullRequest) => pullRequest.number);
 }
 
 /**
@@ -44,10 +35,6 @@ function buildPreview(number) {
   } finally {
     run("git", ["worktree", "remove", "--force", checkoutFolder]);
   }
-}
-
-function run(command, commandArguments) {
-  return execFileSync(command, commandArguments, { cwd: REPOSITORY_ROOT, encoding: "utf8" });
 }
 
 process.exitCode = main();

@@ -14,7 +14,7 @@ The site adds what GitHub's layout cannot give:
 
 Notes are read before they are merged, so every open pull request gets its own copy of the site: `…/doubting-thomas/pr/<number>/`, for example `pr/43/qft/weyl-spinor-representations.html`. A banner on each preview page says that it is not merged and links the pull request. Search engines are asked not to index previews.
 
-At the top of each pull request's description, the workflow keeps a section **Read on the site**. It links the preview page of every note the pull request adds or changes, plus the preview's home page. The section sits between two HTML comments. The workflow rewrites everything between them on every push, so don't edit inside it.
+At the top of each pull request's description, the workflow keeps a section **Read on the site**. It links the preview page of every note the pull request adds or changes, plus the preview's home page. The section sits between two HTML comments. The workflow writes it on every push to the pull request and after every publish of the site, so every open pull request has it, even one nobody has pushed to lately. Everything between the comments is overwritten each time, so don't edit inside it.
 
 A preview is built from the pull request's notes with `main`'s build code. A pull request that changes the build code therefore shows its notes with the old code until it is merged. A closed or merged pull request's preview disappears with the next build. Pull requests from forks get no preview.
 
@@ -31,6 +31,7 @@ flowchart LR
   push["push to main"] --> publish["job publish<br/>main + every open pull request"]
   manual["Run workflow<br/>(by hand)"] --> publish
   publish --> deploy["job deploy<br/>GitHub Pages"]
+  deploy --> describeAll["job describe-all<br/>links in every open<br/>pull request's description"]
 ```
 
 | Job | Runs on | What a failure blocks |
@@ -39,6 +40,7 @@ flowchart LR
 | `describe` | a pull request, unless closed | nothing: the description keeps its old links |
 | `request-publish` | a pull request, also when closed | nothing: the previews stay as they were until the next publish |
 | `publish`, `deploy` | `main`: a push, a request from a pull request, or by hand | nothing new is published: the site keeps showing the last good version |
+| `describe-all` | after each `deploy` | nothing: descriptions keep their old links until the next publish or push |
 
 `check` builds with the pull request's own code, so a change to the build code is tested before it is merged. `publish` uses `main`'s code for `main` and for every preview.
 
@@ -90,7 +92,7 @@ Open the failed run (*Details* next to the check) and the step that is red.
 - **Step "Build"**: each `error:` line names the note and the formula. Fix the formula in the note. Check that GitHub still renders it, because the note must work on both.
 - **Step "Test"**: the failing test's name says which behaviour broke. Undo or fix the change in `src/`.
 - **Step "npm ci"**: `package-lock.json` does not match `package.json`. Run `npm install` locally and commit both files.
-- **Job "describe"**: the token could not read the pull request or edit its description. The log names the `gh api` call that failed. Check that the job's `permissions` in `site.yml` still grant `pull-requests: write`.
+- **Job "describe" or "describe-all"**: the token could not read the pull request or edit its description. The log names the `gh api` call that failed. Check that the job's `permissions` in `site.yml` still grant `pull-requests: write`.
 - **Job "request-publish"**: GitHub refused to start the workflow on `main`. Run it by hand (*Actions → site → Run workflow*). As long as the workflow file is not on `main` yet, the job only prints a notice and stays green.
 - **Job "publish", step "Build main and the previews"**: an `error:` line is a formula in `main` (Rule 1). A failed `git fetch` or `gh pr list` means the pull requests could not be read. Run the job again first.
 - **Job "deploy"**: GitHub Pages is not set up, or not available for the repository. See "Setting up GitHub Pages" below.
@@ -122,7 +124,8 @@ This is needed once, by the repository's owner: *Settings → Pages → Build an
 | [src/build.mjs](src/build.mjs) | builds one site: reads every note, writes its page, copies the assets. With `--preview <number>`, a pull request's preview. |
 | [src/build-with-previews.mjs](src/build-with-previews.mjs) | the `publish` job's build: `main`, then each open pull request into `pr/<number>/` |
 | [src/pull-request-description.mjs](src/pull-request-description.mjs) | the "Read on the site" section and where it goes in a description |
-| [src/update-description.mjs](src/update-description.mjs) | the `describe` job's script around it |
+| [src/describe-pull-requests.mjs](src/describe-pull-requests.mjs) | the script of the `describe` and `describe-all` jobs: writes the section into one or every open pull request's description. `--dry-run` only says what it would change. |
+| [src/pull-requests.mjs](src/pull-requests.mjs) | lists the open pull requests, for the previews and the descriptions |
 | [src/markdown.mjs](src/markdown.mjs) | Markdown to HTML: maths, boxes, folded blocks, heading anchors |
 | [src/links.mjs](src/links.mjs) | how links between notes are rewritten |
 | [template.html](template.html) | the page around each note: the bar, the panels, the column |
