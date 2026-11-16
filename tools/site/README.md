@@ -79,9 +79,12 @@ The site follows the conventions of [AGENTS.md](../../AGENTS.md). A note written
 | `<details><summary>Proof</summary>` or `Solution` | a folded block with an arrow |
 | the list under `## Key claims` | claims with C1, C2, … in the margin |
 | a ` ```mermaid ` block | a diagram, redrawn when the theme changes |
+| a `<picture>` with a light and a dark SVG from `figures/` | the dark SVG under the themes dark and night, the light one under paper, switched along with the theme |
 | a link to another note, `x.md#c3` | a link to its page, `x.html#c3` |
 | a link out of `topics/`, such as `../../AGENTS.md` | a link to the file on GitHub |
 | headings | the same anchors as on GitHub, so `#key-claims` works on both |
+
+A note's figures sit in a `figures/` folder next to it. The build copies every file in a `figures/` folder to the same path on the site, so `figures/x-light.svg` in a note finds its file there as it does on GitHub. A `<picture>` on its own follows only the operating system's dark mode. On the site, the reader's theme decides which version shows, also after a switch.
 
 Only `topics/` is published. `results/`, `backlog.md`, the templates and the rules stay on GitHub.
 
@@ -121,7 +124,7 @@ This is needed once, by the repository's owner: *Settings → Pages → Build an
 
 | File | What it is |
 |---|---|
-| [src/build.mjs](src/build.mjs) | builds one site: reads every note, writes its page, copies the assets. With `--preview <number>`, a pull request's preview. |
+| [src/build.mjs](src/build.mjs) | builds one site: reads every note, writes its page, copies the figures and the assets. With `--preview <number>`, a pull request's preview. |
 | [src/build-with-previews.mjs](src/build-with-previews.mjs) | the `publish` job's build: `main`, then each open pull request into `pr/<number>/` |
 | [src/pull-request-description.mjs](src/pull-request-description.mjs) | the "Read on the site" section and where it goes in a description |
 | [src/describe-pull-requests.mjs](src/describe-pull-requests.mjs) | the script of the `describe` and `describe-all` jobs: writes the section into one or every open pull request's description. `--dry-run` only says what it would change. |
@@ -130,5 +133,5 @@ This is needed once, by the repository's owner: *Settings → Pages → Build an
 | [src/links.mjs](src/links.mjs) | how links between notes are rewritten |
 | [template.html](template.html) | the page around each note: the bar, the panels, the column |
 | [assets/reader.css](assets/reader.css) | the look: themes, type, boxes |
-| [assets/reader.js](assets/reader.js) | the settings, the panels, full screen, fitting long equations, the diagrams |
+| [assets/reader.js](assets/reader.js) | the settings, the panels, full screen, fitting long equations, the diagrams, the figures' light or dark version |
 | [package.json](package.json) | the pinned dependencies: markdown-it, KaTeX, Mermaid and three fonts, all served from the site itself |

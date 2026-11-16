@@ -1,9 +1,10 @@
-// Display settings, contents panel, full screen and diagrams of the reading site.
+// Display settings, contents panel, full screen, diagrams and figures of the reading site.
 // Loaded in <head> so the saved theme applies before the first paint. Documented in ../README.md.
 (() => {
   const STORAGE_KEY = "doubting-thomas-reader-v1";
   const NARROW_SCREEN = "(max-width: 640px)";
   const DARK_THEMES = ["dark", "night"];
+  const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
   const SLIDERS = ["fontSize", "lineHeight", "textWidth", "equationSpace"];
   const SMALLEST_EQUATION_SCALE = 0.7; // below this, formulas get hard to read; they scroll instead
   const EQUATION_FIT_MARGIN = 0.98; // leaves room for the formula's own rounding
@@ -70,7 +71,7 @@
     showPreferences();
     fitEquations();
     savePreferences();
-    if (isThemeChange) drawDiagrams();
+    if (isThemeChange) showTheme();
   }
 
   // ---------- long equations ----------
@@ -98,7 +99,7 @@
 
   function isDarkTheme() {
     if (DARK_THEMES.includes(preferences.theme)) return true;
-    return preferences.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches;
+    return preferences.theme === "auto" && matchMedia(DARK_SCHEME_QUERY).matches;
   }
 
   /** Draws the Mermaid diagrams in the current theme, from the source kept in data-source. */
@@ -111,6 +112,27 @@
     }
     window.mermaid.initialize({ startOnLoad: false, theme: isDarkTheme() ? "dark" : "neutral" });
     window.mermaid.run({ nodes: diagrams }).catch(() => {});
+  }
+
+  // ---------- figures ----------
+
+  /** The <source> of each <picture> that holds a figure's dark version, found once: showFigures rewrites their media. */
+  let darkFigureSources = [];
+
+  function findDarkFigureSources() {
+    darkFigureSources = [...document.querySelectorAll("picture > source[media]")]
+      .filter((source) => source.media.includes("prefers-color-scheme: dark"));
+  }
+
+  /** Shows each figure's dark version under the dark and night themes, its light version under paper. */
+  function showFigures() {
+    const media = isDarkTheme() ? "all" : "not all";
+    for (const source of darkFigureSources) source.media = media;
+  }
+
+  function showTheme() {
+    drawDiagrams();
+    showFigures();
   }
 
   // ---------- panels, bar and full screen ----------
@@ -198,7 +220,8 @@
     setUpTuckingBar();
     setUpEquations();
     fitEquations();
-    drawDiagrams();
-    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawDiagrams);
+    findDarkFigureSources();
+    showTheme();
+    matchMedia(DARK_SCHEME_QUERY).addEventListener("change", showTheme);
   });
 })();
