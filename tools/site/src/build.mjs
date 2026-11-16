@@ -18,6 +18,7 @@ const OWN_ASSETS_FOLDER = path.join(SITE_FOLDER, "assets");
 const ASSETS_FOLDER_NAME = "assets";
 const SITE_NAME = "doubting-thomas";
 const INDEX_FILE = "index.md";
+const FIGURES_FOLDER_NAME = "figures";
 const MAIN_BRANCH = "main";
 const EXIT_MATH_ERRORS = 1;
 
@@ -50,8 +51,10 @@ export function buildSite({ topicsRoot = DEFAULT_TOPICS_ROOT, outputFolder = DEF
     assetsFromRoot: previewNumber === null ? `${ASSETS_FOLDER_NAME}/` : `../../${ASSETS_FOLDER_NAME}/`,
   };
   const mathErrors = notes.flatMap((note) => writePage(note, site));
+  const figures = findFigures(topicsRoot);
+  copyFigures(figures, topicsRoot, outputFolder);
   if (previewNumber === null) copyAssets(path.join(outputFolder, ASSETS_FOLDER_NAME));
-  console.log(`Built ${notes.length} pages into ${outputFolder}.`);
+  console.log(`Built ${notes.length} pages and copied ${figures.length} figures into ${outputFolder}.`);
   return mathErrors;
 }
 
@@ -82,6 +85,16 @@ function findNotes(topicsRoot) {
     .readdirSync(topicsRoot, { recursive: true })
     .filter((file) => file.endsWith(".md"))
     .map((file) => file.split(path.sep).join("/"))
+    .sort();
+}
+
+/** Every file in a figures/ folder under topics/, such as qft/figures/x-light.svg. */
+function findFigures(topicsRoot) {
+  return fs
+    .readdirSync(topicsRoot, { recursive: true })
+    .map((file) => file.split(path.sep).join("/"))
+    .filter((file) => file.split("/").slice(0, -1).includes(FIGURES_FOLDER_NAME))
+    .filter((file) => fs.statSync(path.join(topicsRoot, file)).isFile())
     .sort();
 }
 
@@ -187,7 +200,12 @@ function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-// ---------- assets ----------
+// ---------- figures and assets ----------
+
+/** Copies each figure to the same path next to the pages, where the notes' relative links expect it. */
+function copyFigures(figures, topicsRoot, outputFolder) {
+  for (const figure of figures) fs.cpSync(path.join(topicsRoot, figure), path.join(outputFolder, figure));
+}
 
 function copyAssets(assetsFolder) {
   fs.cpSync(OWN_ASSETS_FOLDER, assetsFolder, { recursive: true });
