@@ -2,7 +2,7 @@
 title: Left- and right-handed Weyl spinors
 area: qft
 created: 2026-11-12
-updated: 2026-11-13
+updated: 2026-11-16
 prerequisites: [qft/sl2c-double-cover-of-the-lorentz-group]
 related: []
 projects: []
@@ -27,13 +27,13 @@ tags: [lorentz-group, sl2c, weyl-spinors, chirality, parity, spinor-helicity]
 
 ## Key claims
 
-Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, four-vectors $x$ as Hermitian matrices $X(x)$, and $`\Lambda(A)`$ defined by $`X \mapsto AXA^\dagger`$. The antisymmetric matrix $`\varepsilon`$ is
+Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, the map $`\Phi : \mathbb{R}^{1,3} \to \mathrm{Herm}(2)`$ from four-vectors to Hermitian matrices, the action $`T_A(X) = AXA^\dagger`$, and the Lorentz transformation $`\Lambda(A) = \Phi^{-1} \circ T_A \circ \Phi`$. The antisymmetric matrix $`\varepsilon`$ is
 
 ```math
 \varepsilon = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix} .
 ```
 
-- <a id="c1"></a>**C1.** $`\rho_L(A) = A`$ and $`\rho_R(A) = (A^\dagger)^{-1}`$ are both representations of SL(2,ℂ) on $`\mathbb{C}^2`$. A **left-handed Weyl spinor** is a $`\psi \in \mathbb{C}^2`$ that transforms as $`\psi \mapsto A\psi`$. A **right-handed Weyl spinor** is a $`\chi \in \mathbb{C}^2`$ that transforms as $`\chi \mapsto (A^\dagger)^{-1}\chi`$. For unitary $A$, $`\rho_L(A) = \rho_R(A)`$.
+- <a id="c1"></a>**C1.** $`\rho_L(A) = A`$ and $`\rho_R(A) = (A^\dagger)^{-1}`$ are both representations of SL(2,ℂ) on $`\mathbb{C}^2`$, that is group homomorphisms $`\rho_L, \rho_R : SL(2,\mathbb{C}) \to GL(2,\mathbb{C})`$. A **left-handed Weyl spinor** is a $`\psi \in \mathbb{C}^2`$ that transforms as $`\psi \mapsto A\psi`$. A **right-handed Weyl spinor** is a $`\chi \in \mathbb{C}^2`$ that transforms as $`\chi \mapsto (A^\dagger)^{-1}\chi`$. For unitary $A$, $`\rho_L(A) = \rho_R(A)`$.
 
 - <a id="c2"></a>**C2.** For every complex 2×2 matrix $M$,
 
@@ -75,7 +75,7 @@ Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-doub
 
   Conjugating by parity exchanges $`\rho_L`$ and $`\rho_R`$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $`(\frac12, 0) \oplus (0, \frac12)`$.
 
-- <a id="c7"></a>**C7.** A Hermitian 2×2 matrix $`X \ne 0`$ has $`\det X = 0`$ if and only if $`X = \pm\lambda\lambda^\dagger`$ for some $`\lambda \in \mathbb{C}^2`$. The sign is $+$ exactly when $x^0 > 0$. So every future-pointing light-like vector is $`X(p) = \lambda\lambda^\dagger`$, with $`\lambda`$ fixed up to a phase. If $`\lambda`$ transforms as a left-handed spinor, $`\lambda \mapsto A\lambda`$, then the momentum transforms as a four-vector:
+- <a id="c7"></a>**C7.** A Hermitian 2×2 matrix $`X \ne 0`$ has $`\det X = 0`$ if and only if $`X = \pm\lambda\lambda^\dagger`$ for some $`\lambda \in \mathbb{C}^2`$. The sign is $+$ exactly when $x^0 > 0$. So every future-pointing light-like vector is $`\Phi(p) = \lambda\lambda^\dagger`$, with $`\lambda`$ fixed up to a phase. If $`\lambda`$ transforms as a left-handed spinor, $`\lambda \mapsto A\lambda`$, then the momentum transforms as a four-vector:
 
   $`\displaystyle \lambda\lambda^\dagger \mapsto A\lambda\lambda^\dagger A^\dagger.`$
 
@@ -285,17 +285,17 @@ It has three properties used below:
 
 $`\displaystyle \mathrm{adj}(MN) = \mathrm{adj}N\,\mathrm{adj}M , \qquad \mathrm{adj}M = M^{-1} \text{ if } \det M = 1 , \qquad \mathrm{adj}(M^\dagger) = (\mathrm{adj}M)^\dagger .`$
 
-For Hermitian $X = X(x)$:
+For Hermitian $`X = \Phi(x)`$:
 
-$`\displaystyle \mathrm{adj}X = 2x^0 I - X = x^0 I - \mathbf{x}\cdot\boldsymbol{\sigma} = X(Px) .`$
+$`\displaystyle \mathrm{adj}X = 2x^0 I - X = x^0 I - \mathbf{x}\cdot\boldsymbol{\sigma} = \Phi(Px) .`$
 
 Then
 
-$`\displaystyle X\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,X(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}X(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, X(x)\, A^{-1} .`$
+$`\displaystyle \Phi\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,\Phi(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}\Phi(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, \Phi(x)\, A^{-1} .`$
 
 With $`B = (A^\dagger)^{-1}`$, $`B^\dagger = A^{-1}`$, so the right-hand side is
 
-$`\displaystyle B X(x) B^\dagger = X(\Lambda(B)x) . \qquad ∎`$
+$`\displaystyle B \Phi(x) B^\dagger = \Phi(\Lambda(B)x) . \qquad ∎`$
 
 </details>
 
@@ -341,7 +341,7 @@ with the sign of $`\mu_1`$. Since $`\mathrm{tr}X = \mu_1 = 2x^0`$, the sign is t
 
 </details>
 
-This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is $`X(p) = \lambda\lambda^\dagger`$. Its spinor $`\lambda`$ transforms as a left-handed spinor, and $`\varepsilon\bar{\lambda}`$ as a right-handed one ([C3](#c3)). Amplitudes can then be written in terms of the $`\lambda`$'s instead of the momenta. The phase of $`\lambda`$ is not fixed by $p$: that freedom is the little-group scaling of the course.
+This is the bridge to spinor helicity. A massless momentum $p$ with $p^0 > 0$ is $`\Phi(p) = \lambda\lambda^\dagger`$. Its spinor $`\lambda`$ transforms as a left-handed spinor, and $`\varepsilon\bar{\lambda}`$ as a right-handed one ([C3](#c3)). Amplitudes can then be written in terms of the $`\lambda`$'s instead of the momenta. The phase of $`\lambda`$ is not fixed by $p$: that freedom is the little-group scaling of the course.
 
 ## Examples
 
@@ -364,11 +364,11 @@ Unchanged ([C2](#c2)).
 **A massless momentum as a spinor.** Two momenta back to back along $z$ have the spinors
 
 ```math
-p_1 = (E, 0, 0, E) : \quad X(p_1) = \mathrm{diag}(2E, 0) = \lambda_1\lambda_1^\dagger , \quad \lambda_1 = (\sqrt{2E}, 0)^T ,
+p_1 = (E, 0, 0, E) : \quad \Phi(p_1) = \mathrm{diag}(2E, 0) = \lambda_1\lambda_1^\dagger , \quad \lambda_1 = (\sqrt{2E}, 0)^T ,
 ```
 
 ```math
-p_2 = (E, 0, 0, -E) : \quad X(p_2) = \mathrm{diag}(0, 2E) = \lambda_2\lambda_2^\dagger , \quad \lambda_2 = (0, \sqrt{2E})^T .
+p_2 = (E, 0, 0, -E) : \quad \Phi(p_2) = \mathrm{diag}(0, 2E) = \lambda_2\lambda_2^\dagger , \quad \lambda_2 = (0, \sqrt{2E})^T .
 ```
 
 Their invariant product is $`\langle\lambda_1, \lambda_2\rangle = 2E`$. Its square is the squared centre-of-mass energy:
@@ -443,11 +443,11 @@ This is the first instance of $`|\langle ij\rangle|^2 = |s_{ij}|`$ ([C2](#c2), [
 
    </details>
 
-5. **A second light-like vector.** Find $`\lambda`$ with $`\lambda\lambda^\dagger = X(p)`$ for $p = (E, E, 0, 0)$. Practises [C7](#c7).
+5. **A second light-like vector.** Find $`\lambda`$ with $`\lambda\lambda^\dagger = \Phi(p)`$ for $p = (E, E, 0, 0)$. Practises [C7](#c7).
 
    <details><summary>Solution</summary>
 
-   $`\displaystyle X(p) = E(I + \sigma_1) = E\begin{pmatrix} 1 & 1 \\ 1 & 1\end{pmatrix} = \lambda\lambda^\dagger`$
+   $`\displaystyle \Phi(p) = E(I + \sigma_1) = E\begin{pmatrix} 1 & 1 \\ 1 & 1\end{pmatrix} = \lambda\lambda^\dagger`$
 
    with $`\lambda = \sqrt{E}\,(1, 1)^T`$, up to a phase.
 
