@@ -98,3 +98,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## android
 
 - `android/webview-renderer-process`: the WebView's page runs in a separate renderer process that Android may end; what `onRenderProcessGone` reports, why returning `true` keeps the app alive, and why the dead WebView must be destroyed and replaced. Came up in [Skip the Fluff PR #23](https://github.com/thomaswening/skip-the-fluff/pull/23) (ADR-0003, point 4).
+
+## refactoring
+
+- `refactoring/effect-reasoning`: how to find what a change to legacy code can affect (return values, changed arguments, fields and static data, overrides, events, and WPF bindings that name a property in a string), Feathers's effect sketches, and pinch points as the place to test. *Working Effectively with Legacy Code*, chapters 11 and 12. Came up in the review of [PR #58](https://github.com/thomaswening/doubting-thomas/pull/58) (`refactoring/characterization-tests`, claim C6, "What could the change affect?"), Claude session at work, 2026-11-16.
