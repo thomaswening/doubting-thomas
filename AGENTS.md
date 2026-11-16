@@ -6,7 +6,7 @@ This file is the single rulebook for any AI that reads or writes this repository
 
 <a id="what-makes-a-note"></a>**What makes a note.** A general concept Thomas learned, one he could be quizzed on outside the project where he met it: a piece of mathematics (greatest common divisor), a tool and how it works (what a GitHub Actions workflow is, and how its trigger, jobs and steps fit together). Not a working rule or a decision about how he works ("document every CI check as a rule with a table of cases"): that belongs in his Claude configuration or in the project's documents. Not a project fact either ("Tante pins FLINT 3.6.0"). Decided by Thomas, 25 October 2026.
 
-**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour. He has a master's degree in physics. He knows many mathematical concepts well, but not always their proofs and the smaller results they rest on: in topology, for example. Where a concept has a .NET counterpart, compare to it. Mathematics and physics notes follow [their own section](#mathematics-and-physics-notes).
+**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour in his own projects. At work he maintains a large legacy desktop application in C# with WPF and MVVM. There he learns about C#, software engineering, architecture, refactoring legacy code and the application's scientific domain. Notes from that work follow the confidentiality rules of [§5](#5-projects-sources-and-confidentiality). He has a master's degree in physics. He knows many mathematical concepts well, but not always their proofs and the smaller results they rest on: in topology, for example. Where a concept has a .NET counterpart, compare to it. Mathematics and physics notes follow [their own section](#mathematics-and-physics-notes).
 
 **Language.** Always English.
 
@@ -151,7 +151,8 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - `projects` records where a concept came up or matters; it is metadata, not organisation. Notes stay organised by concept (§1).
 
 - Under `## Sources`, link where the knowledge came from (a pull request or ADR in one of Thomas's repositories, a book, a paper, documentation) and where to read further. Name the session if it came from a conversation: `Claude session on Tante, 2026-10-19`.
-- **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms, and give no link to the confidential source.
+- **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms. Give no link to the confidential source.
+- **Notes from work.** At work, every candidate note has such a source. Picking a proposed candidate counts as Thomas's yes, provided the note explains the general concept with a snippet written from scratch. It contains no ticket numbers, no code or identifiers from the work codebase and no names of the employer, the product or colleagues. Under `## Sources`, name the session without the project (`Claude session at work, 2026-11-16`) and cite public material: documentation, a book, an article. Knowledge only about the work codebase ("how module X loads its settings") is not a note: it fails the test of [what makes a note](#what-makes-a-note).
 - No secrets, keys, tokens, passwords or personal data, ever.
 
 ## 6. Writing to this repository
@@ -216,7 +217,7 @@ python tools/check_docs.py . --markdown "topics/**/*.md" "templates/*.md" "*.md"
 
 - A snippet followed by "Expected output:" must print exactly that output with both compilers. Warnings the note mentions must appear. Warnings it does not mention are worth a sentence in the note if `-Wall -Wextra` gives them.
 - A commented-out line marked `// error: …` must fail to compile with both compilers once it is uncommented, one such line at a time, for the reason the comment gives. If it only warns, or only fails with `-pedantic-errors`, the note says so.
-- C uses `-std=c17 -Wall -Wextra`, C++ `-std=c++20 -Wall -Wextra`. On Thomas's PC, both compilers are in WSL (`Ubuntu-24.04`: GCC 13.3, Clang 18.1). From PowerShell:
+- C uses `-std=c17 -Wall -Wextra`, C++ `-std=c++20 -Wall -Wextra`. Thomas writes notes on more than one machine, so check which compilers the current one has and report their versions under `## Verification`. A machine without GCC or Clang leaves the snippets unchecked: say so in the pull request. On his personal PC, both compilers are in WSL (`Ubuntu-24.04`: GCC 13.3, Clang 18.1). From PowerShell:
 
   ```text
   wsl -d Ubuntu-24.04 -- bash -c "gcc -std=c17 -Wall -Wextra /mnt/c/path/snip.c -o /tmp/a && /tmp/a"
