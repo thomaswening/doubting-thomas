@@ -27,7 +27,7 @@ tags: [lorentz-group, sl2c, weyl-spinors, chirality, parity, spinor-helicity]
 
 ## Key claims
 
-Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, the map $`\Phi : \mathbb{R}^{1,3} \to \mathrm{Herm}(2)`$ from four-vectors to Hermitian matrices, the action $`T_A(X) = AXA^\dagger`$, and the Lorentz transformation $`\Lambda(A) = \Phi^{-1} \circ T_A \circ \Phi`$. The antisymmetric matrix $`\varepsilon`$ is
+Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-double-cover-of-the-lorentz-group.md): mostly-minus metric, the map $`\Phi : \mathbb{R}^{1,3} \to \mathrm{Herm}(2)`$ from four-vectors to Hermitian matrices, the action $`T_A(X) = AXA^\dagger`$, and the Lorentz transformation $`\Lambda_A = \Phi^{-1} \circ T_A \circ \Phi`$. The antisymmetric matrix $`\varepsilon`$ is
 
 ```math
 \varepsilon = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix} .
@@ -71,7 +71,7 @@ Conventions as in [SL(2,ℂ) as the double cover of the Lorentz group](sl2c-doub
 
 - <a id="c6"></a>**C6.** Let $`P = \mathrm{diag}(1, -1, -1, -1)`$ be parity. Then for all $`A \in SL(2,\mathbb{C})`$
 
-  $`\displaystyle P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big).`$
+  $`\displaystyle P\,\Lambda_A\,P = \Lambda_{(A^\dagger)^{-1}}.`$
 
   Conjugating by parity exchanges $`\rho_L`$ and $`\rho_R`$, so a parity-invariant theory with a left-handed spinor must also contain a right-handed one. The Dirac spinor is the pair: the representation $`(\frac12, 0) \oplus (0, \frac12)`$.
 
@@ -264,7 +264,7 @@ Parity $P$ flips space: $`(x^0, \mathbf{x}) \mapsto (x^0, -\mathbf{x})`$. It is 
 **Proposition.** For all $`A \in SL(2,\mathbb{C})`$,
 
 ```math
-P\,\Lambda(A)\,P = \Lambda\big((A^\dagger)^{-1}\big) .
+P\,\Lambda_A\,P = \Lambda_{(A^\dagger)^{-1}} .
 ```
 
 *Proof idea.* Parity turns $X$ into the adjugate of $X$:
@@ -291,11 +291,11 @@ $`\displaystyle \mathrm{adj}X = 2x^0 I - X = x^0 I - \mathbf{x}\cdot\boldsymbol{
 
 Then
 
-$`\displaystyle \Phi\big(P\Lambda(A)Px\big) = \mathrm{adj}\big(A\,\Phi(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}\Phi(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, \Phi(x)\, A^{-1} .`$
+$`\displaystyle \Phi\big(P\Lambda_A Px\big) = \mathrm{adj}\big(A\,\Phi(Px)\,A^\dagger\big) = \mathrm{adj}(A^\dagger)\,\mathrm{adj}\Phi(Px)\,\mathrm{adj}A = (A^\dagger)^{-1}\, \Phi(x)\, A^{-1} .`$
 
 With $`B = (A^\dagger)^{-1}`$, $`B^\dagger = A^{-1}`$, so the right-hand side is
 
-$`\displaystyle B \Phi(x) B^\dagger = \Phi(\Lambda(B)x) . \qquad ∎`$
+$`\displaystyle B \Phi(x) B^\dagger = \Phi(\Lambda_B x) . \qquad ∎`$
 
 </details>
 

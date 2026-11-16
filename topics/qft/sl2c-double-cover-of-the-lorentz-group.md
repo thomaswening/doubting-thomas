@@ -17,9 +17,9 @@ tags: [lorentz-group, sl2c, su2, double-cover, spinors, spinor-helicity]
 
   $`\displaystyle \Phi(x) = x^0 I + \mathbf{x} \cdot \boldsymbol{\sigma}, \qquad \det \Phi(x) = (x^0)^2 - |\mathbf{x}|^2.`$
 
-- **A complex 2×2 matrix with determinant 1 acts on these matrices by $`X \mapsto A X A^\dagger`$.** The result is again Hermitian with the same determinant. Translated back through $`\Phi`$, every $`A \in SL(2,\mathbb{C})`$ gives a Lorentz transformation $`\Lambda(A)`$.
+- **A complex 2×2 matrix with determinant 1 acts on these matrices by $`X \mapsto A X A^\dagger`$.** The result is again Hermitian with the same determinant. Translated back through $`\Phi`$, every $`A \in SL(2,\mathbb{C})`$ gives a Lorentz transformation $`\Lambda_A`$.
 
-- **The map $`A \mapsto \Lambda(A)`$ respects multiplication, hits every proper orthochronous Lorentz transformation, and sends exactly $A$ and $-A$ to the same one.** So, as groups,
+- **The map $`\pi : A \mapsto \Lambda_A`$ respects multiplication, hits every proper orthochronous Lorentz transformation, and sends exactly $A$ and $-A$ to the same one.** So, as groups,
 
   $`\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\}.`$
 
@@ -55,35 +55,35 @@ x \cdot y = x^0 y^0 - \mathbf{x} \cdot \mathbf{y} .
 
   is real-linear and keeps the determinant. So the map
 
-  $`\displaystyle \Lambda(A) = \Phi^{-1} \circ T_A \circ \Phi : \mathbb{R}^{1,3} \to \mathbb{R}^{1,3}`$
+  $`\displaystyle \Lambda_A = \Phi^{-1} \circ T_A \circ \Phi : \mathbb{R}^{1,3} \to \mathbb{R}^{1,3}`$
 
-  is linear and keeps the Minkowski square, $`\Lambda(A)x \cdot \Lambda(A)x = x \cdot x`$: it is a Lorentz transformation. Its matrix is
+  is linear and keeps the Minkowski square, $`\Lambda_A x \cdot \Lambda_A x = x \cdot x`$: it is a Lorentz transformation. Its matrix is
 
-  $`\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).`$
+  $`\displaystyle (\Lambda_A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).`$
 
 - <a id="c4"></a>**C4.** The map
 
-  $`\displaystyle \Lambda : SL(2,\mathbb{C}) \to O(1,3), \qquad A \mapsto \Lambda(A)`$
+  $`\displaystyle \pi : SL(2,\mathbb{C}) \to O(1,3), \qquad A \mapsto \Lambda_A`$
 
-  is a group homomorphism: $`\Lambda(AB) = \Lambda(A)\Lambda(B)`$ and $`\Lambda(I) = 1`$. It is continuous, since the entries of $`\Lambda(A)`$ are polynomials in the entries of $A$ and $`\bar{A}`$.
+  is a group homomorphism: $`\Lambda_{AB} = \Lambda_A\Lambda_B`$ and $`\Lambda_I = 1`$. It is continuous, since the entries of $`\Lambda_A`$ are polynomials in the entries of $A$ and $`\bar{A}`$.
 
-- <a id="c5"></a>**C5.** Every $`\Lambda(A)`$ is proper and orthochronous:
+- <a id="c5"></a>**C5.** Every $`\Lambda_A`$ is proper and orthochronous:
 
-  $`\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1, \qquad \det \Lambda(A) = 1.`$
+  $`\displaystyle (\Lambda_A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) \ge 1, \qquad \det \Lambda_A = 1.`$
 
-- <a id="c6"></a>**C6.** $`\Lambda(A) = 1`$ exactly for $`A = \pm I`$. Hence $`\Lambda(A) = \Lambda(B)`$ exactly when $`B = \pm A`$.
+- <a id="c6"></a>**C6.** $`\Lambda_A = 1`$ exactly for $`A = \pm I`$. Hence $`\Lambda_A = \Lambda_B`$ exactly when $`B = \pm A`$.
 
 - <a id="c7"></a>**C7.** Let $`R_z(\theta)`$ and $`R_y(\theta)`$ be the rotations by $`\theta`$ about the $z$- and $y$-axes, and $`B_z(\eta)`$ the boost along $+z$ with rapidity $`\eta`$. Then
 
-  $`\displaystyle \Lambda\big(e^{-i\theta\sigma_3/2}\big) = R_z(\theta), \qquad \Lambda\big(e^{-i\theta\sigma_2/2}\big) = R_y(\theta), \qquad \Lambda\big(e^{\eta\sigma_3/2}\big) = B_z(\eta).`$
+  $`\displaystyle \pi\big(e^{-i\theta\sigma_3/2}\big) = R_z(\theta), \qquad \pi\big(e^{-i\theta\sigma_2/2}\big) = R_y(\theta), \qquad \pi\big(e^{\eta\sigma_3/2}\big) = B_z(\eta).`$
 
   The boost scales the light-cone coordinates:
 
   $`\displaystyle x^0 \pm x^3 \mapsto e^{\pm\eta}(x^0 \pm x^3).`$
 
-  For unitary $A$, $`\Lambda(A)`$ fixes $x^0$ and is a rotation, so $`\Lambda`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
+  For unitary $A$, $`\Lambda_A`$ fixes $x^0$ and is a rotation, so $`\pi`$ restricts to a homomorphism $`SU(2) \to SO(3)`$.
 
-- <a id="c8"></a>**C8.** The homomorphism $`\Lambda : SL(2,\mathbb{C}) \to SO^+(1,3)`$ is surjective. Together with [C4](#c4) and [C6](#c6), as groups,
+- <a id="c8"></a>**C8.** The homomorphism $`\pi : SL(2,\mathbb{C}) \to SO^+(1,3)`$ is surjective. Together with [C4](#c4) and [C6](#c6), as groups,
 
   $`\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\},`$
 
@@ -93,7 +93,7 @@ x \cdot y = x^0 y^0 - \mathbf{x} \cdot \mathbf{y} .
 
   $`\displaystyle A : [0, 2\pi] \to SL(2,\mathbb{C}), \qquad t \mapsto e^{-it\sigma_3/2},`$
 
-  runs from $I$ to $`A(2\pi) = -I`$. Its image $`\Lambda(A(t))`$ is the full rotation about $z$, a closed loop in $SO^+(1,3)$. So a vector $`\psi \in \mathbb{C}^2`$ on which $A$ acts as $`\psi \mapsto A\psi`$ returns as $`-\psi`$ after a $`2\pi`$ rotation.
+  runs from $I$ to $`A(2\pi) = -I`$. Its image $`\pi(A(t))`$ is the full rotation about $z$, a closed loop in $SO^+(1,3)$. So a vector $`\psi \in \mathbb{C}^2`$ on which $A$ acts as $`\psi \mapsto A\psi`$ returns as $`-\psi`$ after a $`2\pi`$ rotation.
 
 ## Explanation
 
@@ -101,13 +101,15 @@ x \cdot y = x^0 y^0 - \mathbf{x} \cdot \mathbf{y} .
 
 The Lorentz group acts on four-vectors. The Dirac equation needs more: objects that transform under Lorentz transformations but change sign under a rotation by $`2\pi`$.
 
-**Why does the Dirac equation need that?** The Dirac field describes particles of spin ½, such as the electron. In quantum mechanics, a spin-½ state is rotated by $`\theta`$ about the axis $`\hat{n}`$ with the operator $`e^{-i\theta\,\hat{n}\cdot\boldsymbol{\sigma}/2}`$. The factor ½ is the spin. At $`\theta = 2\pi`$ this operator is $-I$: the state changes sign. That is not an artefact of notation. A neutron beam split in two, with one half rotated by $`2\pi`$ in a magnetic field, interferes destructively with the other half when the two are recombined *(cited: Rauch et al. 1975; Werner et al. 1975)*. The Dirac equation is built so that its solutions carry spin ½. Its Lorentz transformations must therefore contain these rotation operators, sign included.
+**Why does the Dirac equation need that?** The Dirac field describes particles of spin ½, such as the electron. In quantum mechanics, a spin-½ state is rotated by $`\theta`$ about the axis $`\hat{n}`$ with the operator $`e^{-i\theta\,\hat{n}\cdot\boldsymbol{\sigma}/2}`$. The factor ½ is the spin.
+
+Where does that operator come from? Two results of quantum mechanics, both *(cited: Sakurai and Napolitano, sections 3.1 and 3.2)*. First, angular momentum generates rotations: a rotation by $`\theta`$ about $`\hat{n}`$ acts on states as $`e^{-i\theta\,\hat{n}\cdot\mathbf{J}/\hbar}`$, where $`\mathbf{J}`$ is the angular momentum. This is the rotation counterpart of momentum generating translations. Second, for a spin-½ particle at rest the angular momentum is the spin, $`\mathbf{S} = \hbar\boldsymbol{\sigma}/2`$. Its components have the two eigenvalues $`\pm\hbar/2`$, the two beams of a Stern–Gerlach experiment. Inserting the second into the first gives the operator above.
+
+At $`\theta = 2\pi`$ this operator is $-I$: the state changes sign. That is not an artefact of notation. A neutron beam split in two, with one half rotated by $`2\pi`$ in a magnetic field, interferes destructively with the other half when the two are recombined *(cited: Rauch et al. 1975; Werner et al. 1975)*. The Dirac equation is built so that its solutions carry spin ½. Its Lorentz transformations must therefore contain these rotation operators, sign included.
 
 No representation of $SO^+(1,3)$ itself can do that, because the $`2\pi`$ rotation *is* the identity there. The way out is a bigger group that maps onto the Lorentz group, two elements to one, so that the signs $+$ and $-$ survive upstairs. That group is SL(2,ℂ), the complex 2×2 matrices with determinant 1. This note builds the map. The [next note](weyl-spinor-representations.md) builds the spinors that live on SL(2,ℂ).
 
 Rotations alone show the same pattern one level down, with SU(2) and SO(3). This note contains that case: restrict everything to unitary $A$ ([C7](#c7)).
-
-**A word on *(cited)*.** This note marks some results *(cited)*. A cited result is used here but not proved here. The note states it and says where to read the proof: in the [Sources](#sources), or in a note of its own. A result that isn't obvious also gets a short motivation where it is used.
 
 ### Four-vectors as Hermitian matrices
 
@@ -153,7 +155,7 @@ Three maps are involved, and it pays to keep them apart:
 
 - $`\Phi`$, from Minkowski space to Hermitian matrices ([C1](#c1)). It is fixed once and for all.
 - For each $A$, the action $`T_A`$ on Hermitian matrices, $`X \mapsto AXA^\dagger`$.
-- For each $A$, the Lorentz transformation $`\Lambda(A)`$ on Minkowski space. It does what $`T_A`$ does, translated through $`\Phi`$.
+- For each $A$, the Lorentz transformation $`\Lambda_A`$ on Minkowski space. It does what $`T_A`$ does, translated through $`\Phi`$.
 
 **Definition (the action and the Lorentz transformation of $A$).** For $`A \in SL(2,\mathbb{C})`$, let
 
@@ -162,28 +164,27 @@ T_A : \mathrm{Herm}(2) \to \mathrm{Herm}(2), \qquad T_A(X) = A X A^\dagger ,
 ```
 
 ```math
-\Lambda(A) = \Phi^{-1} \circ T_A \circ \Phi : \mathbb{R}^{1,3} \to \mathbb{R}^{1,3} .
+\Lambda_A = \Phi^{-1} \circ T_A \circ \Phi : \mathbb{R}^{1,3} \to \mathbb{R}^{1,3} .
 ```
 
-To apply $`\Lambda(A)`$ to $x$: turn $x$ into the matrix $`\Phi(x)`$, act with $A$, and read the four components of the result back off with $`\Phi^{-1}`$. The diagram commutes: both routes from the top left to the bottom right give the same matrix, $`\Phi(\Lambda(A)x) = A\,\Phi(x)\,A^\dagger`$.
+To apply $`\Lambda_A`$ to $x$: turn $x$ into the matrix $`\Phi(x)`$, act with $A$, and read the four components of the result back off with $`\Phi^{-1}`$. The diagram commutes: both routes from the top left to the bottom right give the same matrix, $`\Phi(\Lambda_A x) = A\,\Phi(x)\,A^\dagger`$.
 
-```mermaid
-flowchart LR
-    x["x in R^(1,3)"] -- "Λ(A)" --> y["Λ(A)x in R^(1,3)"]
-    x -- "Φ" --> X["X = Φ(x) in Herm(2)"]
-    y -- "Φ" --> Y["A X A† in Herm(2)"]
-    X -- "T_A" --> Y
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/sl2c-commutative-square-dark.svg">
+  <img src="figures/sl2c-commutative-square-light.svg" alt="Commutative square. Top row: R^(1,3) to R^(1,3) by Lambda_A. Bottom row: Herm(2) to Herm(2) by T_A. Both columns: Phi, from top to bottom.">
+</picture>
 
 Finally, collecting all $A$ gives one more map, from the group to the Lorentz transformations:
 
 ```math
-\Lambda : SL(2,\mathbb{C}) \to O(1,3), \qquad A \mapsto \Lambda(A) .
+\pi : SL(2,\mathbb{C}) \to O(1,3), \qquad A \mapsto \Lambda_A .
 ```
 
-[C3](#c3) shows that each $`\Lambda(A)`$ really lies in $O(1,3)$. [C4](#c4) shows that $`\Lambda`$ respects multiplication.
+The letter $`\pi`$ is the usual name for a covering map, a projection from the bigger group down onto the smaller one. $`\Lambda`$ stays reserved for a Lorentz transformation, an element of $O(1,3)$: $`\pi`$ takes a matrix $A$ and returns the Lorentz transformation $`\Lambda_A`$.
 
-**Proposition ([C3](#c3)).** For $`A \in SL(2,\mathbb{C})`$, $`T_A`$ maps $`\mathrm{Herm}(2)`$ to itself and keeps the determinant. Hence $`\Lambda(A) \in O(1,3)`$.
+[C3](#c3) shows that each $`\Lambda_A`$ really lies in $O(1,3)$. [C4](#c4) shows that $`\pi`$ respects multiplication.
+
+**Proposition ([C3](#c3)).** For $`A \in SL(2,\mathbb{C})`$, $`T_A`$ maps $`\mathrm{Herm}(2)`$ to itself and keeps the determinant. Hence $`\Lambda_A \in O(1,3)`$.
 
 *Proof idea.* The dagger of $`AXA^\dagger`$ is $`AX^\dagger A^\dagger`$, and the determinant of a product is the product of the determinants.
 
@@ -197,23 +198,23 @@ so $`T_A(X)`$ is Hermitian. By the product rule for determinants, $`\det(MN) = \
 
 $`\displaystyle \det(A X A^\dagger) = \det A \cdot \det X \cdot \overline{\det A} = |\det A|^2 \det X = \det X ,`$
 
-since $`\det A = 1`$. $`T_A`$ is real-linear because matrix multiplication is linear in each factor. $`\Phi`$ is a real-linear bijection ([C1](#c1)), so $`\Lambda(A) = \Phi^{-1} \circ T_A \circ \Phi`$ is real-linear, as a composition of linear maps. By [C2](#c2),
+since $`\det A = 1`$. $`T_A`$ is real-linear because matrix multiplication is linear in each factor. $`\Phi`$ is a real-linear bijection ([C1](#c1)), so $`\Lambda_A = \Phi^{-1} \circ T_A \circ \Phi`$ is real-linear, as a composition of linear maps. By [C2](#c2),
 
-$`\displaystyle \Lambda(A)x \cdot \Lambda(A)x = \det \Phi(\Lambda(A)x) = \det T_A(\Phi(x)) = \det \Phi(x) = x \cdot x .`$
+$`\displaystyle \Lambda_A x \cdot \Lambda_A x = \det \Phi(\Lambda_A x) = \det T_A(\Phi(x)) = \det \Phi(x) = x \cdot x .`$
 
 A linear map that keeps $`x \cdot x`$ for all $x$ keeps $`x \cdot y`$ for all $x, y$, by the polarisation identity
 
 $`\displaystyle x \cdot y = \tfrac14\big[(x+y)\cdot(x+y) - (x-y)\cdot(x-y)\big] ,`$
 
-so $`\Lambda(A) \in O(1,3)`$. The matrix entries follow from the inverse in [C1](#c1): column $`\nu`$ of $`\Lambda(A)`$ is the image of the basis vector $`e_\nu`$, and $`\Phi(e_\nu) = \sigma_\nu`$. Its component $`\mu`$ is
+so $`\Lambda_A \in O(1,3)`$. The matrix entries follow from the inverse in [C1](#c1): column $`\nu`$ of $`\Lambda_A`$ is the image of the basis vector $`e_\nu`$, and $`\Phi(e_\nu) = \sigma_\nu`$. Its component $`\mu`$ is
 
-$`\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}\big(\sigma_\mu\, T_A(\sigma_\nu)\big) = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger) . \qquad ∎`$
+$`\displaystyle (\Lambda_A)^\mu{}_\nu = \frac12 \mathrm{tr}\big(\sigma_\mu\, T_A(\sigma_\nu)\big) = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger) . \qquad ∎`$
 
 </details>
 
 **Why determinant 1 and not something simpler?** Only $`|\det A| = 1`$ is needed to keep $`\det X`$. But $A$ and $`e^{i\varphi} A`$ give the same map, since the phases cancel in $`A X A^\dagger`$. Fixing $`\det A = 1`$ removes this redundant phase, except for one leftover sign: $`\det(-A) = \det A`$ for 2×2 matrices. That leftover sign is the "double" in double cover ([C6](#c6)).
 
-**Proposition ([C4](#c4)).** $`\Lambda : SL(2,\mathbb{C}) \to O(1,3)`$ is a continuous group homomorphism.
+**Proposition ([C4](#c4)).** $`\pi : SL(2,\mathbb{C}) \to O(1,3)`$ is a continuous group homomorphism.
 
 *Proof idea.* Acting with $B$ and then with $A$ is acting with $AB$:
 
@@ -223,11 +224,11 @@ T_A \circ T_B = T_{AB}, \qquad \text{because} \quad A(BXB^\dagger)A^\dagger = (A
 
 <details><summary>Proof</summary>
 
-By the definition of $`\Lambda`$ and $`T_A \circ T_B = T_{AB}`$,
+By the definition of $`\pi`$ and $`T_A \circ T_B = T_{AB}`$,
 
-$`\displaystyle \Lambda(A)\Lambda(B) = \Phi^{-1} T_A \Phi\, \Phi^{-1} T_B \Phi = \Phi^{-1} T_A T_B \Phi = \Phi^{-1} T_{AB} \Phi = \Lambda(AB) .`$
+$`\displaystyle \Lambda_A\Lambda_B = \Phi^{-1} T_A \Phi\, \Phi^{-1} T_B \Phi = \Phi^{-1} T_A T_B \Phi = \Phi^{-1} T_{AB} \Phi = \Lambda_{AB} .`$
 
-$`\Lambda(I) = 1`$ because $`T_I`$ is the identity. Continuity: by [C3](#c3), each entry of $`\Lambda(A)`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$, a polynomial and therefore continuous. ∎
+$`\Lambda_I = 1`$ because $`T_I`$ is the identity. Continuity: by [C3](#c3), each entry of $`\Lambda_A`$ is a sum of products of one entry of $A$ and one entry of $`\bar{A}`$, a polynomial and therefore continuous. ∎
 
 </details>
 
@@ -235,9 +236,9 @@ $`\Lambda(I) = 1`$ because $`T_I`$ is the identity. Continuity: by [C3](#c3), ea
 
 The Lorentz group $O(1,3)$ has four pieces. A transformation can reverse time or not (the sign of its time-time entry $`\Lambda^0{}_0`$), and it can reverse orientation or not (the sign of $`\det \Lambda`$). The proper orthochronous piece $SO^+(1,3)$, with $`\Lambda^0{}_0 \ge 1`$ and $`\det\Lambda = 1`$, is the one connected to the identity: rotations, boosts and their products.
 
-**Proposition ([C5](#c5)).** $`\Lambda(A) \in SO^+(1,3)`$ for every $`A \in SL(2,\mathbb{C})`$.
+**Proposition ([C5](#c5)).** $`\Lambda_A \in SO^+(1,3)`$ for every $`A \in SL(2,\mathbb{C})`$.
 
-*Proof idea.* For the time direction, compute $`\Lambda^0{}_0`$ directly. For the orientation, use continuity: $`\det\Lambda(A)`$ is $`\pm 1`$, it is $+1$ at $A = I$, and SL(2,ℂ) is path-connected, so it cannot jump to $-1$. Two lemmas below make the second half precise.
+*Proof idea.* For the time direction, compute $`\Lambda^0{}_0`$ directly. For the orientation, use continuity: $`\det\Lambda_A`$ is $`\pm 1`$, it is $+1$ at $A = I$, and SL(2,ℂ) is path-connected, so it cannot jump to $-1$. Two lemmas below make the second half precise.
 
 **Lemma (polar decomposition in SL(2,ℂ)).** Every $`A \in SL(2,\mathbb{C})`$ is a product $`A = U e^{H}`$ with $`U \in SU(2)`$ and $H$ Hermitian and traceless.
 
@@ -277,17 +278,17 @@ $`\displaystyle A = \begin{pmatrix} a & b \\ c & d\end{pmatrix} .`$
 
 By [C3](#c3) with $`\mu = \nu = 0`$,
 
-$`\displaystyle \Lambda(A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12\big(|a|^2 + |b|^2 + |c|^2 + |d|^2\big) .`$
+$`\displaystyle (\Lambda_A)^0{}_0 = \frac12 \mathrm{tr}(A A^\dagger) = \frac12\big(|a|^2 + |b|^2 + |c|^2 + |d|^2\big) .`$
 
 Now estimate $`1 = \det A = ad - bc`$ in two steps. The triangle inequality, $`|z + w| \le |z| + |w|`$, together with $`|zw| = |z||w|`$, gives the first. The inequality $`uv \le \frac12(u^2 + v^2)`$ for real $u, v$, applied twice, gives the second. It holds because $`u^2 + v^2 - 2uv = (u - v)^2 \ge 0`$.
 
-$`\displaystyle 1 = |ad - bc| \le |a||d| + |b||c| \le \frac12\big(|a|^2 + |d|^2\big) + \frac12\big(|b|^2 + |c|^2\big) = \Lambda(A)^0{}_0 .`$
+$`\displaystyle 1 = |ad - bc| \le |a||d| + |b||c| \le \frac12\big(|a|^2 + |d|^2\big) + \frac12\big(|b|^2 + |c|^2\big) = (\Lambda_A)^0{}_0 .`$
 
-*Orientation.* $`\Lambda(A) \in O(1,3)`$ ([C3](#c3)), so $`\Lambda^T g \Lambda = g`$. By the product rule for determinants, $`(\det\Lambda)^2 \det g = \det g`$, so $`\det \Lambda(A) = \pm 1`$. The function
+*Orientation.* $`\Lambda_A \in O(1,3)`$ ([C3](#c3)), so $`\Lambda_A^T g \Lambda_A = g`$. By the product rule for determinants, $`(\det\Lambda_A)^2 \det g = \det g`$, so $`\det \Lambda_A = \pm 1`$. The function
 
-$`\displaystyle f : SL(2,\mathbb{C}) \to \{+1, -1\}, \qquad A \mapsto \det\Lambda(A)`$
+$`\displaystyle f : SL(2,\mathbb{C}) \to \{+1, -1\}, \qquad A \mapsto \det\Lambda_A`$
 
-is continuous, as a composition of $`\Lambda`$ ([C4](#c4)) and the determinant, which is a polynomial.
+is continuous, as a composition of $`\pi`$ ([C4](#c4)) and the determinant, which is a polynomial.
 
 SL(2,ℂ) is path-connected. By the polar decomposition, $`A = Ue^H`$. The path $`t \mapsto U e^{tH}`$, $`t \in [0, 1]`$, runs from $U$ to $A$ inside SL(2,ℂ), since $`\det e^{tH} = e^{t\,\mathrm{tr}H} = 1`$. And $U$ connects to $I$ inside SU(2): by the spectral theorem for unitary matrices *(cited)*, $`U = W\,\mathrm{diag}(e^{i\varphi}, e^{-i\varphi})\,W^\dagger`$ with $W$ unitary, the two eigenvalues being inverse to each other because $`\det U = 1`$. The path $`t \mapsto W\,\mathrm{diag}(e^{it\varphi}, e^{-it\varphi})\,W^\dagger`$ runs from $I$ to $U$ inside SU(2).
 
@@ -295,15 +296,15 @@ By the lemma on continuous signs, $f$ is constant. At $A = I$ it is $`\det 1 = 1
 
 </details>
 
-**Proposition ([C6](#c6)).** $`\Lambda(A) = 1`$ exactly for $`A = \pm I`$.
+**Proposition ([C6](#c6)).** $`\Lambda_A = 1`$ exactly for $`A = \pm I`$.
 
 *Proof idea.* If $`A X A^\dagger = X`$ for every Hermitian $X$, take $X = I$: $A$ must be unitary. Then $A$ commutes with every Pauli matrix, so it is a multiple of $I$, and $`\det A = 1`$ leaves $`\pm I`$.
 
 <details><summary>Proof</summary>
 
-$`\Lambda(A) = 1`$ means $`T_A`$ is the identity, because $`\Phi`$ is a bijection ([C1](#c1)). So suppose $`AXA^\dagger = X`$ for all Hermitian $X$. With $X = I$: $`AA^\dagger = I`$, so $`A^\dagger = A^{-1}`$, and the condition becomes $A X A^{-1} = X$, that is $AX = XA$. With $`X = \sigma_3`$: $A$ commutes with $`\mathrm{diag}(1,-1)`$, which forces $A$ to be diagonal. With $`X = \sigma_1`$: a diagonal $`A = \mathrm{diag}(a, d)`$ commutes with $`\sigma_1`$ only if $a = d$. So $A = aI$, and $`\det A = a^2 = 1`$ gives $`a = \pm 1`$. Conversely $`(\pm I) X (\pm I)^\dagger = X`$.
+$`\Lambda_A = 1`$ means $`T_A`$ is the identity, because $`\Phi`$ is a bijection ([C1](#c1)). So suppose $`AXA^\dagger = X`$ for all Hermitian $X$. With $X = I$: $`AA^\dagger = I`$, so $`A^\dagger = A^{-1}`$, and the condition becomes $A X A^{-1} = X$, that is $AX = XA$. With $`X = \sigma_3`$: $A$ commutes with $`\mathrm{diag}(1,-1)`$, which forces $A$ to be diagonal. With $`X = \sigma_1`$: a diagonal $`A = \mathrm{diag}(a, d)`$ commutes with $`\sigma_1`$ only if $a = d$. So $A = aI$, and $`\det A = a^2 = 1`$ gives $`a = \pm 1`$. Conversely $`(\pm I) X (\pm I)^\dagger = X`$.
 
-For the second statement: $`\Lambda(A) = \Lambda(B)`$ means $`\Lambda(B^{-1}A) = 1`$ by [C4](#c4), so $`B^{-1}A = \pm I`$. ∎
+For the second statement: $`\Lambda_A = \Lambda_B`$ means $`\Lambda_{B^{-1}A} = 1`$ by [C4](#c4), so $`B^{-1}A = \pm I`$. ∎
 
 </details>
 
@@ -350,11 +351,11 @@ The pattern holds in general. A unitary $A$ keeps the trace of $X$, which is $2x
 \mathrm{tr}(AXA^{-1}) = \mathrm{tr}(A^{-1}AX) = \mathrm{tr}\,X .
 ```
 
-So $`\Lambda(A)`$ fixes time and is a rotation. Restricted to SU(2), $`\Lambda`$ is therefore a homomorphism onto rotations. The topological picture of this map, with SU(2) as the 3-sphere, is in the open pull request [doubting-thomas#40](https://github.com/thomaswening/doubting-thomas/pull/40). That pull request leaves $p(UV) = p(U)p(V)$ open. [C4](#c4) supplies it.
+So $`\Lambda_A`$ fixes time and is a rotation. Restricted to SU(2), $`\pi`$ is therefore a homomorphism onto rotations. The topological picture of this map, with SU(2) as the 3-sphere, is in the open pull request [doubting-thomas#40](https://github.com/thomaswening/doubting-thomas/pull/40). That pull request leaves $p(UV) = p(U)p(V)$ open. [C4](#c4) supplies it.
 
 ### Every proper orthochronous Lorentz transformation is reached
 
-**Theorem ([C8](#c8)).** $`\Lambda(SL(2,\mathbb{C})) = SO^+(1,3)`$.
+**Theorem ([C8](#c8)).** $`\pi(SL(2,\mathbb{C})) = SO^+(1,3)`$.
 
 *Proof idea.* A Lorentz transformation is fixed by where it sends the time axis plus a rotation. A rotation and a $z$-boost can move the time axis anywhere on the future unit hyperboloid. What is left fixes the time axis, so it is a rotation. All rotations are reached by [C7](#c7) and Euler angles.
 
@@ -376,7 +377,7 @@ So $`R' = (RB)^{-1}\Lambda`$ fixes $`e_0`$. $R'$ keeps the Minkowski product, so
 
 </details>
 
-So $`\Lambda`$ is a surjective homomorphism with kernel $`\{\pm I\}`$ ([C6](#c6)). By the first isomorphism theorem for groups *(cited)*,
+So $`\pi`$ is a surjective homomorphism with kernel $`\{\pm I\}`$ ([C6](#c6)). By the first isomorphism theorem for groups *(cited)*,
 
 ```math
 SL(2,\mathbb{C})/\{\pm I\} \cong SO^+(1,3) .
@@ -394,7 +395,7 @@ That makes it *the* universal cover of $SO^+(1,3)$. Nothing in the spinor-helici
 
 ### The 2π rotation
 
-Follow $`A(t) = e^{-it\sigma_3/2}`$ from $t = 0$ to $`t = 2\pi`$ ([C9](#c9)). Downstairs, $`\Lambda(A(t))`$ is the rotation by $t$ about $z$ ([C7](#c7)), which returns to the identity at $`t = 2\pi`$. Upstairs, the path ends at
+Follow $`A(t) = e^{-it\sigma_3/2}`$ from $t = 0$ to $`t = 2\pi`$ ([C9](#c9)). Downstairs, $`\pi(A(t))`$ is the rotation by $t$ about $z$ ([C7](#c7)), which returns to the identity at $`t = 2\pi`$. Upstairs, the path ends at
 
 ```math
 A(2\pi) = \mathrm{diag}(e^{-i\pi}, e^{i\pi}) = -I .
@@ -450,7 +451,7 @@ So the momentum transforms because the spinor $`\lambda`$ does.
 
 - **Confusing $`A X A^\dagger`$ with $A X A^{-1}$.** For unitary $A$ they agree. For a boost they do not, and $A X A^{-1}$ would not keep $X$ Hermitian.
 
-- **Mixing up $`T_A`$ and $`\Lambda(A)`$.** $`T_A`$ acts on Hermitian matrices, $`\Lambda(A)`$ on four-vectors. They are the same transformation seen through $`\Phi`$ ([C3](#c3)), but a formula for one doesn't apply to the other without $`\Phi`$.
+- **Mixing up $`T_A`$ and $`\Lambda_A`$.** $`T_A`$ acts on Hermitian matrices, $`\Lambda_A`$ on four-vectors. They are the same transformation seen through $`\Phi`$ ([C3](#c3)), but a formula for one doesn't apply to the other without $`\Phi`$.
 
 - **Forgetting that $`\det(-A) = \det A`$ only in even dimension.** For 2×2 matrices it holds, which is why the kernel is $`\{\pm I\}`$ and not just $`\{I\}`$.
 
@@ -528,5 +529,6 @@ So the momentum transforms because the spinor $`\lambda`$ does.
 - Mark Srednicki, *Quantum Field Theory* (Cambridge, 2007), chapter 33, "Representations of the Lorentz Group", and chapter 2 for the Lorentz group itself. Srednicki uses the mostly-plus metric. The construction here is metric-independent, but signs in $`x \cdot x`$ flip.
 - Matthew D. Schwartz, *Quantum Field Theory and the Standard Model* (Cambridge, 2014), chapter 10, "Spinors". Source of the mostly-minus conventions used here.
 - Brian C. Hall, *Lie Groups, Lie Algebras, and Representations* (2nd ed., Springer, 2015): chapter 1 for the connectedness and simple connectedness of SL(n,ℂ) via the polar decomposition, and the SU(2) → SO(3) homomorphism; chapter 3 for the Lie algebra of a matrix group, here the traceless matrices. The spectral theorem for Hermitian and unitary matrices, Euler's angle decomposition and the first isomorphism theorem are standard results of linear algebra, rotation geometry and group theory.
+- J. J. Sakurai and Jim Napolitano, *Modern Quantum Mechanics* (2nd ed., Addison-Wesley, 2011): section 3.1 for rotations generated by angular momentum, section 3.2 for spin-½ systems and finite rotations.
 - H. Rauch et al., "Verification of coherent spinor rotation of fermions", *Physics Letters A* 54 (1975) 425; S. A. Werner et al., "Observation of the phase shift of a neutron due to precession in a magnetic field", *Physical Review Letters* 35 (1975) 1053. The neutron experiments that show the sign change of a spin-½ state under a $`2\pi`$ rotation.
 - H. K. Dreiner, H. E. Haber, S. P. Martin, "Two-component spinor techniques and Feynman rules for quantum field theory and supersymmetry", [arXiv:0812.1594](https://arxiv.org/abs/0812.1594), section 2, for the same map in two-component notation.
