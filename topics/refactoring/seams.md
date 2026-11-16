@@ -4,7 +4,7 @@ area: refactoring
 created: 2026-11-16
 updated: 2026-11-16
 prerequisites: []
-related: []
+related: [refactoring/characterization-tests]
 projects: []
 tags: [legacy-code, seams, dependency-breaking, testability, feathers]
 ---
@@ -248,7 +248,7 @@ In a test, `new ReportViewModel(new DecliningDialogs())` is the enabling point, 
 
 - **Overriding a method the constructor calls.** If the base constructor calls the `virtual` method, the override runs before the subclass's constructor body. Anything that body sets is still unset. Extract and Override Call is safe for methods the constructor does not call ([C6](#c6)).
 
-- **Refactoring "a little more" while creating the seam.** Renaming, reordering or cleaning up in the same step mixes untested changes with the seam. Make only the seam. Then write a test through it that pins down what the code does today, such as "user declines, so `Status` is `Cancelled`", and get it to pass. Only then improve the code: that test now tells you if the improvement changed the behaviour ([C8](#c8)). Tests that pin down current behaviour this way are called characterization tests.
+- **Refactoring "a little more" while creating the seam.** Renaming, reordering or cleaning up in the same step mixes untested changes with the seam. Make only the seam. Then write a test through it that pins down what the code does today, such as "user declines, so `Status` is `Cancelled`", and get it to pass. Only then improve the code: that test now tells you if the improvement changed the behaviour ([C8](#c8)). Tests that pin down current behaviour this way are called [characterization tests](characterization-tests.md).
 
 - **Removing the old constructor.** Parameterize Constructor keeps the parameterless one. Deleting it breaks every caller at once, XAML-created view models included ([C7](#c7)).
 
