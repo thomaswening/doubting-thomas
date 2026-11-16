@@ -61,15 +61,15 @@ quadrantChart
     title Files of a legacy WPF app
     x-axis Rarely changed --> Often changed
     y-axis Simple --> Complex
-    quadrant-1 Hotspots: start here
-    quadrant-2 Complex but stable: leave alone for now
+    quadrant-1 Hotspots to start with
+    quadrant-2 Complex but stable
     quadrant-3 Simple and stable
-    quadrant-4 Simple and busy: fine
-    MainViewModel.cs: [0.85, 0.9]
-    ExportService.cs: [0.7, 0.75]
-    LegacyReportDialog.cs: [0.1, 0.85]
-    Strings.resx: [0.9, 0.1]
-    App.xaml.cs: [0.2, 0.2]
+    quadrant-4 Simple and busy
+    MainViewModel: [0.85, 0.9]
+    ExportService: [0.7, 0.75]
+    LegacyReportDialog: [0.1, 0.85]
+    Strings resource file: [0.9, 0.1]
+    App startup: [0.2, 0.2]
 ```
 
 `LegacyReportDialog.cs` is ugly but stable: leave it. `Strings.resx` changes all the time, but there is nothing to refactor. `MainViewModel.cs` is where the time goes.
