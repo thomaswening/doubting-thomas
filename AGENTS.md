@@ -71,6 +71,7 @@ Style: plain, precise, short sentences. Define a term before using it. One idea 
 - **Inside a list item or a `<details>` block**, a displayed formula is a paragraph of its own, indented to the item's text, in the backtick form with `\displaystyle`: `` $`\displaystyle \frac{a}{b}`$ ``. GitHub shows a ` ```math ` block there as LaTeX source code once the list or block contains any inline math. A `$$ … $$` line breaks as soon as two underscores pair up as Markdown italics. The backtick form is safe from both, because Markdown leaves code spans alone. `\displaystyle` keeps fractions at full size. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43) and [#50](https://github.com/thomaswening/doubting-thomas/pull/50), 13 November 2026.
 - A literal dollar sign in prose is written `\$`.
 - GitHub rejects some macros and shows "The following macros are not allowed" in place of the formula. `\operatorname` is one of them: write `\mathrm{tr}` instead of `\operatorname{tr}`. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
+- Write three-vectors in bold, `\mathbf{x}` and `\boldsymbol{\sigma}`, not with `\vec`. In Firefox, GitHub misplaces the arrow accent and splits the formula after it. Chromium renders it correctly, so a check in one browser doesn't catch it. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
 - Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
 - Write formulas in LaTeX everywhere a formula appears, key claims included. Code, identifiers and program output stay in backticks: `arb_t`, `x^2 - 1` as typed into a program.
 - Check that the note renders on GitHub before asking for review (§9): in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
@@ -97,7 +98,11 @@ Right after each one, the text answers whichever of these questions apply:
 
 Notation comes after the idea it names: first the operation is understood, then it gets its symbol.
 
+**Every map has a domain and a codomain.** A map is introduced with its name, its domain and its codomain, then its rule: $`\Phi : \mathbb{R}^{1,3} \to \mathrm{Herm}(2)`$, $`x \mapsto X(x)`$. A rule such as $`X \mapsto AXA^\dagger`$ alone doesn't say what the map acts on. Where several maps are chained, or one is defined through another, a commutative diagram shows how they connect, drawn as a Mermaid flowchart. Decided by Thomas, 13 November 2026, in the review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
+
 **Full proofs, in two layers.** Every result that belongs to the note's concept is proved. The **proof idea** comes first, in the open text: the picture and the one trick the proof rests on. The **full proof** follows in a collapsed block, `<details><summary>Proof</summary>`, with the empty lines that §2 asks for. Each step that uses an earlier result links it: a claim, a note or a cited result.
+
+**Every step names its tool.** A step that uses an identity, an inequality or a theorem names it, however familiar: "by the triangle inequality", "by the polarisation identity", "by the intermediate value theorem". A reader then sees which fact carries the step instead of having to recognise it. Decided by Thomas, 16 November 2026, in the review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
 
 **Every gap is labelled.** A result that the note uses but doesn't prove is **cited**. It is stated precisely and marked *(cited)*, with a link to its note or to a source with a theorem or page number, in the form "Author, *Title*, Theorem 4.2". Nothing is used without being either proved or cited, because a leap of faith Thomas doesn't notice is the error this rule prevents. How much a citation explains depends on how obvious the result is:
 
