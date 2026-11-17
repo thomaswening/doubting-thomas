@@ -56,6 +56,20 @@ The Mikado Method, from Ola Ellnestam and Daniel Brolund's book (2014), turns th
 5. **Revert.** All of it ([C3](#c3)).
 6. Pick a prerequisite that has none of its own yet, and go to step 2 with it.
 
+```mermaid
+flowchart TD
+    S(["Set the goal, write it down"]) --> T["Try the node, timeboxed, then build and run the tests"]
+    T --> Q{"Works?"}
+    Q -->|yes| C["Commit and tick off the node"]
+    C --> D{"Goal ticked off?"}
+    D -->|yes| E(["Done"])
+    D -->|no| P["Pick an open node with no open prerequisites"]
+    Q -->|no| W["Write what broke as prerequisites below the node"]
+    W --> R["Revert everything"]
+    R --> P
+    P --> T
+```
+
 It ends when the goal itself is ticked off. Working on a leaf is the same loop: a leaf is just a node whose attempt succeeds ([C4](#c4)).
 
 ### Why revert?
