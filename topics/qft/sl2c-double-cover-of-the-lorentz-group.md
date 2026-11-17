@@ -2,7 +2,7 @@
 title: SL(2,ℂ) as the double cover of the Lorentz group
 area: qft
 created: 2026-11-12
-updated: 2026-11-16
+updated: 2026-11-17
 prerequisites: []
 related: [qft/weyl-spinor-representations]
 projects: []
@@ -87,7 +87,7 @@ x \cdot y = x^0 y^0 - \mathbf{x} \cdot \mathbf{y} .
 
   $`\displaystyle SO^+(1,3) \cong SL(2,\mathbb{C})/\{\pm I\},`$
 
-  and SL(2,ℂ) is a double cover of $SO^+(1,3)$.
+  where the quotient is the group of pairs $`\{A, -A\}`$. SL(2,ℂ) is a double cover of $SO^+(1,3)$.
 
 - <a id="c9"></a>**C9.** The path
 
@@ -357,31 +357,107 @@ So $`\Lambda_A`$ fixes time and is a rotation. Restricted to SU(2), $`\pi`$ is t
 
 **Theorem ([C8](#c8)).** $`\pi(SL(2,\mathbb{C})) = SO^+(1,3)`$.
 
-*Proof idea.* A Lorentz transformation is fixed by where it sends the time axis plus a rotation. A rotation and a $z$-boost can move the time axis anywhere on the future unit hyperboloid. What is left fixes the time axis, so it is a rotation. All rotations are reached by [C7](#c7) and Euler angles.
+*Proof idea.* Surjective means: every $`\Lambda \in SO^+(1,3)`$ has a preimage, some $A$ with $`\pi(A) = \Lambda`$. So far only rotations about $z$ and $y$ and boosts along $z$ are known to have one ([C7](#c7)). The plan is to write an arbitrary $`\Lambda`$ as a product of transformations of that kind. Then the homomorphism property ([C4](#c4)) multiplies their preimages into a preimage of $`\Lambda`$.
+
+The key observation: a Lorentz transformation is almost fixed by one vector, the image $`u = \Lambda e_0`$ of the time axis. Any two Lorentz transformations that send $`e_0`$ to the same $u$ differ only by a transformation that fixes $`e_0`$, and such a transformation is a rotation. So the proof builds one transformation $RB$ from the known pieces that also sends $`e_0`$ to $u$: the boost $B$ produces the right time component and the right length of the spatial part, and the rotation $R$ turns the spatial part into the right direction. The rest, $`R' = (RB)^{-1}\Lambda`$, fixes $`e_0`$, so it is a rotation. Every rotation has a preimage (step 1).
 
 <details><summary>Proof</summary>
 
-*Step 1: all rotations are in the image.* By [C7](#c7), rotations about $z$ and about $y$ by any angle are in the image. Every rotation is a product $`R_z(\alpha) R_y(\beta) R_z(\gamma)`$ by Euler's angle decomposition *(cited)*. The image of a homomorphism is closed under products ([C4](#c4)), so every rotation is in the image.
+*Step 1: every rotation has a preimage.* By [C7](#c7), every rotation about $z$ and every rotation about $y$ has a preimage:
 
-*Step 2: decomposition.* Let $`\Lambda \in SO^+(1,3)`$ and $`u = \Lambda e_0`$, where $`e_0 = (1, 0, 0, 0)`$. Then $`u \cdot u = e_0 \cdot e_0 = 1`$ and $`u^0 \ge 1`$. Let $`\eta = \mathrm{arcosh}\, u^0 \ge 0`$. From $`(u^0)^2 - |\mathbf{u}|^2 = 1`$ and the identity $`\cosh^2\eta - \sinh^2\eta = 1`$, $`|\mathbf{u}| = \sinh\eta`$. So for some unit vector $`\hat{n}`$
+$`\displaystyle R_z(\alpha) = \pi\big(e^{-i\alpha\sigma_3/2}\big), \qquad R_y(\beta) = \pi\big(e^{-i\beta\sigma_2/2}\big).`$
+
+By Euler's angle decomposition *(cited)*, every rotation $Q \in SO(3)$ is a product $`Q = R_z(\alpha) R_y(\beta) R_z(\gamma)`$ for some angles. The homomorphism property ([C4](#c4)) turns the product of the three preimages into a preimage of $Q$:
+
+$`\displaystyle Q = \pi\big(e^{-i\alpha\sigma_3/2}\big)\,\pi\big(e^{-i\beta\sigma_2/2}\big)\,\pi\big(e^{-i\gamma\sigma_3/2}\big) = \pi\big(e^{-i\alpha\sigma_3/2}\, e^{-i\beta\sigma_2/2}\, e^{-i\gamma\sigma_3/2}\big).`$
+
+*Step 2: where $`\Lambda`$ sends the time axis.* Let $`\Lambda \in SO^+(1,3)`$, $`e_0 = (1, 0, 0, 0)`$ and $`u = \Lambda e_0`$, the first column of $`\Lambda`$. Two facts restrict $u$. $`\Lambda`$ keeps the Minkowski product, so $`u \cdot u = e_0 \cdot e_0 = 1`$. $`\Lambda`$ is orthochronous, so $`u^0 = \Lambda^0{}_0 \ge 1`$. Let $`\eta = \mathrm{arcosh}\, u^0 \ge 0`$. From $`(u^0)^2 - |\mathbf{u}|^2 = 1`$ and the identity $`\cosh^2\eta - \sinh^2\eta = 1`$, $`|\mathbf{u}| = \sinh\eta`$. So, with a unit vector $`\hat{n}`$ in the direction of $`\mathbf{u}`$ (any unit vector if $`\mathbf{u} = 0`$),
 
 $`\displaystyle u = (\cosh\eta, \sinh\eta\, \hat{n}) .`$
 
-Choose a rotation $R$ with $`R\hat{z} = \hat{n}`$ (step 1), and let $B$ be the $z$-boost with rapidity $`\eta`$ ([C7](#c7)). Then
+*Step 3: a known transformation with the same image of the time axis.* Let $B$ be the $z$-boost with rapidity $`\eta`$. It sends $`e_0`$ to $`(\cosh\eta, 0, 0, \sinh\eta)`$: the right time component and the right spatial length, but along $\hat{z}$ instead of $`\hat{n}`$. Write $`\hat{n}`$ in spherical angles,
 
-$`\displaystyle RB e_0 = R(\cosh\eta, 0, 0, \sinh\eta) = u .`$
+$`\displaystyle \hat{n} = (\sin\theta\cos\varphi,\ \sin\theta\sin\varphi,\ \cos\theta) ,`$
 
-So $`R' = (RB)^{-1}\Lambda`$ fixes $`e_0`$. $R'$ keeps the Minkowski product, so for every $y$ with $`y \cdot e_0 = 0`$ also $`R'y \cdot e_0 = R'y \cdot R'e_0 = y \cdot e_0 = 0`$. So $R'$ maps the space $`\{x^0 = 0\}`$ to itself and keeps $`|\mathbf{x}|^2`$ there: it is an orthogonal transformation of space. By the product rule for determinants, $`\det R' = 1`$, because $`\det\Lambda = \det R = \det B = 1`$. So $R'$ is a rotation, and $`\Lambda = R B R'`$.
+and let $`R = R_z(\varphi) R_y(\theta)`$. $`R_y(\theta)`$ tilts $\hat{z}$ by $`\theta`$ towards $\hat{x}$, and $`R_z(\varphi)`$ then turns it by $`\varphi`$ about $z$, so $`R\hat{z} = \hat{n}`$. A rotation leaves the time component alone, so
 
-*Step 3.* $R$, $B$ and $R'$ are in the image (steps 1 and 2, [C7](#c7)), and so is their product. ∎
+$`\displaystyle RBe_0 = R(\cosh\eta, 0, 0, \sinh\eta) = (\cosh\eta, \sinh\eta\, \hat{n}) = u = \Lambda e_0 .`$
+
+*Step 4: the remainder fixes the time axis.* Define $`R' = (RB)^{-1}\Lambda`$, so that $`\Lambda = RBR'`$. Then
+
+$`\displaystyle R'e_0 = (RB)^{-1}\Lambda e_0 = (RB)^{-1} u = e_0 ,`$
+
+by step 3. So the first column of $R'$ is $`e_0`$.
+
+*Step 5: the remainder is a rotation.* $R'$ is a product of Lorentz transformations, so it keeps the Minkowski product. First, it maps the spatial subspace $`\{x : x^0 = 0\}`$ to itself. A vector $y$ is spatial exactly when $`y \cdot e_0 = y^0 = 0`$. For spatial $y$,
+
+$`\displaystyle (R'y)^0 = R'y \cdot e_0 = R'y \cdot R'e_0 = y \cdot e_0 = 0 ,`$
+
+using $`R'e_0 = e_0`$ (step 4) in the second equality. Written in components, for every spatial $y$:
+
+$`\displaystyle (R'y)^0 = \sum_{j=1}^{3} R'^0{}_j\, y^j = 0 .`$
+
+Taking $y$ along each spatial axis gives $`R'^0{}_j = 0`$ for $j = 1, 2, 3$. With $`R'^0{}_0 = 1`$ from step 4, the first row of $R'$ is $`(1, 0, 0, 0)`$. Together with the first column, $R'$ has block form, with a real 3×3 matrix $Q$:
+
+$`\displaystyle R' = \begin{pmatrix} 1 & 0 \\ 0 & Q \end{pmatrix} .`$
+
+Second, $Q$ is orthogonal. Keeping the Minkowski product means $`R'^T g R' = g`$ with $`g = \mathrm{diag}(1, -1, -1, -1)`$. In blocks, the lower right block of this equation reads $`-Q^TQ = -I`$, so $`Q^TQ = I`$. Third, $`\det Q = 1`$. By the product rule for determinants, $`\det R' = \det(RB)^{-1} \det\Lambda = 1`$, because $R$, $B$ and $`\Lambda`$ all have determinant 1. The determinant of a block-diagonal matrix is the product of the blocks' determinants, so $`\det Q = \det R' = 1`$. Hence $Q \in SO(3)$, and $R'$ is the rotation $Q$ of space.
+
+*Step 6: a preimage of $`\Lambda`$.* All three factors of $`\Lambda = RBR'`$ have preimages. $R$ and $R'$ are rotations (step 1): $`R = \pi(A_R)`$ and $`R' = \pi(A_{R'})`$. $B$ is a $z$-boost ([C7](#c7)): $`B = \pi(A_B)`$ with $`A_B = e^{\eta\sigma_3/2}`$. By the homomorphism property ([C4](#c4)),
+
+$`\displaystyle \Lambda = RBR' = \pi(A_R)\,\pi(A_B)\,\pi(A_{R'}) = \pi(A_R A_B A_{R'}) .`$
+
+So $`A_R A_B A_{R'}`$ is a preimage of $`\Lambda`$. Since $`\Lambda`$ was arbitrary, $`\pi`$ is surjective. ∎
 
 </details>
 
-So $`\pi`$ is a surjective homomorphism with kernel $`\{\pm I\}`$ ([C6](#c6)). By the first isomorphism theorem for groups *(cited)*,
+### The quotient SL(2,ℂ)/{±I}
+
+$`\pi`$ is now onto, but not one-to-one: $A$ and $-A$ give the same Lorentz transformation ([C6](#c6)). The quotient makes it one-to-one by treating $A$ and $-A$ as one element.
+
+**Definition (coset, quotient).** Let $`K = \{I, -I\}`$, the kernel of $`\pi`$ ([C6](#c6)). The **coset** of $A$ is the set of all products of $A$ with an element of $K$:
 
 ```math
-SL(2,\mathbb{C})/\{\pm I\} \cong SO^+(1,3) .
+AK = \{AI, A(-I)\} = \{A, -A\} .
 ```
+
+The **quotient** $`SL(2,\mathbb{C})/\{\pm I\}`$ is the set of these cosets, with the product
+
+```math
+(AK)(BK) = (AB)K .
+```
+
+In words: each element of the quotient is a pair $`\{A, -A\}`$, and two pairs multiply by multiplying any representatives. The choice of representative doesn't matter: replacing $A$ by $-A$ or $B$ by $-B$ changes $AB$ at most by a sign, which stays in the same pair. As a picture: the quotient glues each matrix to its negative, as the real projective plane glues each point of a sphere to its antipode.
+
+**Why each coset is one Lorentz transformation.** By [C6](#c6), $`\pi(A) = \pi(B)`$ exactly when $`B = \pm A`$, that is when $B$ lies in the coset $AK$. So the cosets are exactly the sets of matrices that give the same Lorentz transformation. This is why the quotient is the right object: it has one element for each value of $`\pi`$.
+
+**Proposition ([C8](#c8)).** The map
+
+```math
+\bar{\pi} : SL(2,\mathbb{C})/\{\pm I\} \to SO^+(1,3), \qquad \{A, -A\} \mapsto \Lambda_A
+```
+
+is a group isomorphism.
+
+*Proof idea.* $`\bar{\pi}`$ is $`\pi`$ read on pairs. It is well defined because both members of a pair give the same $`\Lambda_A`$. It is one-to-one because different pairs give different transformations (C6), and onto because $`\pi`$ is (C8).
+
+<details><summary>Proof</summary>
+
+*Well defined.* $`\pi(-A) = \pi(A)`$ ([C6](#c6)), so the value doesn't depend on the representative.
+
+*Homomorphism.* By the product of cosets and [C4](#c4):
+
+$`\displaystyle \bar{\pi}\big((AK)(BK)\big) = \bar{\pi}\big((AB)K\big) = \Lambda_{AB} = \Lambda_A \Lambda_B = \bar{\pi}(AK)\,\bar{\pi}(BK) .`$
+
+*One-to-one.* If $`\bar{\pi}(AK) = \bar{\pi}(BK)`$, then $`\Lambda_A = \Lambda_B`$, so $`B = \pm A`$ by [C6](#c6), and $BK = AK$.
+
+*Onto.* Every $`\Lambda \in SO^+(1,3)`$ is $`\pi(A)`$ for some $A$ (theorem above), so $`\Lambda = \bar{\pi}(AK)`$.
+
+A bijective homomorphism is an isomorphism. ∎
+
+</details>
+
+This is the first isomorphism theorem for groups, proved here for this one case: a surjective homomorphism becomes an isomorphism once the elements that differ by its kernel are identified. The same steps, with the kernel of any surjective homomorphism in place of $`\{\pm I\}`$, prove the general theorem.
 
 "Double cover" means: two elements upstairs, $A$ and $-A$, for each Lorentz transformation downstairs, with the map continuous.
 
@@ -528,7 +604,7 @@ So the momentum transforms because the spinor $`\lambda`$ does.
 - Claude session on the spinor-helicity course, 2026-11-12, and Thomas's review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
 - Mark Srednicki, *Quantum Field Theory* (Cambridge, 2007), chapter 33, "Representations of the Lorentz Group", and chapter 2 for the Lorentz group itself. Srednicki uses the mostly-plus metric. The construction here is metric-independent, but signs in $`x \cdot x`$ flip.
 - Matthew D. Schwartz, *Quantum Field Theory and the Standard Model* (Cambridge, 2014), chapter 10, "Spinors". Source of the mostly-minus conventions used here.
-- Brian C. Hall, *Lie Groups, Lie Algebras, and Representations* (2nd ed., Springer, 2015): chapter 1 for the connectedness and simple connectedness of SL(n,ℂ) via the polar decomposition, and the SU(2) → SO(3) homomorphism; chapter 3 for the Lie algebra of a matrix group, here the traceless matrices. The spectral theorem for Hermitian and unitary matrices, Euler's angle decomposition and the first isomorphism theorem are standard results of linear algebra, rotation geometry and group theory.
+- Brian C. Hall, *Lie Groups, Lie Algebras, and Representations* (2nd ed., Springer, 2015): chapter 1 for the connectedness and simple connectedness of SL(n,ℂ) via the polar decomposition, and the SU(2) → SO(3) homomorphism; chapter 3 for the Lie algebra of a matrix group, here the traceless matrices. The spectral theorem for Hermitian and unitary matrices and Euler's angle decomposition are standard results of linear algebra and rotation geometry.
 - J. J. Sakurai and Jim Napolitano, *Modern Quantum Mechanics* (2nd ed., Addison-Wesley, 2011): section 3.1 for rotations generated by angular momentum, section 3.2 for spin-½ systems and finite rotations.
 - H. Rauch et al., "Verification of coherent spinor rotation of fermions", *Physics Letters A* 54 (1975) 425; S. A. Werner et al., "Observation of the phase shift of a neutron due to precession in a magnetic field", *Physical Review Letters* 35 (1975) 1053. The neutron experiments that show the sign change of a spin-½ state under a $`2\pi`$ rotation.
 - H. K. Dreiner, H. E. Haber, S. P. Martin, "Two-component spinor techniques and Feynman rules for quantum field theory and supersymmetry", [arXiv:0812.1594](https://arxiv.org/abs/0812.1594), section 2, for the same map in two-component notation.
