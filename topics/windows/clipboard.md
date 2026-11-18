@@ -5,7 +5,7 @@ created: 2026-11-18
 updated: 2026-11-18
 prerequisites: [windows/pinvoke-and-unmanaged-memory]
 related: [windows/dpapi]
-projects: [ghostkey]
+projects: []
 tags: [windows, win32, clipboard, interop, secrets, clipboard-history]
 ---
 
@@ -65,7 +65,7 @@ same id twice: True
 
 ```mermaid
 sequenceDiagram
-    participant App as GhostKey
+    participant App as Password tool
     participant Clip as Clipboard (system)
     App->>Clip: OpenClipboard(hwnd)
     Note over App,Clip: fails if another window has it open: retry
@@ -419,11 +419,11 @@ static partial class Native
 
 ## Exercises
 
-1. **Predict.** GhostKey copies a password at sequence number 120 (read after closing). Twenty seconds later the user copies a URL. At thirty seconds the expiry timer fires. What does GhostKey do, and why?
+1. **Predict.** A password tool copies a password at sequence number 120 (read after closing). Twenty seconds later the user copies a URL. At thirty seconds the expiry timer fires. What does the tool do, and why?
 
    <details><summary>Solution</summary>
 
-   Nothing. The user's copy raised the sequence number, so it no longer equals 120, and GhostKey leaves the URL on the clipboard ([C7](#c7)). The password is already gone, since the user's copy replaced it.
+   Nothing. The user's copy raised the sequence number, so it no longer equals 120, and the tool leaves the URL on the clipboard ([C7](#c7)). The password is already gone, since the user's copy replaced it.
 
    </details>
 
@@ -449,4 +449,4 @@ static partial class Native
 - Microsoft Learn, [Clipboard Formats](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats): standard, registered and synthesised formats, and the section *Cloud Clipboard and Clipboard History Formats*.
 - Microsoft Learn, [`OpenClipboard`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard), [`EmptyClipboard`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard), [`SetClipboardData`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata), [`GetClipboardSequenceNumber`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber), [`RegisterClipboardFormatW`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerclipboardformatw).
 - Microsoft Learn, [Message-only windows](https://learn.microsoft.com/en-us/windows/win32/winmsg/window-features#message-only-windows).
-- Claude session on GhostKey, 2026-11-18: the snippet was run there with .NET 10.
+- Claude session, 2026-11-18: the program was run there with .NET 10.
