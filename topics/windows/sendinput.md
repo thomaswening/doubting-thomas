@@ -41,7 +41,7 @@ tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-managemen
 
 ## Explanation
 
-The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. The full program is under [Examples](#examples). It pressed Scroll Lock twice, which leaves the lock state as it was.
+The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. Its `Native` declarations (`SendInput`, `GetLastInputInfo`, `SetThreadExecutionState` and the constants) follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out, and so is `LASTINPUTINFO`, a struct of two `uint` fields, `cbSize` and `dwTime`. It pressed Scroll Lock twice, which leaves the lock state as it was.
 
 ### From key to character
 
@@ -218,98 +218,6 @@ An idle-lock policy at work exists for security: it locks a machine whose user h
 ### Injected input is visible
 
 Synthetic input is not perfectly disguised. A low-level keyboard hook sees an `LLKHF_INJECTED` flag on every injected event. `dwExtraInfo` can carry a value the sender chooses, which hooks can read. Games and some security tools use the flag to ignore or block injected input.
-
-## Examples
-
-The snippets above sit right after the sections they illustrate. Together they form this program; it is collapsed because it only adds the `using`, the remaining declarations and the order of the calls.
-
-<details><summary>The full program</summary>
-
-```csharp
-using System.Runtime.InteropServices;
-
-Console.WriteLine($"sizeof INPUT: {Marshal.SizeOf<INPUT>()}, KEYBDINPUT: {Marshal.SizeOf<KEYBDINPUT>()}");
-
-Thread.Sleep(4000);
-Console.WriteLine($"idle before: {IdleMs()} ms");
-
-Native.SetThreadExecutionState(Native.ES_CONTINUOUS | Native.ES_SYSTEM_REQUIRED | Native.ES_DISPLAY_REQUIRED);
-Console.WriteLine($"idle after SetThreadExecutionState: {IdleMs()} ms");
-Native.SetThreadExecutionState(Native.ES_CONTINUOUS);   // end the request
-
-INPUT[] inputs =
-[
-    Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
-    Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
-];
-uint sent = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
-Thread.Sleep(50);
-Console.WriteLine($"sent: {sent}, idle after SendInput: {IdleMs()} ms");
-
-uint bad = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>() - 8);
-Console.WriteLine($"wrong cbSize: {bad}, error {Marshal.GetLastPInvokeError()}");
-
-static INPUT Key(ushort vk, bool up) => new()
-{
-    type = Native.INPUT_KEYBOARD,
-    u = new InputUnion { ki = new KEYBDINPUT { wVk = vk, dwFlags = up ? Native.KEYEVENTF_KEYUP : 0 } },
-};
-
-static INPUT[] TypeChar(char c) =>
-[
-    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE } } },
-    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE | Native.KEYEVENTF_KEYUP } } },
-];
-
-static uint IdleMs()
-{
-    var info = new LASTINPUTINFO { cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>() };
-    Native.GetLastInputInfo(ref info);
-    return (uint)Environment.TickCount - info.dwTime;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-struct INPUT { public uint type; public InputUnion u; }
-
-[StructLayout(LayoutKind.Explicit)]
-struct InputUnion
-{
-    [FieldOffset(0)] public MOUSEINPUT mi;
-    [FieldOffset(0)] public KEYBDINPUT ki;
-    [FieldOffset(0)] public HARDWAREINPUT hi;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public nuint dwExtraInfo; }
-
-[StructLayout(LayoutKind.Sequential)]
-struct KEYBDINPUT { public ushort wVk, wScan; public uint dwFlags, time; public nuint dwExtraInfo; }
-
-[StructLayout(LayoutKind.Sequential)]
-struct HARDWAREINPUT { public uint uMsg; public ushort wParamL, wParamH; }
-
-[StructLayout(LayoutKind.Sequential)]
-struct LASTINPUTINFO { public uint cbSize, dwTime; }
-
-static partial class Native
-{
-    public const uint INPUT_KEYBOARD = 1, KEYEVENTF_KEYUP = 0x0002, KEYEVENTF_UNICODE = 0x0004;
-    public const ushort VK_SCROLL = 0x91;
-    public const uint ES_CONTINUOUS = 0x80000000, ES_SYSTEM_REQUIRED = 0x1, ES_DISPLAY_REQUIRED = 0x2;
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    public static partial uint SendInput(uint count, [In] INPUT[] inputs, int size);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool GetLastInputInfo(ref LASTINPUTINFO info);
-
-    [LibraryImport("kernel32.dll")]
-    public static partial uint SetThreadExecutionState(uint flags);
-}
-```
-
-</details>
 
 ## Good habits
 
