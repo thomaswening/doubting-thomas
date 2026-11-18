@@ -17,7 +17,7 @@ tags: [dotnet, interop, pinvoke, libraryimport, marshalling, safehandle, pinning
 
 - There are two ways to declare it. **`[DllImport]`** converts arguments at run time. **`[LibraryImport]`** (.NET 7+) has a source generator write that conversion code at compile time, so you can read it, it works with Native AOT, and it refuses types whose conversion would be a guess.
 
-- Native memory is outside the garbage collector. You free it yourself, best through a **`SafeHandle`**: the native counterpart of `IDisposable` plus a finaliser.
+- Native pointers and handles arrive as **`nint`**, an integer the size of a pointer that carries no type and no ownership. Native memory is outside the garbage collector. You free it yourself, best through a **`SafeHandle`** subclass: the native counterpart of `IDisposable` plus a finaliser, which P/Invoke can return in place of the raw `nint`.
 
 - The GC **moves** objects when it compacts the heap. A native function holding a pointer into a managed array needs that array **pinned**: for one statement with `fixed`, or for its whole life with `GC.AllocateArray<byte>(n, pinned: true)`.
 
@@ -45,13 +45,25 @@ tags: [dotnet, interop, pinvoke, libraryimport, marshalling, safehandle, pinning
 
 - <a id="c10"></a>**C10.** A secret buffer can be wrapped in an `IDisposable` type whose `Dispose` calls `ZeroMemory`. Used with `using`, the buffer is zeroed when the block is left, also when an exception leaves it. Copies made from the buffer's contents are not zeroed.
 
+- <a id="c11"></a>**C11.** `nint` is C#'s native-sized integer, the same type as `IntPtr`: 4 bytes in a 32-bit process, 8 bytes in a 64-bit one. Win32 pointers and handles (`HANDLE`, `HGLOBAL`, `HWND`) arrive in C# as `nint`. An `nint` is only a number: it carries no type and no ownership.
+
+- <a id="c12"></a>**C12.** For a P/Invoke method whose return type is a `SafeHandle` subclass, the marshaller calls the native function as if it returned an `nint`, creates the subclass through its parameterless constructor, and stores the value in it. For a `SafeHandle` parameter, it passes the stored `nint` and keeps the handle from being released until the call returns.
+
 ## Explanation
+
+Each snippet below is a complete `Program.cs` for a console project with `<TargetFramework>net10.0-windows</TargetFramework>` and `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`. All were run with .NET 10 on Windows 11, and the output shown is what they printed.
 
 ### Calling a native function
 
-A Windows DLL such as `kernel32.dll` exports functions by name, the way a .NET assembly exposes public methods. C# can call them if you tell it the signature ([C1](#c1)):
+A Windows DLL such as `kernel32.dll` exports functions by name, the way a .NET assembly exposes public methods. C# can call them if you tell it the signature ([C1](#c1)). On the first call, the runtime loads the DLL (`kernel32.dll` is already loaded in every process), looks up the function by name and calls it.
+
+The C signature of the function below is `DWORD GetCurrentProcessId(void)`. A `DWORD` is a 32-bit unsigned integer, so the C# side returns `uint`:
 
 ```csharp
+using System.Runtime.InteropServices;
+
+Console.WriteLine(Native.GetCurrentProcessId() == Environment.ProcessId);
+
 internal static partial class Native
 {
     [LibraryImport("kernel32.dll")]
@@ -59,9 +71,41 @@ internal static partial class Native
 }
 ```
 
-On the first call, the runtime loads `kernel32.dll` (already loaded in every process), looks up `GetCurrentProcessId` and calls it. The C signature is `DWORD GetCurrentProcessId(void)`. A `DWORD` is a 32-bit unsigned integer, so the C# side returns `uint`.
+```text
+True
+```
 
 The DLL is found by the Windows DLL search order. For system DLLs that are not on the protected "known DLLs" list, the application's own folder comes first. A DLL of the same name next to your `.exe` wins.
+
+### nint: an integer the size of a pointer
+
+Native code passes pointers and **handles** around. A handle is a number that stands for something the operating system keeps for you: a window (`HWND`), a memory block (`HGLOBAL`), an open file (`HANDLE`). You never see inside it. You hand it back to the functions that know what it means, like a key to a locker.
+
+Pointers and handles have the size of a memory address: 4 bytes in a 32-bit process, 8 in a 64-bit one. C# has a type with exactly that size: **`nint`**, the native-sized integer ([C11](#c11)). It is the same type as `IntPtr`, under a shorter name; `nuint` is `UIntPtr`. Where C uses a pointer or a handle, the C# declaration uses `nint`.
+
+```csharp
+using System.Runtime.InteropServices;
+
+Console.WriteLine($"64-bit process: {Environment.Is64BitProcess}, size of nint: {IntPtr.Size} bytes");
+Console.WriteLine($"nint is IntPtr: {typeof(nint) == typeof(IntPtr)}");
+
+nint module = Native.GetModuleHandleW("kernel32.dll");   // a handle: just a number
+Console.WriteLine($"kernel32 handle is non-zero: {module != 0}");
+
+internal static partial class Native
+{
+    [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial nint GetModuleHandleW(string moduleName);
+}
+```
+
+```text
+64-bit process: True, size of nint: 8 bytes
+nint is IntPtr: True
+kernel32 handle is non-zero: True
+```
+
+An `nint` is only a number. It doesn't know whether it is a window, a memory block or a file, and nothing frees what it stands for. That is the gap `SafeHandle` closes, further down.
 
 ### Marshalling: when the two sides disagree
 
@@ -107,7 +151,7 @@ static partial bool GetUserNameW([Out] char[] buffer, ref uint size);
 
 `[DllImport]` has defaults: a `bool` becomes a 4-byte `BOOL`, and `char` follows `CharSet`, which defaults to ANSI. Defaults are guesses. A wrong guess means a corrupted value at run time, not a build error.
 
-`[LibraryImport]` makes no guesses. A `bool` without `[MarshalAs]` is a build error, and so is a `char[]` without `StringMarshalling`. The generated code is ordinary C# you can open in the IDE under *Analyzers*. It needs `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>` in the project, because the generated body uses pointers. Prefer it in new code: the .NET analyzers even offer to convert `[DllImport]` declarations.
+`[LibraryImport]` makes no guesses. A `bool` without `[MarshalAs]` is a build error, and so is a `char[]` without `StringMarshalling` (`SYSLIB1051`). The generated code is ordinary C# you can open in the IDE under *Analyzers*. It needs `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>` in the project, because the generated body uses pointers. Prefer it in new code: the .NET analyzers even offer to convert `[DllImport]` declarations.
 
 The analogy in .NET terms: `[DllImport]` is like reflection-based serialisation, `[LibraryImport]` like `System.Text.Json`'s source generator.
 
@@ -115,11 +159,40 @@ The analogy in .NET terms: `[DllImport]` is like reflection-based serialisation,
 
 Win32 functions report failure through their return value, usually `FALSE` or `NULL`, and leave the reason in a thread-local **last-error code**. The runtime itself calls Win32 functions too, which could overwrite that code before your next line runs. So `SetLastError = true` asks the marshaller to save the code right after the call. You read the saved value with `Marshal.GetLastPInvokeError()` ([C4](#c4)). `new Win32Exception(code)` turns it into a message.
 
+`GetUserNameW` fills a buffer you pass in. The second call gives it a buffer that is too small:
+
+```csharp
+using System.Runtime.InteropServices;
+
+char[] name = new char[256];
+uint size = (uint)name.Length;
+bool ok = Native.GetUserNameW(name, ref size);   // size now includes the terminating zero
+Console.WriteLine($"{ok}, {new string(name, 0, (int)size - 1) == Environment.UserName}");
+
+uint tooSmall = 1;
+ok = Native.GetUserNameW(new char[1], ref tooSmall);
+Console.WriteLine($"{ok}, error {Marshal.GetLastPInvokeError()}");
+
+internal static partial class Native
+{
+    [LibraryImport("advapi32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool GetUserNameW([Out] char[] buffer, ref uint size);
+}
+```
+
+```text
+True, True
+False, error 122
+```
+
+Error 122 is `ERROR_INSUFFICIENT_BUFFER`.
+
 ### Native memory and SafeHandle
 
-Memory that native code allocates is invisible to the GC. Nothing frees it unless you do. The same goes for handles: a window, a file, a block from `GlobalAlloc`.
+Memory that native code allocates is invisible to the GC. Nothing frees it unless you do. The same goes for every handle: a window, a file, a block from `GlobalAlloc`. If `GlobalAlloc` gives you an `nint`, you must call `GlobalFree` on it exactly once, also when an exception gets in the way. That is the same problem `IDisposable` solves for managed resources.
 
-In C++, a destructor would free it ([RAII](../cpp/raii-and-ownership.md)). In .NET, the tool is `SafeHandle` ([C5](#c5)). You subclass it and override `ReleaseHandle` with the native free call:
+In C++, a destructor would free it ([RAII](../cpp/raii-and-ownership.md)). In .NET, the tool is `SafeHandle` ([C5](#c5)). It is an abstract class that holds an `nint` in a protected field called `handle` and implements `IDisposable` and a finaliser for you. You write one small subclass per *kind* of handle, and the only thing it adds is how to free that kind:
 
 ```csharp
 internal sealed class SafeGlobalHandle : SafeHandleZeroOrMinusOneIsInvalid
@@ -129,20 +202,93 @@ internal sealed class SafeGlobalHandle : SafeHandleZeroOrMinusOneIsInvalid
 }
 ```
 
-Then the P/Invoke declaration returns it instead of an `nint`:
+`SafeHandleZeroOrMinusOneIsInvalid` is a ready-made base that treats 0 and -1 as "no handle", which is how most Win32 functions signal failure.
+
+Then the P/Invoke declaration says `SafeGlobalHandle` where the C function returns an `HGLOBAL`:
 
 ```csharp
 [LibraryImport("kernel32.dll", SetLastError = true)]
 public static partial SafeGlobalHandle GlobalAlloc(uint flags, nuint bytes);
 ```
 
-What you get over a bare `nint` in a class with `Dispose` and a finaliser:
+#### How the generator knows what to do
 
-- The handle is wrapped *inside* the marshalling code, so no exception between the native call and your assignment can leak it.
+The native `GlobalAlloc` returns a pointer-sized number. It has no idea what C# types are. A DLL export carries a name and nothing else: no parameter types, no return type. Your C# declaration is the only description of the call, and it is a promise: "this function returns something pointer-sized."
+
+When the return type is a `SafeHandle` subclass, the source generator reads that as "the native function returns an `nint`; wrap it in this class" ([C12](#c12)). The code it writes for the declaration above looks like this, shortened:
+
+```csharp
+public static partial SafeGlobalHandle GlobalAlloc(uint flags, nuint bytes)
+{
+    // Created before the call, through the parameterless constructor,
+    // so nothing can fail between the native call and the wrapping.
+    var marshaller = new SafeHandleMarshaller<SafeGlobalHandle>.ManagedToUnmanagedOut();
+    Marshal.SetLastSystemError(0);
+    nint native = __PInvoke(flags, bytes);              // the real call: returns an nint
+    int lastError = Marshal.GetLastSystemError();
+    marshaller.FromUnmanaged(native);                   // store the nint in the new SafeGlobalHandle
+    SafeGlobalHandle result = marshaller.ToManaged();
+    Marshal.SetLastPInvokeError(lastError);
+    return result;
+
+    [DllImport("kernel32.dll", EntryPoint = "GlobalAlloc", ExactSpelling = true)]
+    static extern nint __PInvoke(uint flags, nuint bytes);
+}
+```
+
+The inner `__PInvoke` declares the native function as returning `nint`. Your `SafeGlobalHandle` exists only on the C# side. This is why the subclass needs a public parameterless constructor: the generated code creates it.
+
+For a `SafeHandle` *parameter*, as in `GlobalSize(SafeGlobalHandle mem)`, the generated code goes the other way. It takes the `nint` out of the handle, passes it, and holds a reference count on the handle until the call returns. A `Dispose` on another thread meanwhile only marks the handle closed, and `ReleaseHandle` runs after the call. Native code never works on a freed handle.
+
+In short: one subclass per kind of handle, and the imported function returns it as a wrapper around the raw value. What it gains over an `nint` in a class of your own:
+
+- The wrapping happens *inside* the generated code, so no exception between the native call and your assignment can leak the handle.
 - `ReleaseHandle` runs exactly once, from `Dispose` or from the finaliser.
-- While a P/Invoke call is using the handle, the `SafeHandle` counts the use. If another thread calls `Dispose` meanwhile, `ReleaseHandle` is put off until the call returns, so native code never works on a freed handle.
+- A handle in use by a native call is never released under it.
 
 The [note on opaque handles](../c/opaque-handles.md#c6) shows the same idea from the C side.
+
+```csharp
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+
+using (SafeGlobalHandle h = Native.GlobalAlloc(Native.GMEM_MOVEABLE, 16))
+{
+    Console.WriteLine($"invalid: {h.IsInvalid}, size: {Native.GlobalSize(h)}");
+}   // Dispose calls ReleaseHandle, which calls GlobalFree
+
+internal sealed class SafeGlobalHandle : SafeHandleZeroOrMinusOneIsInvalid
+{
+    public SafeGlobalHandle() : base(ownsHandle: true) { }
+
+    protected override bool ReleaseHandle()
+    {
+        Console.WriteLine("ReleaseHandle: GlobalFree");
+        return Native.GlobalFree(handle) == 0;
+    }
+}
+
+internal static partial class Native
+{
+    public const uint GMEM_MOVEABLE = 0x0002;
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    public static partial SafeGlobalHandle GlobalAlloc(uint flags, nuint bytes);
+
+    [LibraryImport("kernel32.dll")]
+    public static partial nuint GlobalSize(SafeGlobalHandle mem);
+
+    [LibraryImport("kernel32.dll")]
+    public static partial nint GlobalFree(nint mem);
+}
+```
+
+```text
+invalid: False, size: 16
+ReleaseHandle: GlobalFree
+```
+
+`GlobalFree` itself still takes a plain `nint`: it is called from inside `ReleaseHandle`, where the raw value is all there is.
 
 Two allocation functions appear in Win32 code, and they are not interchangeable:
 
@@ -157,6 +303,22 @@ The GC compacts the heap: it copies live objects together to close the gaps, and
 
 - **`fixed`** pins for one block. The P/Invoke marshaller does the same for a `byte[]` argument during the call.
 - **`GC.AllocateArray<T>(n, pinned: true)`** (.NET 5+) allocates on the **pinned object heap**, a separate heap the GC never compacts. The array stays at one address for its whole life.
+
+```csharp
+byte[] movable = new byte[4];
+unsafe
+{
+    fixed (byte* q = movable)   // the GC won't move the array inside this block
+    {
+        *q = 42;
+    }
+}   // from here on the array may move again, and q must not be used
+Console.WriteLine(movable[0]);
+```
+
+```text
+42
+```
 
 Pinning matters for secrets even when no native code is involved. When the GC moves an array, the bytes at the old address are not wiped. They stay in memory until something else overwrites them. A pinned array has exactly one copy, so one `ZeroMemory` really erases it.
 
@@ -175,57 +337,16 @@ flowchart LR
 
 Writing zeros in a loop into a buffer that is never read again is a "dead store". An optimising compiler may delete it, because no observable behaviour changes. `CryptographicOperations.ZeroMemory` is guaranteed not to be removed ([C7](#c7)). It takes a `Span<byte>`, so it works on arrays and on native memory alike. For a `char[]`, pass `MemoryMarshal.AsBytes(chars.AsSpan())`.
 
-### Wiping by Dispose
-
-Calling `ZeroMemory` by hand has the problem every manual cleanup has: an exception or an early `return` skips it. .NET's answer for cleanup is `IDisposable` with `using`, and it fits here too ([C10](#c10)). A small `SecretBuffer` class owns a pinned array, hands it out only as a `Span<byte>`, and zeroes it in `Dispose`. Held in a `using`, the buffer is zeroed when the block is left, whether normally or by an exception. The example below shows one.
-
-Two limits remain. `using` only zeroes the buffer itself: a `string` or another array made from its contents is a copy outside the wrapper. And if the caller forgets `using`, nothing zeroes it. A finaliser could, but only at some later garbage collection, so the analyzer warning CA2000 (dispose objects before losing scope) is the better safety net.
-
-### Why not a string?
-
-Everything above is why a password tool keeps secrets out of `string` ([C8](#c8)):
-
-- **Immutable.** There is no supported way to overwrite a string's characters. You can only drop the reference and wait.
-- **Interned.** A string literal is shared and lives until the process ends.
-- **Moved.** A string lives on the ordinary heap, so compaction can leave copies behind, as in the diagram.
-- **Copied.** `Substring`, `+`, `$"…"`, `ToString`, a WPF `TextBox`, a log call: each makes a new string you can't wipe.
-
-In memory, a string on 64-bit .NET is an object header (8 bytes), a method-table pointer (8 bytes), a 4-byte length, then the characters in UTF-16 and a terminating zero character. The password sits there as plain UTF-16 for anyone who can read the process memory or a crash dump.
-
-`SecureString` was meant to fix this. Microsoft now advises against it ([C9](#c9)): on Linux and macOS it isn't encrypted at all, and to *use* the secret (send it, show it, hash it) you almost always convert it to a `string` or plain memory first. The guidance is to avoid holding credentials in the process where possible, and otherwise to keep the window short: plain bytes in a buffer you control, wiped right after use.
-
-## Examples
-
-All snippets were run in one console project (`net10.0-windows`, `AllowUnsafeBlocks` on), with the declarations at the end.
+The snippet keeps a secret in a pinned array, copies it into native memory, and wipes both:
 
 ```csharp
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Win32.SafeHandles;
 
-// 1. A first call
-Console.WriteLine(Native.GetCurrentProcessId() == Environment.ProcessId);
-
-// 2. A buffer the native side fills, and the last-error code
-char[] name = new char[256];
-uint size = (uint)name.Length;
-bool ok = Native.GetUserNameW(name, ref size);   // size now includes the terminating zero
-Console.WriteLine($"{ok}, {new string(name, 0, (int)size - 1) == Environment.UserName}");
-
-uint tooSmall = 1;
-ok = Native.GetUserNameW(new char[1], ref tooSmall);
-Console.WriteLine($"{ok}, error {Marshal.GetLastPInvokeError()}");
-
-// 3. SafeHandle around GlobalAlloc
-using (SafeGlobalHandle h = Native.GlobalAlloc(Native.GMEM_MOVEABLE, 16))
-{
-    Console.WriteLine($"invalid: {h.IsInvalid}, size: {Native.GlobalSize(h)}");
-}   // GlobalFree runs here
-
-// 4. A pinned secret, copied to native memory, both wiped
 byte[] secret = GC.AllocateArray<byte>(8, pinned: true);
 "s3cr3t!?"u8.CopyTo(secret);
-nint p = Marshal.AllocHGlobal(secret.Length);
+
+nint p = Marshal.AllocHGlobal(secret.Length);   // native memory, invisible to the GC
 Marshal.Copy(secret, 0, p, secret.Length);
 unsafe
 {
@@ -234,73 +355,19 @@ unsafe
     Console.WriteLine($"native zeroed: {native.IndexOfAnyExcept((byte)0) < 0}");
 }
 Marshal.FreeHGlobal(p);
+
 CryptographicOperations.ZeroMemory(secret);
 Console.WriteLine($"managed zeroed: {secret.AsSpan().IndexOfAnyExcept((byte)0) < 0}");
-
-// 5. fixed: a pointer into an ordinary array, valid only inside the block
-byte[] movable = new byte[4];
-unsafe
-{
-    fixed (byte* q = movable)
-    {
-        *q = 42;
-    }
-}
-Console.WriteLine(movable[0]);
-
-// 6. Strings: equal text, separate copies; the literal is interned
-string a = "hunter2";
-string b = string.Concat("hunter", "2".AsSpan());
-Console.WriteLine($"{ReferenceEquals(a, b)}, {ReferenceEquals(a, string.IsInterned(b))}");
-
-internal sealed class SafeGlobalHandle : SafeHandleZeroOrMinusOneIsInvalid
-{
-    public SafeGlobalHandle() : base(ownsHandle: true) { }
-    protected override bool ReleaseHandle() => Native.GlobalFree(handle) == 0;
-}
-
-internal static partial class Native
-{
-    public const uint GMEM_MOVEABLE = 0x0002;
-
-    [LibraryImport("kernel32.dll")]
-    public static partial uint GetCurrentProcessId();
-
-    [LibraryImport("advapi32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool GetUserNameW([Out] char[] buffer, ref uint size);
-
-    [LibraryImport("kernel32.dll", SetLastError = true)]
-    public static partial SafeGlobalHandle GlobalAlloc(uint flags, nuint bytes);
-
-    [LibraryImport("kernel32.dll")]
-    public static partial nuint GlobalSize(SafeGlobalHandle mem);
-
-    [LibraryImport("kernel32.dll")]
-    public static partial nint GlobalFree(nint mem);
-}
 ```
-
-Expected output:
 
 ```text
-True
-True, True
-False, error 122
-invalid: False, size: 16
 native zeroed: True
 managed zeroed: True
-42
-False, True
 ```
 
-- Error 122 is `ERROR_INSUFFICIENT_BUFFER`: the one-character buffer was too small ([C4](#c4)).
-- Without `StringMarshalling = StringMarshalling.Utf16`, the build fails with `SYSLIB1051` on the `char[]` parameter ([C3](#c3)).
-- In 6, `b` has the same text as `a` but is a separate object: a second copy of the "password" now exists. `string.IsInterned(b)` returns the literal's instance, which lives until the process ends ([C8](#c8)).
+### Wiping by Dispose
 
-### A buffer that zeroes itself on Dispose
-
-A second program, run with .NET 10. `DangerousArray` exists only so the demo can look at the array after disposal ([C10](#c10)):
+Calling `ZeroMemory` by hand has the problem every manual cleanup has: an exception or an early `return` skips it. .NET's answer for cleanup is `IDisposable` with `using`, and it fits here too ([C10](#c10)). A small `SecretBuffer` class owns a pinned array, hands it out only as a `Span<byte>`, and zeroes it in `Dispose`. Held in a `using`, the buffer is zeroed when the block is left, whether normally or by an exception. `DangerousArray` exists only so the demo can look at the array after disposal:
 
 ```csharp
 using System.Security.Cryptography;
@@ -351,8 +418,6 @@ public sealed class SecretBuffer : IDisposable
 }
 ```
 
-Expected output:
-
 ```text
 hunter2
 after using: all zero = True
@@ -360,7 +425,47 @@ after exception: all zero = True
 use after Dispose: ObjectDisposedException
 ```
 
-The demo itself breaks the rule it shows: `"hunter2"` is a string literal, and `Encoding.UTF8.GetString` makes another string. Real code fills the buffer from a source that isn't a `string`, such as `Unprotect`'s result copied in and zeroed, or characters read one at a time from a password box.
+Two limits remain. `using` only zeroes the buffer itself: a `string` or another array made from its contents is a copy outside the wrapper. The demo breaks that rule on purpose: `"hunter2"` is a string literal, and `Encoding.UTF8.GetString` makes another string. Real code fills the buffer from a source that isn't a `string`, such as `Unprotect`'s result copied in and zeroed, or characters read one at a time from a password box. And if the caller forgets `using`, nothing zeroes it. A finaliser could, but only at some later garbage collection, so the analyzer warning CA2000 (dispose objects before losing scope) is the better safety net.
+
+### Why not a string?
+
+Everything above is why a password tool keeps secrets out of `string` ([C8](#c8)):
+
+- **Immutable.** There is no supported way to overwrite a string's characters. You can only drop the reference and wait.
+- **Interned.** A string literal is shared and lives until the process ends.
+- **Moved.** A string lives on the ordinary heap, so compaction can leave copies behind, as in the diagram.
+- **Copied.** `Substring`, `+`, `$"…"`, `ToString`, a WPF `TextBox`, a log call: each makes a new string you can't wipe.
+
+```csharp
+string a = "hunter2";
+string b = string.Concat("hunter", "2".AsSpan());
+Console.WriteLine($"equal text: {a == b}, same object: {ReferenceEquals(a, b)}");
+Console.WriteLine($"the literal is interned: {ReferenceEquals(a, string.IsInterned(b))}");
+```
+
+```text
+equal text: True, same object: False
+the literal is interned: True
+```
+
+`b` has the same text as `a` but is a separate object: a second copy of the "password" now exists. `string.IsInterned(b)` returns the literal's instance, which lives until the process ends.
+
+In memory, a string on 64-bit .NET is an object header (8 bytes), a method-table pointer (8 bytes), a 4-byte length, then the characters in UTF-16 and a terminating zero character. The password sits there as plain UTF-16 for anyone who can read the process memory or a crash dump.
+
+`SecureString` was meant to fix this. Microsoft now advises against it ([C9](#c9)): on Linux and macOS it isn't encrypted at all, and to *use* the secret (send it, show it, hash it) you almost always convert it to a `string` or plain memory first. The guidance is to avoid holding credentials in the process where possible, and otherwise to keep the window short: plain bytes in a buffer you control, wiped right after use.
+
+## Examples
+
+The examples sit in the explanation above, each right after the section it illustrates:
+
+- [Calling a native function](#calling-a-native-function): `GetCurrentProcessId`.
+- [nint](#nint-an-integer-the-size-of-a-pointer): its size, and a module handle.
+- [Errors](#errors-the-last-error-code): `GetUserNameW` with a buffer, and error 122.
+- [SafeHandle](#native-memory-and-safehandle): `SafeGlobalHandle` around `GlobalAlloc`, and the code the generator writes.
+- [Pinning](#pinning-the-gc-moves-things): `fixed`.
+- [ZeroMemory](#wiping-zeromemory): wiping managed and native memory.
+- [Wiping by Dispose](#wiping-by-dispose): `SecretBuffer`.
+- [Why not a string?](#why-not-a-string): two copies of the same text, and interning.
 
 ## Good habits
 
@@ -431,6 +536,14 @@ The demo itself breaks the rule it shows: `"hunter2"` is a string literal, and `
 
    </details>
 
+5. **Explain.** The C function is `HGLOBAL GlobalAlloc(UINT, SIZE_T)`. The C# declaration returns `SafeGlobalHandle`. Nothing in `kernel32.dll` mentions that class. Who creates the `SafeGlobalHandle`, when, and what does the native function actually return?
+
+   <details><summary>Solution</summary>
+
+   The native function returns a pointer-sized number, an `nint` ([C11](#c11)). The code the source generator writes declares an inner `extern` method that returns `nint`, creates the `SafeGlobalHandle` through its parameterless constructor before the call, and stores the returned value in it after the call ([C12](#c12)). The DLL only knows the function's name; the C# declaration is the only place that says what the value means.
+
+   </details>
+
 ## Sources
 
 - Microsoft Learn, [Platform Invoke (P/Invoke)](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke).
@@ -441,4 +554,5 @@ The demo itself breaks the rule it shows: `"hunter2"` is a string literal, and `
 - Microsoft Learn, [`GC.AllocateArray`](https://learn.microsoft.com/en-us/dotnet/api/system.gc.allocatearray) and [`CryptographicOperations.ZeroMemory`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.zeromemory).
 - Microsoft Learn, [`SecureString` class](https://learn.microsoft.com/en-us/dotnet/api/system.security.securestring), section *Remarks*, and [DE0001: SecureString shouldn't be used](https://github.com/dotnet/platform-compat/blob/master/docs/DE0001.md).
 - Microsoft Learn, [Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order).
-- Claude session on GhostKey, 2026-11-18: the snippets were run there with .NET 10.
+- Microsoft Learn, [Native-sized integers](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types#native-sized-integers): `nint` and `nuint`, and that they are `IntPtr` and `UIntPtr`.
+- Claude session on GhostKey, 2026-11-18: every snippet was run there with .NET 10. The shortened generated code for `GlobalAlloc` comes from building with `EmitCompilerGeneratedFiles=true` and reading `LibraryImports.g.cs`.
