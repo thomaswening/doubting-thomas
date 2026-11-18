@@ -360,7 +360,7 @@ nint p = Marshal.AllocHGlobal(secret.Length);   // native memory, invisible to t
 Marshal.Copy(secret, 0, p, secret.Length);
 unsafe
 {
-    var native = new Span<byte>((void*)p, secret.Length);
+    var native = new Span<byte>((byte*)p, secret.Length);
     CryptographicOperations.ZeroMemory(native);
     Console.WriteLine($"native zeroed: {native.IndexOfAnyExcept((byte)0) < 0}");
 }
@@ -380,7 +380,9 @@ Step by step:
 1. `GC.AllocateArray<byte>(8, pinned: true)` makes an 8-byte managed array that never moves, and the secret is copied into it.
 2. `Marshal.AllocHGlobal(8)` allocates 8 bytes of native memory and returns its address as an `nint`, here `p`. It is .NET's way of calling C's `malloc`; the memory is invisible to the GC.
 3. `Marshal.Copy(secret, 0, p, secret.Length)` copies `secret.Length` bytes from the array, starting at index 0, to the address `p`. It is `memcpy` with a managed array on one side.
-4. The `unsafe` block turns `p` into a `Span<byte>`. A `Span` over native memory needs a real pointer (`void*`), and C# allows pointer types only inside `unsafe` code, which is code the compiler can't check for memory safety. Here it is safe because the span covers exactly the 8 bytes that were allocated. `ZeroMemory` then wipes them through the span.
+4. The `unsafe` block turns `p` into a `Span<byte>`. `p` is an `nint`, a plain number; `(byte*)p` reinterprets that number as the address of a byte, a real pointer type. C# allows pointer types only inside `unsafe` code, which is code the compiler can't check for memory safety. Here it is safe because the span covers exactly the 8 bytes that were allocated. `ZeroMemory` then wipes them through the span.
+
+   The constructor's parameter is declared as `void*`: a pointer with no element type, just an address, which can't be dereferenced until it is cast to a typed pointer. Any typed pointer, `byte*` included, converts to `void*` on its own, the way any reference converts to `object`. The span's element type comes from `Span<byte>`, not from the pointer. Writing `(void*)p` would compile as well; `(byte*)p` just says what the memory holds.
 5. `Marshal.FreeHGlobal(p)` gives the native block back, like C's `free`. After this, `p` must not be used.
 6. Last, the managed copy is wiped as well. Both checks print `True`: no byte other than 0 is left.
 
