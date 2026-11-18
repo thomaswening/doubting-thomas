@@ -47,7 +47,7 @@ expected output
 
 ## Examples
 
-<Links to the snippets in the Explanation, worked examples that span the whole note, or the full program the snippets come from (collapsed in <details> if it only adds declarations).>
+<Links to the snippets in the Explanation, worked examples that span the whole note, or the full program the snippets come from (collapsed in `<details>` if it only adds declarations).>
 
 ```csharp
 // snippet
