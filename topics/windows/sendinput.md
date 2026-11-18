@@ -41,7 +41,7 @@ tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-managemen
 
 ## Explanation
 
-The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. Its `Native` declarations (`SendInput`, `GetLastInputInfo`, `SetThreadExecutionState` and the constants) follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out, and so is `LASTINPUTINFO`, a struct of two `uint` fields, `cbSize` and `dwTime`. It pressed Scroll Lock twice, which leaves the lock state as it was.
+The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. Its `Native` declarations (`SendInput`, `GetLastInputInfo`, `SetThreadExecutionState` and the constants) follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out. So is `LASTINPUTINFO`, a struct of two `uint` fields, `cbSize` and `dwTime`. It pressed Scroll Lock twice, which leaves the lock state as it was.
 
 ### From key to character
 
