@@ -43,6 +43,8 @@ tags: [dotnet, interop, pinvoke, libraryimport, marshalling, safehandle, pinning
 
 - <a id="c9"></a>**C9.** Microsoft recommends against `SecureString` for new code (platform-compat diagnostic DE0001). It is encrypted only on Windows, and most APIs that consume it turn it into a `string` or plain memory anyway.
 
+- <a id="c10"></a>**C10.** A secret buffer can be wrapped in an `IDisposable` type whose `Dispose` calls `ZeroMemory`. Used with `using`, the buffer is zeroed when the block is left, also when an exception leaves it. Copies made from the buffer's contents are not zeroed.
+
 ## Explanation
 
 ### Calling a native function
@@ -161,6 +163,12 @@ flowchart LR
 
 Writing zeros in a loop into a buffer that is never read again is a "dead store". An optimising compiler may delete it, because no observable behaviour changes. `CryptographicOperations.ZeroMemory` is guaranteed not to be removed ([C7](#c7)). It takes a `Span<byte>`, so it works on arrays and on native memory alike. For a `char[]`, pass `MemoryMarshal.AsBytes(chars.AsSpan())`.
 
+### Wiping by Dispose
+
+Calling `ZeroMemory` by hand has the problem every manual cleanup has: an exception or an early `return` skips it. .NET's answer for cleanup is `IDisposable` with `using`, and it fits here too ([C10](#c10)). A small `SecretBuffer` class owns a pinned array, hands it out only as a `Span<byte>`, and zeroes it in `Dispose`. Held in a `using`, the buffer is zeroed when the block is left, whether normally or by an exception. The example below shows one.
+
+Two limits remain. `using` only zeroes the buffer itself: a `string` or another array made from its contents is a copy outside the wrapper. And if the caller forgets `using`, nothing zeroes it. A finaliser could, but only at some later garbage collection, so the analyzer warning CA2000 (dispose objects before losing scope) is the better safety net.
+
 ### Why not a string?
 
 Everything above is why a password tool keeps secrets out of `string` ([C8](#c8)):
@@ -278,6 +286,70 @@ False, True
 - Without `StringMarshalling = StringMarshalling.Utf16`, the build fails with `SYSLIB1051` on the `char[]` parameter ([C3](#c3)).
 - In 6, `b` has the same text as `a` but is a separate object: a second copy of the "password" now exists. `string.IsInterned(b)` returns the literal's instance, which lives until the process ends ([C8](#c8)).
 
+### A buffer that zeroes itself on Dispose
+
+A second program, run with .NET 10. `DangerousArray` exists only so the demo can look at the array after disposal ([C10](#c10)):
+
+```csharp
+using System.Security.Cryptography;
+using System.Text;
+
+byte[] seen;
+using (var secret = new SecretBuffer(7))
+{
+    Encoding.UTF8.GetBytes("hunter2", secret.Span);
+    seen = secret.DangerousArray;
+    Console.WriteLine(Encoding.UTF8.GetString(secret.Span));
+}
+Console.WriteLine($"after using: all zero = {seen.AsSpan().IndexOfAnyExcept((byte)0) < 0}");
+
+try
+{
+    using var s2 = new SecretBuffer(4);
+    seen = s2.DangerousArray;
+    s2.Span.Fill(0xAA);
+    throw new InvalidOperationException("boom");
+}
+catch (InvalidOperationException)
+{
+    Console.WriteLine($"after exception: all zero = {seen.AsSpan().IndexOfAnyExcept((byte)0) < 0}");
+}
+
+var s3 = new SecretBuffer(4);
+s3.Dispose();
+try { _ = s3.Span; } catch (ObjectDisposedException) { Console.WriteLine("use after Dispose: ObjectDisposedException"); }
+
+/// <summary>A pinned byte buffer for a secret that is zeroed on Dispose.</summary>
+public sealed class SecretBuffer : IDisposable
+{
+    private byte[]? _bytes;
+
+    public SecretBuffer(int length) => _bytes = GC.AllocateArray<byte>(length, pinned: true);
+
+    public Span<byte> Span => _bytes ?? throw new ObjectDisposedException(nameof(SecretBuffer));
+
+    internal byte[] DangerousArray => _bytes!;   // for the demo only
+
+    public void Dispose()
+    {
+        if (_bytes is null) return;
+        CryptographicOperations.ZeroMemory(_bytes);
+        _bytes = null;
+    }
+}
+```
+
+Expected output:
+
+```text
+hunter2
+after using: all zero = True
+after exception: all zero = True
+use after Dispose: ObjectDisposedException
+```
+
+The demo itself breaks the rule it shows: `"hunter2"` is a string literal, and `Encoding.UTF8.GetString` makes another string. Real code fills the buffer from a source that isn't a `string`, such as `Unprotect`'s result copied in and zeroed, or characters read one at a time from a password box.
+
 ## Good habits
 
 - Write new declarations with `[LibraryImport]`, not `[DllImport]` ([C3](#c3); Microsoft Learn, *P/Invoke source generation*).
@@ -289,6 +361,8 @@ False, True
 - Return handles as `SafeHandle` subclasses, never as bare `nint` ([C5](#c5); same source).
 
 - Keep secrets in a pinned `byte[]` or `char[]`, and wipe them with `CryptographicOperations.ZeroMemory` as soon as they are used ([C6](#c6), [C7](#c7), [C8](#c8); .NET documentation of `SecureString` and `ZeroMemory`).
+
+- Put that buffer in a disposable wrapper that zeroes it, and hold the wrapper in a `using` ([C10](#c10); .NET design guidelines, *Dispose pattern*, and analyzer rule CA2000).
 
 ## Pitfalls
 
