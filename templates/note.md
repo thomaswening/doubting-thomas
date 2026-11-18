@@ -47,7 +47,7 @@ expected output
 
 ## Examples
 
-<Optional. Only a worked example that spans the whole note, or the full program the snippets come from (collapsed in `<details>` if it only adds declarations). Delete this section if every snippet sits in the Explanation.>
+<Optional. Only a short worked example that spans the whole note, never the full program the snippets come from. Delete this section if every snippet sits in the Explanation.>
 
 ```csharp
 // snippet
