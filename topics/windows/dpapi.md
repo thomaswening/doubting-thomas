@@ -5,7 +5,7 @@ created: 2026-11-18
 updated: 2026-11-18
 prerequisites: []
 related: [windows/pinvoke-and-unmanaged-memory]
-projects: [ghostkey]
+projects: []
 tags: [windows, security, cryptography, dpapi, protecteddata, secrets, threat-model]
 ---
 
@@ -110,9 +110,9 @@ A password **reset** by an administrator is different ([C5](#c5)). Windows doesn
 
 ### What entropy is for
 
-Every program running as you can call `Unprotect` on any `CurrentUser` blob it finds. Entropy is a second input that must match ([C6](#c6)). If GhostKey protects with the entropy `"GhostKey v1"`, a program that finds the blob but doesn't know that string can't decrypt it.
+Every program running as you can call `Unprotect` on any `CurrentUser` blob it finds. Entropy is a second input that must match ([C6](#c6)). If a password tool protects with the entropy `"MyTool v1"`, a program that finds the blob but doesn't know that string can't decrypt it.
 
-That is a guard against *accidents and lazy attackers*, not a secret. The string is in GhostKey's binary. A determined attacker who runs as you reads it out and calls `Unprotect` with it.
+That is a guard against *accidents and lazy attackers*, not a secret. The string is in the tool's binary. A determined attacker who runs as you reads it out and calls `Unprotect` with it.
 
 ### Entropy as a second password
 
@@ -173,7 +173,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 byte[] secret = Encoding.UTF8.GetBytes("hunter2");
-byte[] entropy = Encoding.UTF8.GetBytes("GhostKey v1");
+byte[] entropy = Encoding.UTF8.GetBytes("MyTool v1");
 
 byte[] blob = ProtectedData.Protect(secret, entropy, DataProtectionScope.CurrentUser);
 Console.WriteLine($"secret: {secret.Length} bytes, blob: {blob.Length} bytes");
@@ -296,15 +296,15 @@ one PBKDF2-SHA256 guess with 600000 iterations: 64 ms
 
    </details>
 
-2. **Predict.** GhostKey protects its store with `CurrentUser` and the entropy `"GhostKey v1"`. Which of these can read the passwords: (a) a thief with the laptop's SSD, (b) your colleague logged on to the same PC under their own account, (c) a malicious browser extension's native helper running as you, (d) you, after an IT administrator reset your forgotten local password?
+2. **Predict.** A password tool protects its store with `CurrentUser` and the entropy `"MyTool v1"`. Which of these can read the passwords: (a) a thief with the laptop's SSD, (b) your colleague logged on to the same PC under their own account, (c) a malicious browser extension's native helper running as you, (d) you, after an IT administrator reset your forgotten local password?
 
    <details><summary>Solution</summary>
 
-   (a) No: they need your logon password to decrypt the master key ([C7](#c7)), unless they can guess a weak one. (b) No: `CurrentUser` keys belong to your account ([C2](#c2)). (c) Yes: it runs as you, can read the entropy from GhostKey's binary and call `Unprotect` ([C6](#c6), [C7](#c7)). (d) No: an administrator reset leaves the master keys encrypted under the old password, so the store is lost on a standalone machine ([C5](#c5)).
+   (a) No: they need your logon password to decrypt the master key ([C7](#c7)), unless they can guess a weak one. (b) No: `CurrentUser` keys belong to your account ([C2](#c2)). (c) Yes: it runs as you, can read the entropy from the tool's binary and call `Unprotect` ([C6](#c6), [C7](#c7)). (d) No: an administrator reset leaves the master keys encrypted under the old password, so the store is lost on a standalone machine ([C5](#c5)).
 
    </details>
 
-3. **Explain.** Your new PC has the same user name, and you copied GhostKey's store file over. Why does `Unprotect` throw, and what should the migration do instead?
+3. **Explain.** Your new PC has the same user name, and you copied a password tool's store file over. Why does `Unprotect` throw, and what should the migration do instead?
 
    <details><summary>Solution</summary>
 
@@ -338,4 +338,4 @@ one PBKDF2-SHA256 guess with 600000 iterations: 64 ms
 - KeePass, [Composite Master Key](https://keepass.info/help/base/keys.html): combining a master password with the Windows user account, what an administrator reset and a new PC do to the latter, and the advice not to rely on it alone.
 - KeePass, [Security](https://keepass.info/help/base/security.html), sections on key derivation and dictionary attacks: why a slow KDF makes guessing harder.
 - OWASP, [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html): 600,000 iterations as the PBKDF2-HMAC-SHA256 recommendation.
-- Claude session on GhostKey, 2026-11-18: the snippets were run there on Windows 11 with .NET 10.
+- Claude session, 2026-11-18: the snippets were run there on Windows 11 with .NET 10.
