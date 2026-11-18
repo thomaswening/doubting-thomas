@@ -2,6 +2,7 @@
 // textbook layout of the reading site. Documented in ../README.md.
 import MarkdownIt from "markdown-it";
 import katex from "katex";
+import hljs from "highlight.js";
 import { rewriteLink } from "./links.mjs";
 
 /** Labels that open a formal statement (AGENTS.md, "Mathematics and physics notes"). */
@@ -32,7 +33,7 @@ export function renderNote(markdownText, sourcePath) {
 }
 
 function createMarkdown() {
-  const markdown = new MarkdownIt({ html: true });
+  const markdown = new MarkdownIt({ html: true, highlight: highlightCode });
   markdown.inline.ruler.before("escape", "github_math", parseInlineMath);
   markdown.core.ruler.after("inline", "display_paragraphs", markDisplayParagraphs);
   markdown.core.ruler.push("heading_ids", (state) => addHeadingIds(state));
@@ -136,6 +137,18 @@ function renderFence(defaultRule) {
     }
     return defaultRule(tokens, index, options, environment, renderer);
   };
+}
+
+// ---------- code ----------
+
+/**
+ * Colours a code block at build time with highlight.js. A language highlight.js
+ * does not know, or a block without one, returns "", and markdown-it then
+ * escapes the code as plain text. Math and Mermaid fences never get here.
+ */
+function highlightCode(code, language) {
+  if (!language || !hljs.getLanguage(language)) return "";
+  return hljs.highlight(code, { language, ignoreIllegals: true }).value;
 }
 
 // ---------- links and headings ----------
