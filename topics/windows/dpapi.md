@@ -4,7 +4,7 @@ area: windows
 created: 2026-11-18
 updated: 2026-11-18
 prerequisites: []
-related: []
+related: [windows/pinvoke-and-unmanaged-memory]
 projects: [ghostkey]
 tags: [windows, security, cryptography, dpapi, protecteddata, secrets, threat-model]
 ---
@@ -13,7 +13,7 @@ tags: [windows, security, cryptography, dpapi, protecteddata, secrets, threat-mo
 
 ## TL;DR
 
-- **DPAPI** (the Windows Data Protection API) encrypts a byte array with a key that Windows manages for you. In .NET you call `ProtectedData.Protect(bytes, entropy, scope)` and get back an opaque **blob**. `ProtectedData.Unprotect` turns the blob back into the bytes.
+- **DPAPI** (the Windows Data Protection API) encrypts a byte array with a key that Windows manages for you. In .NET you call `ProtectedData.Protect(bytes, entropy, scope)` and get back an opaque **blob**: a `byte[]` you store but can't read, holding the encrypted data plus what Windows needs to decrypt it. `ProtectedData.Unprotect` turns the blob back into the bytes.
 
 - You never see or store a key. With `DataProtectionScope.CurrentUser`, the key belongs to your Windows account and is itself protected by your logon password. With `LocalMachine`, it belongs to the computer, and every user and process on it can decrypt.
 
@@ -21,11 +21,13 @@ tags: [windows, security, cryptography, dpapi, protecteddata, secrets, threat-mo
 
 - DPAPI protects a stolen disk or backup, and data of one Windows user against another. It does **not** protect against malware running as you: such a program calls `Unprotect` exactly as your app does.
 
+- The alternative is a **master password** run through a slow key derivation function. It stops malware that only grabs the file, and the store survives a password reset by an administrator or a move to a new PC. It costs typing the password, and a forgotten password loses everything. Neither protects against malware that waits until the store is unlocked.
+
 - Think of it as a `using`-free, keyless `Aes`: Windows holds the key ring, the blob says which key it needs.
 
 ## Key claims
 
-- <a id="c1"></a>**C1.** `ProtectedData.Protect(userData, optionalEntropy, scope)` encrypts a `byte[]` and returns a blob. `ProtectedData.Unprotect(blob, optionalEntropy, scope)` decrypts it. The caller never handles a key. `ProtectedData` works only on Windows; elsewhere it throws `PlatformNotSupportedException`.
+- <a id="c1"></a>**C1.** `ProtectedData.Protect(userData, optionalEntropy, scope)` encrypts a `byte[]` and returns a **blob**, an opaque `byte[]` that holds the encrypted data together with a header Windows needs to decrypt it. ("Blob" stands for *binary large object*, a term from databases for bytes stored without a known structure.) `ProtectedData.Unprotect(blob, optionalEntropy, scope)` decrypts it. The caller never handles a key. `ProtectedData` works only on Windows; elsewhere it throws `PlatformNotSupportedException`.
 
 - <a id="c2"></a>**C2.** With `DataProtectionScope.CurrentUser`, only the same Windows user can decrypt the blob. With `DataProtectionScope.LocalMachine`, any user and any process on the same computer can decrypt it.
 
@@ -40,6 +42,12 @@ tags: [windows, security, cryptography, dpapi, protecteddata, secrets, threat-mo
 - <a id="c7"></a>**C7.** DPAPI protects against reading the blob without the user's logon: a stolen disk, a copied backup, another Windows user on the same machine. It does not protect against code running as the same user, which can call `Unprotect` itself, nor against an administrator of the running machine.
 
 - <a id="c8"></a>**C8.** With a roaming profile, the master keys roam with `%APPDATA%`, so a user can decrypt `CurrentUser` blobs on another computer of the same network. Without a roaming profile, a blob decrypts only on the computer where it was made.
+
+- <a id="c9"></a>**C9.** Entropy that the user types, such as a PIN, stops a program that finds the blob and calls `Unprotect`, because the program doesn't know the PIN. But `Unprotect` doesn't slow down repeated guesses: on a 2026 laptop it tried about 5,000 entropies per second and found a four-digit PIN in under a second.
+
+- <a id="c10"></a>**C10.** A store encrypted with a key derived from a **master password** by a deliberately slow key derivation function (such as PBKDF2 or Argon2) depends on neither the Windows account nor the machine. It survives a password reset by an administrator and opens on any PC. The slow function makes each guess cost tens of milliseconds instead of a fraction of one. Forgetting the master password loses the store.
+
+- <a id="c11"></a>**C11.** Neither DPAPI nor a master password protects secrets from malware running as the same user *while the store is unlocked*. Such malware can log the master password as it is typed, read decrypted secrets from the tool's memory, or read them from the clipboard.
 
 ## Explanation
 
@@ -104,7 +112,15 @@ A password **reset** by an administrator is different ([C5](#c5)). Windows doesn
 
 Every program running as you can call `Unprotect` on any `CurrentUser` blob it finds. Entropy is a second input that must match ([C6](#c6)). If GhostKey protects with the entropy `"GhostKey v1"`, a program that finds the blob but doesn't know that string can't decrypt it.
 
-That is a guard against *accidents and lazy attackers*, not a secret. The string is in GhostKey's binary. A determined attacker who runs as you reads it out and calls `Unprotect` with it. Entropy only becomes a real secret if it comes from outside, for example a PIN the user types.
+That is a guard against *accidents and lazy attackers*, not a secret. The string is in GhostKey's binary. A determined attacker who runs as you reads it out and calls `Unprotect` with it.
+
+### Entropy as a second password
+
+Entropy becomes a real secret only if it comes from outside the program, for example from a PIN the user types at start-up ([C9](#c9)). Then a program that steals the blob and calls `Unprotect` fails, because it doesn't know the PIN.
+
+The catch is speed. Malware that runs as you can call `Unprotect` in a loop, trying every PIN. Nothing in DPAPI slows that down: in the check for this note, it ran about 5,000 guesses per second and found a four-digit PIN after 4,712 tries in 0.9 seconds. A short PIN is no obstacle. Even a real password is guessed at that rate if it is weak.
+
+The fix is to pass the typed password through a **key derivation function** (KDF) first, and use its output as the entropy. A KDF is a hash that is slow on purpose. `Rfc2898DeriveBytes.Pbkdf2` with SHA-256 and 600,000 iterations took 64 ms per guess on the same laptop, about 350 times slower than an `Unprotect` call. But then you have built a master password ([C10](#c10)). It sits on top of DPAPI, and it keeps DPAPI's weakness: an administrator reset or a new PC still loses the store.
 
 ### What DPAPI protects, and what not
 
@@ -119,7 +135,30 @@ This is the part to get right before relying on it ([C7](#c7)):
 
 A weak logon password weakens the first row: with the disk in hand, an attacker can guess passwords offline against the master-key file.
 
-The third row is the honest limit of every password tool that runs without a separate master password. DPAPI moves the question "who can read my passwords?" to "who can run code as me?". For a tool on your own machine, that is usually the right trade.
+The third row is the honest limit of DPAPI. It moves the question "who can read my passwords?" to "who can run code as me?".
+
+### DPAPI or a master password?
+
+The main alternative is the one password managers such as KeePass use by default: a **master password**. The tool derives a key from the password with a slow KDF and encrypts the store with it, for example with `AesGcm`. Windows plays no part.
+
+Malware running as you comes in two kinds, and the comparison depends on which one you mean:
+
+- **Grab and go:** it copies files and calls whatever decrypts them, then leaves. Against DPAPI that is one `Unprotect` call. Against a master password it is stuck: it must guess, and the slow KDF makes each guess expensive.
+- **Lurking:** it stays and waits until you unlock. Then it logs the master password as you type it, or reads the decrypted passwords from the tool's memory or from the clipboard. Against this, neither helps ([C11](#c11)).
+
+| | DPAPI only | Master password |
+|---|---|---|
+| Grab-and-go malware running as you | decrypts at once | must guess the password |
+| Lurking malware running as you | decrypts | logs the password or reads memory |
+| Stolen disk or backup | needs the logon password | needs the master password |
+| Administrator resets your Windows password | **store lost** (standalone machine) | unaffected |
+| Move to a new PC | **store lost** without roaming | copy the file |
+| Daily use | nothing to type | type the password at each unlock |
+| Forgotten password | Windows recovers it | **store lost** |
+
+So a master password is safer against grab-and-go malware, and it survives what Windows does to your account. DPAPI is more convenient and survives your forgetfulness.
+
+The two can be combined. KeePass lets a database require a master password *and* the Windows user account (through DPAPI). Its documentation warns against relying on the Windows account alone, for exactly the reset and new-PC cases above, and recommends always adding a password or a key file. A common design for a tool is the other way round: the master password protects the store, and DPAPI only caches the derived key for a while, so you don't type the password at every use. Losing the cache then costs one password entry, not the store.
 
 ### Roaming profiles
 
@@ -184,13 +223,48 @@ Console.WriteLine(new Guid(blob.AsSpan(24, 16)));
 
 On the machine where this note was checked, that printed `9e24ca40-19fe-4673-9450-e8daca27f33a`, and a file of exactly that name sat in `%APPDATA%\Microsoft\Protect\<SID>\` next to three older master keys and the `Preferred` file. The header layout is not a documented contract: read it to understand DPAPI, never to build on it.
 
+### Guessing a PIN through Unprotect
+
+How cheap a guess is, when the entropy is a four-digit PIN ([C9](#c9)), compared with one guess against PBKDF2 ([C10](#c10)):
+
+```csharp
+byte[] blob = ProtectedData.Protect("hunter2"u8.ToArray(), Encoding.UTF8.GetBytes("4711"), DataProtectionScope.CurrentUser);
+
+var sw = Stopwatch.StartNew();
+int tries = 0;
+for (int pin = 0; pin < 10000; pin++)
+{
+    tries++;
+    try
+    {
+        ProtectedData.Unprotect(blob, Encoding.UTF8.GetBytes(pin.ToString("D4")), DataProtectionScope.CurrentUser);
+        break;
+    }
+    catch (CryptographicException) { }
+}
+Console.WriteLine($"found 4-digit PIN after {tries} tries in {sw.Elapsed.TotalSeconds:F1} s ({tries / sw.Elapsed.TotalSeconds:F0} guesses/s)");
+
+sw.Restart();
+Rfc2898DeriveBytes.Pbkdf2("guess"u8, RandomNumberGenerator.GetBytes(16), 600_000, HashAlgorithmName.SHA256, 32);
+Console.WriteLine($"one PBKDF2-SHA256 guess with 600000 iterations: {sw.Elapsed.TotalMilliseconds:F0} ms");
+```
+
+Output on the laptop used for this note (the times vary by machine):
+
+```text
+found 4-digit PIN after 4712 tries in 0.9 s (5406 guesses/s)
+one PBKDF2-SHA256 guess with 600000 iterations: 64 ms
+```
+
 ## Good habits
 
 - Use `DataProtectionScope.CurrentUser` for a user's secrets; `LocalMachine` lets every account on the PC decrypt them ([C2](#c2); Microsoft, *Windows Data Protection*).
 
 - Pass a fixed, application-specific entropy, so other programs can't decrypt your blobs by accident, and don't count it as a secret ([C6](#c6); Microsoft, *Windows Data Protection*).
 
-- Zero plain-text byte arrays with `CryptographicOperations.ZeroMemory` as soon as they are no longer needed ([C7](#c7); .NET documentation of `CryptographicOperations.ZeroMemory`).
+- Zero plain-text byte arrays with `CryptographicOperations.ZeroMemory` as soon as they are no longer needed. Wrap them in a disposable type that zeroes them in `Dispose`, and hold it in a `using`, so an exception can't skip the zeroing ([C11](#c11); .NET documentation of `CryptographicOperations.ZeroMemory`). The note on P/Invoke and unmanaged memory shows such a type.
+
+- Don't make DPAPI the only way to decrypt data the user can't afford to lose. Keep a second way in, such as a master password or an encrypted export ([C5](#c5), [C8](#c8); KeePass, *Composite Master Key*).
 
 ## Pitfalls
 
@@ -198,7 +272,9 @@ On the machine where this note was checked, that printed `9e24ca40-19fe-4673-945
 
 - **Thinking `LocalMachine` is stronger.** It is weaker: it binds the blob to the machine, but opens it to every user on it ([C2](#c2)).
 
-- **Treating entropy as a password.** A string compiled into the app is readable by anyone who has the app ([C6](#c6)).
+- **Treating entropy as a password.** A string compiled into the app is readable by anyone who has the app ([C6](#c6)). A PIN the user types is a secret, but one that malware guesses in seconds through `Unprotect` ([C9](#c9)).
+
+- **Thinking a master password stops all malware.** It stops malware that grabs the file. It doesn't stop malware that waits until you unlock ([C11](#c11)).
 
 - **Copying the store to a new PC.** Without a roaming profile, the blobs don't decrypt there, even for the same user name ([C8](#c8)). Migrate by decrypting on the old machine and protecting again on the new one.
 
@@ -234,11 +310,30 @@ On the machine where this note was checked, that printed `9e24ca40-19fe-4673-945
 
    </details>
 
+4. **Explain.** A colleague suggests passing a six-digit PIN as the entropy, "so malware can't call `Unprotect`". What does that stop, what doesn't it stop, and how would you make it stronger?
+
+   <details><summary>Solution</summary>
+
+   It stops malware that only knows the blob and the program, since it lacks the PIN ([C9](#c9)). It doesn't stop that malware from guessing: a million PINs at about 5,000 `Unprotect` calls per second take a few minutes. It doesn't stop malware that logs the PIN as it is typed ([C11](#c11)). Stronger: derive the entropy from a real password with a slow KDF ([C10](#c10)). It still leaves the reset and new-PC problems, because the store is still tied to DPAPI ([C5](#c5), [C8](#c8)).
+
+   </details>
+
+5. **Decide.** Your Windows password is managed by an IT department that sometimes resets it, and you have changed laptops twice in a year. Which design keeps your passwords: DPAPI only, DPAPI with a typed PIN as entropy, or a master password with DPAPI caching the derived key?
+
+   <details><summary>Solution</summary>
+
+   Only the last. Both DPAPI designs lose the store at an administrator reset and at a laptop change ([C5](#c5), [C8](#c8)). With the master password, the store is a portable file ([C10](#c10)). Losing the DPAPI cache only means typing the password once.
+
+   </details>
+
 ## Sources
 
 - Microsoft Learn, [`ProtectedData` class](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata): the API, Windows-only, the note on loaded profiles.
 - Microsoft Learn, [How to: Use Data Protection](https://learn.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection): the scopes, with a sample.
 - Microsoft Learn, [`CryptProtectData` function](https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata): the Win32 function underneath, `CRYPTPROTECT_LOCAL_MACHINE`, roaming profiles.
 - Microsoft (NAI Labs), [*Windows Data Protection*](https://learn.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)), 2001: the key hierarchy, master-key rotation and expiry, password changes, the domain backup key, the advice against the machine scope on workstations. It describes the Windows XP algorithms; current Windows uses stronger ones, but the structure is the same.
-- Microsoft Learn, [`CryptographicOperations.ZeroMemory`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.zeromemory).
+- Microsoft Learn, [`CryptographicOperations.ZeroMemory`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.zeromemory) and [`Rfc2898DeriveBytes.Pbkdf2`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.rfc2898derivebytes.pbkdf2).
+- KeePass, [Composite Master Key](https://keepass.info/help/base/keys.html): combining a master password with the Windows user account, what an administrator reset and a new PC do to the latter, and the advice not to rely on it alone.
+- KeePass, [Security](https://keepass.info/help/base/security.html), sections on key derivation and dictionary attacks: why a slow KDF makes guessing harder.
+- OWASP, [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html): 600,000 iterations as the PBKDF2-HMAC-SHA256 recommendation.
 - Claude session on GhostKey, 2026-11-18: the snippets were run there on Windows 11 with .NET 10.
