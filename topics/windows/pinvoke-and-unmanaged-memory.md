@@ -246,7 +246,13 @@ In short: one subclass per kind of handle, and the imported function returns it 
 - `ReleaseHandle` runs exactly once, from `Dispose` or from the finaliser.
 - A handle in use by a native call is never released under it.
 
-The [note on opaque handles](../c/opaque-handles.md#c6) shows the same idea from the C side.
+#### SafeHandle and opaque handles
+
+The handle itself, the `nint` that `GlobalAlloc` returns, is an **opaque handle** in the sense of the [note on opaque handles](../c/opaque-handles.md): a value you can store and pass back but not look inside, with a release function you must call exactly once. `SafeHandle` is not another kind of handle. It is the *owner* of one: the .NET counterpart of the C++ wrapper class in that note ([C6 there](../c/opaque-handles.md#c6)), whose destructor calls the release function. With a `SafeHandle` you still have the opaque handle inside. You just no longer manage its release yourself.
+
+#### Trying it out
+
+The program below allocates a 16-byte block through the `SafeGlobalHandle` declaration from above. It then asks Windows for the block's size, passing the `SafeGlobalHandle` where the C function expects an `HGLOBAL`, and lets the `using` block end. `ReleaseHandle` prints a line, so you can see when the release happens: at the end of the `using`, without any `GlobalFree` call in your own code.
 
 ```csharp
 using System.Runtime.InteropServices;
@@ -287,6 +293,10 @@ internal static partial class Native
 invalid: False, size: 16
 ReleaseHandle: GlobalFree
 ```
+
+- `invalid: False`: the block was allocated, so the handle isn't 0.
+- `size: 16`: `GlobalSize` received the raw value out of the `SafeGlobalHandle` and reported the block's size.
+- `ReleaseHandle: GlobalFree`: printed when the `using` block ended, by `Dispose`.
 
 `GlobalFree` itself still takes a plain `nint`: it is called from inside `ReleaseHandle`, where the raw value is all there is.
 
@@ -364,6 +374,15 @@ Console.WriteLine($"managed zeroed: {secret.AsSpan().IndexOfAnyExcept((byte)0) <
 native zeroed: True
 managed zeroed: True
 ```
+
+Step by step:
+
+1. `GC.AllocateArray<byte>(8, pinned: true)` makes an 8-byte managed array that never moves, and the secret is copied into it.
+2. `Marshal.AllocHGlobal(8)` allocates 8 bytes of native memory and returns its address as an `nint`, here `p`. It is .NET's way of calling C's `malloc`; the memory is invisible to the GC.
+3. `Marshal.Copy(secret, 0, p, secret.Length)` copies `secret.Length` bytes from the array, starting at index 0, to the address `p`. It is `memcpy` with a managed array on one side.
+4. The `unsafe` block turns `p` into a `Span<byte>`. A `Span` over native memory needs a real pointer (`void*`), and C# allows pointer types only inside `unsafe` code, which is code the compiler can't check for memory safety. Here it is safe because the span covers exactly the 8 bytes that were allocated. `ZeroMemory` then wipes them through the span.
+5. `Marshal.FreeHGlobal(p)` gives the native block back, like C's `free`. After this, `p` must not be used.
+6. Last, the managed copy is wiped as well. Both checks print `True`: no byte other than 0 is left.
 
 ### Wiping by Dispose
 
@@ -453,19 +472,6 @@ the literal is interned: True
 In memory, a string on 64-bit .NET is an object header (8 bytes), a method-table pointer (8 bytes), a 4-byte length, then the characters in UTF-16 and a terminating zero character. The password sits there as plain UTF-16 for anyone who can read the process memory or a crash dump.
 
 `SecureString` was meant to fix this. Microsoft now advises against it ([C9](#c9)): on Linux and macOS it isn't encrypted at all, and to *use* the secret (send it, show it, hash it) you almost always convert it to a `string` or plain memory first. The guidance is to avoid holding credentials in the process where possible, and otherwise to keep the window short: plain bytes in a buffer you control, wiped right after use.
-
-## Examples
-
-The examples sit in the explanation above, each right after the section it illustrates:
-
-- [Calling a native function](#calling-a-native-function): `GetCurrentProcessId`.
-- [nint](#nint-an-integer-the-size-of-a-pointer): its size, and a module handle.
-- [Errors](#errors-the-last-error-code): `GetUserNameW` with a buffer, and error 122.
-- [SafeHandle](#native-memory-and-safehandle): `SafeGlobalHandle` around `GlobalAlloc`, and the code the generator writes.
-- [Pinning](#pinning-the-gc-moves-things): `fixed`.
-- [ZeroMemory](#wiping-zeromemory): wiping managed and native memory.
-- [Wiping by Dispose](#wiping-by-dispose): `SecretBuffer`.
-- [Why not a string?](#why-not-a-string): two copies of the same text, and interning.
 
 ## Good habits
 
