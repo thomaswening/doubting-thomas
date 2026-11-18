@@ -9,6 +9,8 @@
   --font-body: var(--font-sans);
   --font-size: 18px; --line-height: 1.7; --text-width: 68ch; --equation-space: 1em;
   --text: var(--foreground); --text-muted: var(--muted);
+  --code-keyword: #cf222e; --code-entity: #8250df; --code-constant: #0550ae; --code-string: #0a3069;
+  --code-variable: #953800; --code-comment: #59636e; --code-tag: #116329;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -16,6 +18,8 @@
     --background: #15181c; --surface: #1d2126; --foreground: #e2e5e9; --foreground-strong: #ffffff;
     --muted: #9aa3ad; --muted-strong: #c9d0d7; --rule: #31373e; --accent: #79b4ff;
     --box: #1b1f24; --box-border: #3b434d; --shadow: rgba(0, 0, 0, .5); color-scheme: dark;
+    --code-keyword: #ff7b72; --code-entity: #d2a8ff; --code-constant: #79c0ff; --code-string: #a5d6ff;
+    --code-variable: #ffa657; --code-comment: #8b949e; --code-tag: #7ee787;
   }
 }
 :root[data-theme="paper"] {
@@ -27,11 +31,15 @@
   --background: #15181c; --surface: #1d2126; --foreground: #e2e5e9; --foreground-strong: #ffffff;
   --muted: #9aa3ad; --muted-strong: #c9d0d7; --rule: #31373e; --accent: #79b4ff;
   --box: #1b1f24; --box-border: #3b434d; --shadow: rgba(0, 0, 0, .5); color-scheme: dark;
+  --code-keyword: #ff7b72; --code-entity: #d2a8ff; --code-constant: #79c0ff; --code-string: #a5d6ff;
+  --code-variable: #ffa657; --code-comment: #8b949e; --code-tag: #7ee787;
 }
 :root[data-theme="night"] {
   --background: #1f1d1b; --surface: #282523; --foreground: #cfc8bd; --foreground-strong: #f1ece4;
   --muted: #958d81; --muted-strong: #bdb5a9; --rule: #3a3633; --accent: #d9a86c;
   --box: #262321; --box-border: #48423c; --shadow: rgba(0, 0, 0, .5); color-scheme: dark;
+  --code-keyword: #ff7b72; --code-entity: #d2a8ff; --code-constant: #79c0ff; --code-string: #a5d6ff;
+  --code-variable: #ffa657; --code-comment: #8b949e; --code-tag: #7ee787;
 }
 :root[data-contrast="high"] { --text: var(--foreground-strong); --text-muted: var(--muted-strong); }
 :root[data-font="serif"] { --font-body: "Source Serif 4 Variable", Georgia, "Times New Roman", serif; }
@@ -165,6 +173,16 @@ code { font-size: .88em; background: var(--box); padding: .1em .3em; border-radi
 pre { background: var(--box); padding: .8em 1em; border-radius: 4px; overflow-x: auto; line-height: 1.45; margin: 0 0 1.2em; }
 pre code { background: none; padding: 0; font-size: .85em; }
 pre.mermaid { background: none; text-align: center; }
+/* Code colours from highlight.js, set at build time. The tokens follow the theme. */
+.hljs-keyword, .hljs-doctag, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_ { color: var(--code-keyword); }
+.hljs-title, .hljs-title.class_, .hljs-title.function_ { color: var(--code-entity); }
+.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id { color: var(--code-constant); }
+.hljs-string, .hljs-regexp, .hljs-meta .hljs-string { color: var(--code-string); }
+.hljs-built_in, .hljs-symbol { color: var(--code-variable); }
+.hljs-comment, .hljs-code, .hljs-formula { color: var(--code-comment); font-style: italic; }
+.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo { color: var(--code-tag); }
+.hljs-section, .hljs-strong { font-weight: bold; }
+.hljs-emphasis { font-style: italic; }
 .page-foot { margin-top: 3em; padding-top: 1em; border-top: 1px solid var(--rule); font-family: var(--font-sans); font-size: .8em; }
 
 /* ---------- maths ---------- */
