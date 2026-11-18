@@ -65,9 +65,21 @@ The DLL is found by the Windows DLL search order. For system DLLs that are not o
 
 ### Marshalling: when the two sides disagree
 
-Managed and native code agree on what an `int` is: four bytes, same order. Such **blittable** types cross without conversion ([C2](#c2)). A struct of blittable fields does too, laid out sequentially as in C.
+Managed and native code agree on what an `int` is: four bytes, same order. A type whose bytes in memory mean exactly the same on both sides is called **blittable** ([C2](#c2)). The word comes from *blit*, an old graphics term for copying a block of memory unchanged. For a blittable argument the marshaller has nothing to do: it passes the value as it is, or, for an array of them, pins the array and passes a pointer to it. Native code then works directly on your managed memory.
 
-They disagree on others:
+| Blittable | Not blittable |
+|---|---|
+| `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong` | `bool`: 1, 2 or 4 bytes on the native side? |
+| `float`, `double` | `char`: UTF-16 or an 8-bit code page? |
+| `nint`, `nuint` (`IntPtr`, `UIntPtr`), pointers | `string`: an object with a length field, not a zero-terminated buffer |
+| a struct whose fields are all blittable, with sequential layout | a class, a delegate, an array of a non-blittable type |
+| a one-dimensional array of a blittable type, such as `byte[]` | a struct with one non-blittable field |
+
+A struct such as `struct DATA_BLOB { int cbData; nint pbData; }` is blittable. Add one `bool` field, and the whole struct isn't.
+
+The C# constraint `where T : unmanaged` is a close relative but not the same thing. It only asks "no references inside", so `bool` and `char` satisfy it. Blittable asks the stricter question "same meaning on the native side", and for `bool` and `char` the answer depends on the native API.
+
+The other types need conversion:
 
 | C# type | Native counterpart | The problem |
 |---|---|---|
