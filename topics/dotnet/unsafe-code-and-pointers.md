@@ -80,29 +80,39 @@ unsafe
 
 `p + 1` moved by four bytes, the size of one `int`: arithmetic counts in elements, not bytes. The `fixed` is explained [below](#fixed-pinning-for-one-block).
 
+`p[2]` is not array access, although it looks like it. On a pointer, `p[i]` is shorthand for `*(p + i)`: move `i` elements on, then read. So `p[0]` is the same as `*p`. C has the same rule, as the [note on array parameters](../c/array-parameters.md) shows. The indexer form is just easier to read when you step through memory element by element.
+
 ### void*: an address without a type
 
 A `void*` is a pointer that doesn't say what it points at ([C3](#c3)). It is the C# form of C's `void*`. Without an element type, the compiler doesn't know how many bytes to read, so `*v` is an error (`CS0242`). To use the memory, you cast the `void*` to a typed pointer.
 
 The closest .NET comparison is `object`. Every reference converts to `object` on its own, and you cast back to use it as something specific. In the same way every typed pointer converts to `void*` on its own, and a cast turns it back into a typed one. APIs that accept "any memory" take a `void*` for that reason. `Span<T>`'s constructor is one of them: it serves `Span<byte>`, `Span<int>` and every other `T` with one parameter type.
 
-The snippet takes the address of an `int`, loses the type by converting to `void*`, and reads the first byte through a `byte*`:
+The snippet takes the address of an `int`, loses the type by converting to `void*`, and then reads the `int`'s four bytes one at a time through a `byte*`. The point to look for: the same memory, read through a different pointer type, gives you its single bytes.
+
+The number is written in hexadecimal on purpose. `0x01020304` is the same number as `16909060`, but in hex each pair of digits is one byte: `01`, `02`, `03` and `04`. Every byte has a different, recognisable value, so the output shows which byte sits where in memory. In decimal you couldn't see that.
 
 ```csharp
 unsafe
 {
-    int x = 0x01020304;
+    int x = 0x01020304;    // the same number as 16909060, written so each byte shows
     void* v = &x;          // int* converts to void* on its own
     byte* b = (byte*)v;    // a cast gives it an element type again
-    Console.WriteLine(b[0]);
+    Console.WriteLine(*b);                           // the byte b points at
+    Console.WriteLine($"{b[1]} {b[2]} {b[3]}");      // b[i] is *(b + i): the next bytes
+    Console.WriteLine(x == 16909060);
 }
 ```
 
 ```text
 4
+3 2 1
+True
 ```
 
-The first byte of `x` in memory is `0x04`, its lowest byte: x86 and x64 store integers little-endian. And `&x` needed no `fixed`: `x` is a local variable, which doesn't move ([C5](#c5)).
+`*b` reads one byte, because `b` is a `byte*`. Through the original `int*`, the same address would read all four bytes as one `int`. The first byte in memory is `04`, the lowest one: x86 and x64 store integers little-endian, lowest byte first. `b[1]` to `b[3]` step on byte by byte and find the rest in reverse order.
+
+And `&x` needed no `fixed`: `x` is a local variable, which doesn't move ([C5](#c5)).
 
 ### nint and pointers: the same number
 
