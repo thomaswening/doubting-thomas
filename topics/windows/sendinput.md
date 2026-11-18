@@ -5,7 +5,7 @@ created: 2026-11-18
 updated: 2026-11-18
 prerequisites: [windows/pinvoke-and-unmanaged-memory]
 related: [windows/clipboard]
-projects: [ghostkey]
+projects: []
 tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-management]
 ---
 
@@ -21,7 +21,7 @@ tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-managemen
 
 - Two different "stay awake" mechanisms exist. **`SetThreadExecutionState`** tells the power manager not to sleep or turn off the display. It does **not** reset the input-idle timer that presence indicators (Teams' "Away") and idle-lock policies watch. Only input does, and synthetic input from `SendInput` counts.
 
-- GhostKey's heartbeat presses Scroll Lock twice: real input for the idle timer, no character typed, and the lock state back where it was.
+- A heartbeat that presses Scroll Lock twice gives real input for the idle timer, no character typed, and the lock state back where it was.
 
 ## Key claims
 
@@ -117,7 +117,7 @@ wrong cbSize: 0, error 87
 
 A `KEYBDINPUT` has `wVk` (the virtual key), `wScan` (a scan code), `dwFlags`, `time` and `dwExtraInfo`. One press is two events ([C3](#c3)): down with `dwFlags = 0`, up with `KEYEVENTF_KEYUP`. Forget the up event and Windows believes the key is held. For a modifier such as Shift or Ctrl, that changes every key the user presses afterwards.
 
-Put all events of one action in one array and one call. `SendInput` inserts them as a block, so the user's own keystrokes can't land in the middle. GhostKey's heartbeat, Scroll Lock pressed twice, is four events:
+Put all events of one action in one array and one call. `SendInput` inserts them as a block, so the user's own keystrokes can't land in the middle. A heartbeat of Scroll Lock pressed twice is four events:
 
 ```csharp
 static INPUT Key(ushort vk, bool up) => new()
@@ -211,7 +211,7 @@ sent: 4, idle after SendInput: 47 ms
 
 `SetThreadExecutionState` left the idle time where it was. `SendInput` reset it to almost zero. The times vary from run to run; the difference doesn't.
 
-So a program that only calls `SetThreadExecutionState` keeps the PC from sleeping, but Teams still shows "Away" after a while, and the idle lock still locks. A program that sends a harmless key now and then keeps all of them from noticing. That is GhostKey's heartbeat: Scroll Lock types no character, almost no program reacts to it, and pressing it twice puts the lock state back.
+So a program that only calls `SetThreadExecutionState` keeps the PC from sleeping, but Teams still shows "Away" after a while, and the idle lock still locks. A program that sends a harmless key now and then keeps all of them from noticing. Scroll Lock is a good key for such a heartbeat: it types no character, almost no program reacts to it, and pressing it twice puts the lock state back.
 
 An idle-lock policy at work exists for security: it locks a machine whose user has walked away. A heartbeat defeats it as surely as it defeats Teams' presence, so whether it may run on a work machine is the organisation's call, not the tool's.
 
@@ -345,7 +345,7 @@ static partial class Native
 
    </details>
 
-2. **Explain.** GhostKey's heartbeat runs, but Teams still goes "Away". It turns out the heartbeat calls `SetThreadExecutionState` every minute. Why doesn't that help, and what does?
+2. **Explain.** A tool's heartbeat runs, but Teams still goes "Away". It turns out the heartbeat calls `SetThreadExecutionState` every minute. Why doesn't that help, and what does?
 
    <details><summary>Solution</summary>
 
@@ -369,4 +369,4 @@ static partial class Native
 - Microsoft Learn, [`GetLastInputInfo`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getlastinputinfo) and [`SetThreadExecutionState`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate).
 - Microsoft Learn, [Mandatory Integrity Control](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control): integrity levels behind UIPI.
 - Microsoft Learn, [`KBDLLHOOKSTRUCT`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct): the `LLKHF_INJECTED` flag.
-- Claude session on GhostKey, 2026-11-18: the first snippet was run there with .NET 10.
+- Claude session, 2026-11-18: the program was run there with .NET 10.
