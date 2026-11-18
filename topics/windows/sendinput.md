@@ -41,6 +41,8 @@ tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-managemen
 
 ## Explanation
 
+The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. The full program is under [Examples](#examples). It pressed Scroll Lock twice, which leaves the lock state as it was.
+
 ### From key to character
 
 When you press a key, the keyboard driver reports a **scan code**: which physical key moved. Windows maps it to a **virtual-key code**, a layout-neutral name such as `VK_SCROLL` (0x91) or `'A'` (0x41). Windows then puts a key-down message in the queue of the window that has the focus. The window's message loop turns the virtual key into a character using the active **keyboard layout** (`WM_KEYDOWN`, then `WM_CHAR`). That last step is why the same key types `y` on a US layout and `z` on a German one.
@@ -68,19 +70,87 @@ flowchart LR
     end
 ```
 
-The padding is there because the union contains a pointer-sized field (`dwExtraInfo`), which must start at an 8-byte boundary. `SendInput` checks its `size` argument against the real `sizeof(INPUT)`. Declare only `KEYBDINPUT` in the union, and your struct is 32 bytes: the call inserts nothing and fails with error 87 ([C1](#c1)). It is the classic `SendInput` bug, and it looks exactly like "nothing happens".
+The padding is there because the union contains a pointer-sized field (`dwExtraInfo`), which must start at an 8-byte boundary. The C# declarations:
+
+```csharp
+[StructLayout(LayoutKind.Sequential)]
+struct INPUT { public uint type; public InputUnion u; }
+
+[StructLayout(LayoutKind.Explicit)]
+struct InputUnion
+{
+    [FieldOffset(0)] public MOUSEINPUT mi;
+    [FieldOffset(0)] public KEYBDINPUT ki;
+    [FieldOffset(0)] public HARDWAREINPUT hi;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public nuint dwExtraInfo; }
+
+[StructLayout(LayoutKind.Sequential)]
+struct KEYBDINPUT { public ushort wVk, wScan; public uint dwFlags, time; public nuint dwExtraInfo; }
+
+[StructLayout(LayoutKind.Sequential)]
+struct HARDWAREINPUT { public uint uMsg; public ushort wParamL, wParamH; }
+```
+
+```csharp
+Console.WriteLine($"sizeof INPUT: {Marshal.SizeOf<INPUT>()}, KEYBDINPUT: {Marshal.SizeOf<KEYBDINPUT>()}");
+```
+
+```text
+sizeof INPUT: 40, KEYBDINPUT: 24
+```
+
+`SendInput` checks its `size` argument against the real `sizeof(INPUT)`. Declare only `KEYBDINPUT` in the union, and your struct is 32 bytes: the call inserts nothing and fails with error 87 ([C1](#c1)). It is the classic `SendInput` bug, and it looks exactly like "nothing happens". Passing a size 8 bytes short shows it:
+
+```csharp
+uint bad = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>() - 8);
+Console.WriteLine($"wrong cbSize: {bad}, error {Marshal.GetLastPInvokeError()}");
+```
+
+```text
+wrong cbSize: 0, error 87
+```
 
 ### Key down, key up
 
 A `KEYBDINPUT` has `wVk` (the virtual key), `wScan` (a scan code), `dwFlags`, `time` and `dwExtraInfo`. One press is two events ([C3](#c3)): down with `dwFlags = 0`, up with `KEYEVENTF_KEYUP`. Forget the up event and Windows believes the key is held. For a modifier such as Shift or Ctrl, that changes every key the user presses afterwards.
 
-Put all events of one action in one array and one call. `SendInput` inserts them as a block, so the user's own keystrokes can't land in the middle.
+Put all events of one action in one array and one call. `SendInput` inserts them as a block, so the user's own keystrokes can't land in the middle. GhostKey's heartbeat, Scroll Lock pressed twice, is four events:
+
+```csharp
+static INPUT Key(ushort vk, bool up) => new()
+{
+    type = Native.INPUT_KEYBOARD,
+    u = new InputUnion { ki = new KEYBDINPUT { wVk = vk, dwFlags = up ? Native.KEYEVENTF_KEYUP : 0 } },
+};
+
+INPUT[] inputs =
+[
+    Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
+    Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
+];
+uint sent = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+```
+
+`sent` was 4: all four events were inserted.
 
 ### Virtual keys against Unicode
 
 With a virtual-key code, the target app sees a real key: shortcuts work, and the active layout decides the character ([C3](#c3)). That's what you want for keys that aren't characters, such as Scroll Lock, Tab or Enter.
 
 To *type text*, a virtual-key code is fragile. Typing `@` means pressing Shift+2 on a US layout but AltGr+Q on a German one. `KEYEVENTF_UNICODE` sidesteps the layout: put the character in `wScan`, leave `wVk` at 0, and the target receives a `VK_PACKET` carrying exactly that character ([C4](#c4)). A character beyond U+FFFF, such as many emoji, is two UTF-16 code units in .NET as well, and takes two events.
+
+```csharp
+static INPUT[] TypeChar(char c) =>
+[
+    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE } } },
+    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE | Native.KEYEVENTF_KEYUP } } },
+];
+```
+
+`TypeChar('@')` types `@` into the focused window on any keyboard layout. It was compiled for this note, not run: it would type into whatever window has the focus.
 
 ### UIPI: you can't push input upwards
 
@@ -111,6 +181,36 @@ flowchart TD
 
 **The last-input time** is when the session last saw keyboard or mouse input. `GetLastInputInfo` reports it. Presence indicators such as Teams' "Away", screen savers, and idle-lock policies (such as the *machine inactivity limit* security policy) look at how long ago that was. `SetThreadExecutionState` doesn't touch it. Input does, and `SendInput` counts as input ([C6](#c6)).
 
+The program measured both. `IdleMs` is how long ago the last input was:
+
+```csharp
+static uint IdleMs()
+{
+    var info = new LASTINPUTINFO { cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>() };
+    Native.GetLastInputInfo(ref info);
+    return (uint)Environment.TickCount - info.dwTime;
+}
+
+Thread.Sleep(4000);
+Console.WriteLine($"idle before: {IdleMs()} ms");
+
+Native.SetThreadExecutionState(Native.ES_CONTINUOUS | Native.ES_SYSTEM_REQUIRED | Native.ES_DISPLAY_REQUIRED);
+Console.WriteLine($"idle after SetThreadExecutionState: {IdleMs()} ms");
+Native.SetThreadExecutionState(Native.ES_CONTINUOUS);   // end the request
+
+// ... the SendInput call from "Key down, key up" ...
+Thread.Sleep(50);
+Console.WriteLine($"sent: {sent}, idle after SendInput: {IdleMs()} ms");
+```
+
+```text
+idle before: 6766 ms
+idle after SetThreadExecutionState: 6766 ms
+sent: 4, idle after SendInput: 47 ms
+```
+
+`SetThreadExecutionState` left the idle time where it was. `SendInput` reset it to almost zero. The times vary from run to run; the difference doesn't.
+
 So a program that only calls `SetThreadExecutionState` keeps the PC from sleeping, but Teams still shows "Away" after a while, and the idle lock still locks. A program that sends a harmless key now and then keeps all of them from noticing. That is GhostKey's heartbeat: Scroll Lock types no character, almost no program reacts to it, and pressing it twice puts the lock state back.
 
 An idle-lock policy at work exists for security: it locks a machine whose user has walked away. A heartbeat defeats it as surely as it defeats Teams' presence, so whether it may run on a work machine is the organisation's call, not the tool's.
@@ -121,9 +221,9 @@ Synthetic input is not perfectly disguised. A low-level keyboard hook sees an `L
 
 ## Examples
 
-### Press Scroll Lock twice, and watch the idle timer
+The snippets above sit right after the sections they illustrate. Together they form this program; it is collapsed because it only adds the `using`, the remaining declarations and the order of the calls.
 
-A console program, run on Windows 11 with .NET 10 while nobody touched keyboard or mouse:
+<details><summary>The full program</summary>
 
 ```csharp
 using System.Runtime.InteropServices;
@@ -154,6 +254,12 @@ static INPUT Key(ushort vk, bool up) => new()
     type = Native.INPUT_KEYBOARD,
     u = new InputUnion { ki = new KEYBDINPUT { wVk = vk, dwFlags = up ? Native.KEYEVENTF_KEYUP : 0 } },
 };
+
+static INPUT[] TypeChar(char c) =>
+[
+    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE } } },
+    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE | Native.KEYEVENTF_KEYUP } } },
+];
 
 static uint IdleMs()
 {
@@ -203,31 +309,7 @@ static partial class Native
 }
 ```
 
-Output (the idle times vary):
-
-```text
-sizeof INPUT: 40, KEYBDINPUT: 24
-idle before: 6766 ms
-idle after SetThreadExecutionState: 6766 ms
-sent: 4, idle after SendInput: 47 ms
-wrong cbSize: 0, error 87
-```
-
-- `INPUT` is 40 bytes, though the keyboard part is only 24: the union is as large as `MOUSEINPUT` ([C2](#c2)).
-- `SetThreadExecutionState` left the idle time where it was ([C7](#c7)). `SendInput` reset it to almost zero ([C6](#c6)).
-- A size 8 bytes short, which is what a union without `MOUSEINPUT` gives, inserts nothing ([C1](#c1)).
-
-### Typing a character with KEYEVENTF_UNICODE
-
-```csharp
-static INPUT[] TypeChar(char c) =>
-[
-    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE } } },
-    new() { type = Native.INPUT_KEYBOARD, u = new() { ki = new() { wScan = c, dwFlags = Native.KEYEVENTF_UNICODE | Native.KEYEVENTF_KEYUP } } },
-];
-```
-
-`TypeChar('@')` types `@` into the focused window on any keyboard layout ([C4](#c4)). It uses the declarations of the first example. It was compiled for this note, not run.
+</details>
 
 ## Good habits
 
