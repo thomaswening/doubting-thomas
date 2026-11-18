@@ -5,7 +5,7 @@ created: 2026-11-18
 updated: 2026-11-18
 prerequisites: []
 related: [cryptography/aes-gcm, windows/dpapi]
-projects: [ghostkey]
+projects: []
 tags: [cryptography, kdf, pbkdf2, argon2, salt, password, brute-force]
 ---
 
@@ -132,7 +132,7 @@ one million plain SHA-256 hashes: 331 ms
 - Another salt gives another key ([C3](#c3)).
 - One PBKDF2 run took as long as about 150,000 plain hashes. That factor is what an offline attacker pays per guess ([C2](#c2)).
 
-The `"correct horse"u8` literal is a shortcut for the demo. A real program gets the password from the user as bytes or characters, never as a `string`. The note on P/Invoke and unmanaged memory explains why.
+The `"correct horse"u8` literal is a shortcut for the demo. A real program gets the password from the user as bytes or characters, never as a `string`. The note on keeping secrets in .NET memory explains why.
 
 A complete store that uses this key with AES-GCM is in the [AES-GCM note](aes-gcm.md#examples).
 
@@ -180,7 +180,7 @@ A complete store that uses this key with AES-GCM is in the [AES-GCM note](aes-gc
 
    </details>
 
-3. **Decide.** GhostKey 1.0 used 600,000 PBKDF2 iterations. GhostKey 2.0 wants 1,000,000. How does 2.0 open the stores 1.0 wrote, and when do they get the higher cost?
+3. **Decide.** Version 1.0 of a password tool used 600,000 PBKDF2 iterations. Version 2.0 wants 1,000,000. How does 2.0 open the stores 1.0 wrote, and when do they get the higher cost?
 
    <details><summary>Solution</summary>
 
@@ -194,4 +194,4 @@ A complete store that uses this key with AES-GCM is in the [AES-GCM note](aes-gc
 - A. Biryukov, D. Dinu, D. Khovratovich, S. Josefsson, [RFC 9106: Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications](https://www.rfc-editor.org/rfc/rfc9106.html), 2021: Argon2id, recommended parameters, 16-byte salts.
 - OWASP, [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html): Argon2id first, minimum parameters, 600,000 iterations for PBKDF2-HMAC-SHA256.
 - Microsoft Learn, [`Rfc2898DeriveBytes.Pbkdf2`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.rfc2898derivebytes.pbkdf2) and [SYSLIB0060](https://aka.ms/dotnet-warnings/SYSLIB0060).
-- Claude session on GhostKey, 2026-11-18: the snippet was run there with .NET 10.
+- Claude session, 2026-11-18: the snippet was run there with .NET 10.

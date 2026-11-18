@@ -5,7 +5,7 @@ created: 2026-11-18
 updated: 2026-11-18
 prerequisites: []
 related: [cryptography/password-key-derivation]
-projects: [ghostkey]
+projects: []
 tags: [cryptography, aes, gcm, aead, nonce, authentication-tag, aesgcm]
 ---
 
@@ -100,7 +100,7 @@ That is what **associated data** is for ([C7](#c7)). You pass the header bytes t
 ```text
 offset  length  field                    encrypted?   in the tag?
 ------  ------  -----------------------  -----------  -----------
-     0       4  format marker "GKS1"     no           yes (associated data)
+     0       4  format marker "PWS1"     no           yes (associated data)
      4       4  PBKDF2 iterations        no           yes (associated data)
      8      16  salt                     no           yes (associated data)
     24      12  nonce                    no           yes (associated data)
@@ -144,7 +144,7 @@ catch (AuthenticationTagMismatchException) { Console.WriteLine("ciphertext bit f
 
 static class Store
 {
-    // Layout: "GKS1" | iterations (int32 LE) | salt (16) | nonce (12) | tag (16) | ciphertext
+    // Layout: "PWS1" | iterations (int32 LE) | salt (16) | nonce (12) | tag (16) | ciphertext
     const int HeaderLength = 4 + 4 + 16 + 12;
     const int Iterations = 600_000;
 
@@ -152,7 +152,7 @@ static class Store
     {
         byte[] file = new byte[HeaderLength + 16 + plaintext.Length];
         Span<byte> header = file.AsSpan(0, HeaderLength);
-        "GKS1"u8.CopyTo(header);
+        "PWS1"u8.CopyTo(header);
         BinaryPrimitives.WriteInt32LittleEndian(header[4..], Iterations);
         RandomNumberGenerator.Fill(header.Slice(8, 16));    // new salt at every save
         RandomNumberGenerator.Fill(header.Slice(24, 12));   // new nonce at every save
@@ -172,7 +172,7 @@ static class Store
     public static byte[] Open(ReadOnlySpan<byte> password, byte[] file)
     {
         ReadOnlySpan<byte> header = file.AsSpan(0, HeaderLength);
-        if (!header[..4].SequenceEqual("GKS1"u8)) throw new InvalidDataException("not a store");
+        if (!header[..4].SequenceEqual("PWS1"u8)) throw new InvalidDataException("not a store");
         int iterations = BinaryPrimitives.ReadInt32LittleEndian(header[4..]);
 
         byte[] key = Rfc2898DeriveBytes.Pbkdf2(password, header.Slice(8, 16), iterations, HashAlgorithmName.SHA256, 32);
@@ -288,4 +288,4 @@ The attacker computed $`C_1 \oplus C_2 \oplus P_2 = P_1`$ ([C5](#c5)).
 - A. Joux, [Authentication Failures in NIST version of GCM](https://csrc.nist.gov/csrc/media/projects/block-cipher-techniques/documents/bcm/joux_comments.pdf), comment to NIST, 2006: forging tags after a nonce is repeated.
 - Microsoft Learn, [`AesGcm` class](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aesgcm): nonce and tag sizes, the constructor with `tagSizeInBytes`, `AuthenticationTagMismatchException`, clearing the plaintext on failure.
 - OWASP, [Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html): authenticated modes as the default.
-- Claude session on GhostKey, 2026-11-18: both snippets were run there with .NET 10.
+- Claude session, 2026-11-18: both snippets were run there with .NET 10.
