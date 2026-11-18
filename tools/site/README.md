@@ -7,6 +7,7 @@ The site adds what GitHub's layout cannot give:
 - a text column of comfortable width;
 - definitions, propositions and theorems in boxes;
 - maths rendered by [KaTeX](https://katex.org);
+- code coloured by [highlight.js](https://highlightjs.org), in light or dark colours to match the theme;
 - display settings that each browser remembers: theme, contrast, font, text size, line spacing, text width, space around equations, and whether long equations shrink or scroll;
 - a contents panel, and a full-screen button where the browser allows it.
 
@@ -64,7 +65,7 @@ error: topics/qft/example.md: KaTeX cannot render "\\frac{a": KaTeX parse error:
 
 ### Rule 2: the tests pass
 
-**`npm test` passes.** The tests in [test/](test/) pin down how the site reads a note: which Markdown becomes maths, a box or a folded proof, and how links and heading anchors are rewritten. A failure means a change to [src/](src/) broke one of these. Each test is named after the behaviour it checks.
+**`npm test` passes.** The tests in [test/](test/) pin down how the site reads a note: which Markdown becomes maths, a box or a folded proof, which code is coloured, and how links and heading anchors are rewritten. A failure means a change to [src/](src/) broke one of these. Each test is named after the behaviour it checks.
 
 ## How the site reads a note
 
@@ -78,6 +79,7 @@ The site follows the conventions of [AGENTS.md](../../AGENTS.md). A note written
 | a paragraph that starts with `*Proof idea.*` | set off by a line on the left |
 | `<details><summary>Proof</summary>` or `Solution` | a folded block with an arrow |
 | the list under `## Key claims` | claims with C1, C2, … in the margin |
+| a code block with a language, such as ` ```csharp ` | coloured at build time by highlight.js. A language it does not know shows as plain text. The build goes on. |
 | a ` ```mermaid ` block | a diagram, redrawn when the theme changes |
 | a `<picture>` with a light and a dark SVG from `figures/` | the dark SVG under the themes dark and night, the light one under paper, switched along with the theme |
 | a link to another note, `x.md#c3` | a link to its page, `x.html#c3` |
@@ -94,6 +96,8 @@ Open the failed run (*Details* next to the check) and the step that is red.
 
 - **Step "Build"**: each `error:` line names the note and the formula. Fix the formula in the note. Check that GitHub still renders it, because the note must work on both.
 - **Step "Test"**: the failing test's name says which behaviour broke. Undo or fix the change in `src/`.
+  - A test named `highlight.js knows the language …` fails after highlight.js was updated: the new version dropped or renamed a language the notes use. Find its new name in highlight.js's [list of languages](https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md), or go back to the old version in `package.json`.
+  - A test about code colours fails: check that `markdown.mjs` still imports the full `highlight.js` (all languages), not `highlight.js/lib/core`, and that math and Mermaid fences are still handled before the highlighter.
 - **Step "npm ci"**: `package-lock.json` does not match `package.json`. Run `npm install` locally and commit both files.
 - **Job "describe" or "describe-all"**: the token could not read the pull request or edit its description. The log names the `gh api` call that failed. Check that the job's `permissions` in `site.yml` still grant `pull-requests: write`.
 - **Job "request-publish"**: GitHub refused to start the workflow on `main`. Run it by hand (*Actions → site → Run workflow*). As long as the workflow file is not on `main` yet, the job only prints a notice and stays green.
@@ -129,9 +133,9 @@ This is needed once, by the repository's owner: *Settings → Pages → Build an
 | [src/pull-request-description.mjs](src/pull-request-description.mjs) | the "Read on the site" section and where it goes in a description |
 | [src/describe-pull-requests.mjs](src/describe-pull-requests.mjs) | the script of the `describe` and `describe-all` jobs: writes the section into one or every open pull request's description. `--dry-run` only says what it would change. |
 | [src/pull-requests.mjs](src/pull-requests.mjs) | lists the open pull requests, for the previews and the descriptions |
-| [src/markdown.mjs](src/markdown.mjs) | Markdown to HTML: maths, boxes, folded blocks, heading anchors |
+| [src/markdown.mjs](src/markdown.mjs) | Markdown to HTML: maths, boxes, folded blocks, heading anchors, code colours |
 | [src/links.mjs](src/links.mjs) | how links between notes are rewritten |
 | [template.html](template.html) | the page around each note: the bar, the panels, the column |
-| [assets/reader.css](assets/reader.css) | the look: themes, type, boxes |
+| [assets/reader.css](assets/reader.css) | the look: themes, type, boxes, code colours per theme |
 | [assets/reader.js](assets/reader.js) | the settings, the panels, full screen, fitting long equations, the diagrams, the figures' light or dark version |
-| [package.json](package.json) | the pinned dependencies: markdown-it, KaTeX, Mermaid and three fonts, all served from the site itself |
+| [package.json](package.json) | the pinned dependencies: markdown-it, KaTeX, highlight.js, Mermaid and three fonts. KaTeX, Mermaid and the fonts are served from the site itself. highlight.js runs only in the build. |

@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import hljs from "highlight.js";
 import { githubSlug, renderNote } from "../src/markdown.mjs";
 
 const NOTE = "qft/example.md";
@@ -103,6 +104,51 @@ test("a Mermaid fence keeps its source for redrawing", () => {
   // Assert
   assert.match(html, /<pre class="mermaid" data-source="flowchart LR\n  a --&gt; b\n">/);
 });
+
+test("a C# fence is highlighted", () => {
+  // Act
+  const { html } = render("```csharp\npublic sealed class Vault { }\n```\n");
+
+  // Assert
+  assert.match(html, /^<pre><code class="language-csharp">.*<span class="hljs-keyword">public<\/span>/);
+});
+
+test("a math fence is left to KaTeX, not highlighted", () => {
+  // Act
+  const { html } = render("```math\nx \\cdot y\n```\n");
+
+  // Assert
+  assert.match(html, /^<div class="math-block"><span class="katex-display">/);
+  assert.doesNotMatch(html, /hljs|<pre/);
+});
+
+test("a Mermaid fence is not highlighted", () => {
+  // Act
+  const { html } = render("```mermaid\nflowchart LR\n  a --> b\n```\n");
+
+  // Assert
+  assert.doesNotMatch(html, /hljs/);
+});
+
+test("a fence in a language highlight.js does not know stays plain, escaped text", () => {
+  // Act
+  const { html } = render("```nosuchlanguage\nif (a < b) { }\n```\n");
+
+  // Assert
+  assert.equal(html, '<pre><code class="language-nosuchlanguage">if (a &lt; b) { }\n</code></pre>\n');
+});
+
+const HIGHLIGHTED_LANGUAGES = ["csharp", "c", "cpp", "bash", "powershell", "text", "json", "xml", "cmake", "kotlin", "fortran"];
+
+for (const language of HIGHLIGHTED_LANGUAGES) {
+  test(`highlight.js knows the language ${language} of the notes`, () => {
+    // Act
+    const definition = hljs.getLanguage(language);
+
+    // Assert
+    assert.ok(definition, `${language} is not registered`);
+  });
+}
 
 const SLUG_CASES = [
   ["Key claims", "key-claims"],

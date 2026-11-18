@@ -43,7 +43,7 @@ tags: [windows, win32, clipboard, interop, secrets, clipboard-history]
 
 ## Explanation
 
-The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10. The full program, with its `Native` declarations, is under [Examples](#examples). The program saved the clipboard's text first and put it back at the end.
+The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10. Its `Native` declarations follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out. The program saved the clipboard's text first and put it back at the end.
 
 ### What the clipboard is
 
@@ -141,6 +141,10 @@ reads back: True
 
 From step 3 on, the block belongs to Windows. This is an **ownership transfer**, like passing a `Stream` to a constructor that takes ownership and disposes it: after the call, disposing it yourself would be a bug. So the handle must not sit in a `SafeHandle` that frees it later. If the call fails, ownership never moved, and freeing the block is your job again.
 
+`GlobalLock` is what makes a pointer safe here. While the block is locked, Windows promises not to move it, so the pointer it returns can't go stale. `GlobalUnlock` lifts the promise, and from then on the pointer must not be used. It is the same idea as `fixed` for a managed array, applied to memory Windows manages.
+
+The method below puts text on the clipboard as `CF_UNICODETEXT`. It allocates a movable block, locks it to copy the characters and the terminating zero in, unlocks it, and hands it to `SetClipboardData`. The `if` block handles failure. Since the text is a password, the block is wiped before it is freed:
+
 ```csharp
 static unsafe void SetUnicode(ReadOnlySpan<char> text)
 {
@@ -156,7 +160,7 @@ static unsafe void SetUnicode(ReadOnlySpan<char> text)
     {
         int err = Marshal.GetLastPInvokeError();
         p = (char*)Native.GlobalLock(h);
-        new Span<byte>(p, (int)bytes).Clear();
+        CryptographicOperations.ZeroMemory(new Span<byte>(p, (int)bytes));
         Native.GlobalUnlock(h);
         Native.GlobalFree(h);           // still ours: the call failed
         throw new Win32Exception(err);
@@ -165,7 +169,14 @@ static unsafe void SetUnicode(ReadOnlySpan<char> text)
 }
 ```
 
-Once the item is on the clipboard, every program in your session can read it. Text you put there is a plain copy outside your process, and only emptying the clipboard removes it.
+The steps:
+
+- `bytes` is room for `text.Length + 1` characters of two bytes each: the text and its terminating zero ([C6](#c6)).
+- Lock, wrap the pointer in a `Span<char>` of the same length, copy the text, write the zero, unlock.
+- `SetClipboardData` returns 0 (`NULL`) on failure. Then the block is still yours ([C5](#c5)): read the error code first, before another call overwrites it, then lock again and wipe the block with `CryptographicOperations.ZeroMemory`, which the optimiser can't remove. Then unlock and `GlobalFree` it. After `GlobalFree`, the block is gone and `h` is a dead number that must not be used again.
+- On success, nothing more happens: the block now belongs to Windows.
+
+Once the item is on the clipboard, every program in your session can read it. The password is now a plain copy in memory Windows owns, which your program can't wipe. Only emptying the clipboard removes it.
 
 ### Clearing after a timeout, without wiping the user's copy
 
@@ -225,171 +236,27 @@ Windows defines three registered formats that tell these monitors to ignore an i
 | `CanIncludeInClipboardHistory` | `DWORD` 0 | not in history (sync unaffected) |
 | `CanUploadToCloudClipboard` | `DWORD` 0 | not synced (history unaffected) |
 
+Each of these formats carries a 4-byte number, a `DWORD`. The method below registers the format's name to get its number, allocates a 4-byte movable block, writes the value into it and puts it on the clipboard:
+
 ```csharp
 static unsafe void SetDword(string format, uint value)
 {
     uint id = Native.RegisterClipboardFormatW(format);
     nint h = Native.GlobalAlloc(GMEM_MOVEABLE, sizeof(uint));
-    *(uint*)Native.GlobalLock(h) = value;
+    uint* p = (uint*)Native.GlobalLock(h);
+    *p = value;
     Native.GlobalUnlock(h);
     if (Native.SetClipboardData(id, h) == 0) { Native.GlobalFree(h); throw new Win32Exception(); }
 }
 ```
+
+`GlobalLock` returns the block's address as an `nint`. `(uint*)` turns that number into a pointer to a 4-byte unsigned integer. `*p = value` writes `value` into the memory `p` points at, the way `*p` on the right of an assignment would read from it. The [note on pointers and unsafe code](../dotnet/unsafe-code-and-pointers.md) covers both.
 
 Setting all three is the safe choice: the first already covers both, and the other two cover a monitor that only knows one of them. They are a request, not a lock. Windows' own history and sync honour them; a third-party clipboard manager may not. And the item is still readable by any program in your session while it is on the clipboard, which is why the timeout matters as much.
 
 WPF's `Clipboard.SetText` and Windows Forms' `Clipboard.SetText` put only the text on the clipboard, so their copies do land in the history. That is one reason a password tool calls the Win32 functions itself.
 
 The history formats can only be checked by hand: with clipboard history turned on, copy with `CopySecret`, press Win+V, and the password should be missing; copy with `Clipboard.SetText`, and it appears. This check was not run for this note.
-
-## Examples
-
-The snippets above sit right after the sections they illustrate. Together they form this program; it is collapsed because it only adds the declarations and the code that saves and restores the clipboard.
-
-<details><summary>The full program</summary>
-
-```csharp
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-
-// --- save current text so the test can restore it
-string? saved = Clip.ReadText(0);
-
-nint hwnd = Native.CreateWindowExW(0, "STATIC", "clip", 0, 0, 0, 0, 0, Native.HWND_MESSAGE, 0, 0, 0);
-
-char[] password = "hunter2".ToCharArray();
-uint before = Native.GetClipboardSequenceNumber();
-uint mine = Clip.CopySecret(hwnd, password);
-CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(password.AsSpan()));
-Console.WriteLine($"sequence: {before} -> {mine} (changed: {mine != before})");
-Console.WriteLine($"reads back: {Clip.ReadText(hwnd) == "hunter2"}");
-Console.WriteLine($"ExcludeClipboardContentFromMonitorProcessing id >= 0xC000: {Native.RegisterClipboardFormatW("ExcludeClipboardContentFromMonitorProcessing") >= 0xC000}");
-Console.WriteLine($"same id twice: {Native.RegisterClipboardFormatW("CanIncludeInClipboardHistory") == Native.RegisterClipboardFormatW("CanIncludeInClipboardHistory")}");
-
-// expiry: clear only if nobody changed the clipboard since
-Console.WriteLine($"clear if unchanged: {Clip.ClearIfUnchanged(hwnd, mine)}");
-Console.WriteLine($"empty now: {Clip.ReadText(hwnd) is null}");
-
-// someone else copies -> do not clear
-uint mine2 = Clip.CopySecret(hwnd, "x".ToCharArray());
-Clip.SetText(hwnd, "user copied this");
-Console.WriteLine($"clear after user copied: {Clip.ClearIfUnchanged(hwnd, mine2)}");
-
-// restore
-if (saved is not null) Clip.SetText(hwnd, saved); else Clip.ClearIfUnchanged(hwnd, Native.GetClipboardSequenceNumber());
-Native.DestroyWindow(hwnd);
-
-static class Clip
-{
-    const uint CF_UNICODETEXT = 13, GMEM_MOVEABLE = 0x0002;
-
-    public static uint CopySecret(nint owner, ReadOnlySpan<char> secret)
-    {
-        Open(owner);
-        try
-        {
-            if (!Native.EmptyClipboard()) throw new Win32Exception();
-            SetUnicode(secret);
-            SetDword("ExcludeClipboardContentFromMonitorProcessing", 0);
-            SetDword("CanIncludeInClipboardHistory", 0);
-            SetDword("CanUploadToCloudClipboard", 0);
-        }
-        finally { Native.CloseClipboard(); }
-        return Native.GetClipboardSequenceNumber();
-    }
-
-    public static void SetText(nint owner, string text)
-    {
-        Open(owner);
-        try { Native.EmptyClipboard(); SetUnicode(text); }
-        finally { Native.CloseClipboard(); }
-    }
-
-    public static bool ClearIfUnchanged(nint owner, uint sequence)
-    {
-        if (Native.GetClipboardSequenceNumber() != sequence) return false;
-        Open(owner);
-        try { return Native.EmptyClipboard(); }
-        finally { Native.CloseClipboard(); }
-    }
-
-    static unsafe void SetUnicode(ReadOnlySpan<char> text)
-    {
-        nuint bytes = (nuint)((text.Length + 1) * sizeof(char));
-        nint h = Native.GlobalAlloc(GMEM_MOVEABLE, bytes);
-        if (h == 0) throw new Win32Exception();
-        char* p = (char*)Native.GlobalLock(h);
-        var dest = new Span<char>(p, text.Length + 1);
-        text.CopyTo(dest);
-        dest[text.Length] = '\0';
-        Native.GlobalUnlock(h);
-        if (Native.SetClipboardData(CF_UNICODETEXT, h) == 0)
-        {
-            int err = Marshal.GetLastPInvokeError();
-            p = (char*)Native.GlobalLock(h);
-            new Span<byte>(p, (int)bytes).Clear();
-            Native.GlobalUnlock(h);
-            Native.GlobalFree(h);          // still ours: the call failed
-            throw new Win32Exception(err);
-        }
-        // success: the system owns h now, never free or lock it again
-    }
-
-    static unsafe void SetDword(string format, uint value)
-    {
-        uint id = Native.RegisterClipboardFormatW(format);
-        nint h = Native.GlobalAlloc(GMEM_MOVEABLE, sizeof(uint));
-        *(uint*)Native.GlobalLock(h) = value;
-        Native.GlobalUnlock(h);
-        if (Native.SetClipboardData(id, h) == 0) { Native.GlobalFree(h); throw new Win32Exception(); }
-    }
-
-    static void Open(nint owner)
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            if (Native.OpenClipboard(owner)) return;
-            Thread.Sleep(20);   // another program has it open
-        }
-        throw new Win32Exception();
-    }
-
-    public static unsafe string? ReadText(nint owner)
-    {
-        Open(owner);
-        try
-        {
-            nint h = Native.GetClipboardData(CF_UNICODETEXT);
-            if (h == 0) return null;
-            char* p = (char*)Native.GlobalLock(h);
-            try { return new string(p); } finally { Native.GlobalUnlock(h); }
-        }
-        finally { Native.CloseClipboard(); }
-    }
-}
-
-static partial class Native
-{
-    public static readonly nint HWND_MESSAGE = -3;
-    [LibraryImport("user32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static partial bool OpenClipboard(nint owner);
-    [LibraryImport("user32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static partial bool CloseClipboard();
-    [LibraryImport("user32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static partial bool EmptyClipboard();
-    [LibraryImport("user32.dll", SetLastError = true)] public static partial nint SetClipboardData(uint format, nint mem);
-    [LibraryImport("user32.dll", SetLastError = true)] public static partial nint GetClipboardData(uint format);
-    [LibraryImport("user32.dll")] public static partial uint GetClipboardSequenceNumber();
-    [LibraryImport("user32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)] public static partial uint RegisterClipboardFormatW(string name);
-    [LibraryImport("kernel32.dll", SetLastError = true)] public static partial nint GlobalAlloc(uint flags, nuint bytes);
-    [LibraryImport("kernel32.dll")] public static partial nint GlobalLock(nint mem);
-    [LibraryImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)] public static partial bool GlobalUnlock(nint mem);
-    [LibraryImport("kernel32.dll")] public static partial nint GlobalFree(nint mem);
-    [LibraryImport("user32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    public static partial nint CreateWindowExW(uint ex, string cls, string name, uint style, int x, int y, int w, int h, nint parent, nint menu, nint inst, nint param);
-    [LibraryImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] public static partial bool DestroyWindow(nint hwnd);
-}
-```
-
-</details>
 
 ## Good habits
 
