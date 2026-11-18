@@ -228,6 +228,8 @@ On the machine where this note was checked, that printed `9e24ca40-19fe-4673-945
 How cheap a guess is, when the entropy is a four-digit PIN ([C9](#c9)), compared with one guess against PBKDF2 ([C10](#c10)):
 
 ```csharp
+using System.Diagnostics;
+
 byte[] blob = ProtectedData.Protect("hunter2"u8.ToArray(), Encoding.UTF8.GetBytes("4711"), DataProtectionScope.CurrentUser);
 
 var sw = Stopwatch.StartNew();
