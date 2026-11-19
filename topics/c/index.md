@@ -12,3 +12,4 @@
 - [Array parameters and array decay](array-parameters.md): array parameters are pointers, arrays decay in expressions, `a[i]` is `*(a + i)`, and arrays cannot be copied.
 - [The one-element array typedef in GMP and FLINT](one-element-array-typedef.md): why `typedef S name_t[1];` gives inline storage and calls without `&`.
 - [Pointers to arrays and multidimensional arrays](pointers-to-arrays.md): `int (*p)[4]` against `int *p[4]`, row-major layout, two-dimensional parameters, `const` on array types.
+- [Unions, and C struct layout in C#](unions-and-struct-layout.md): members sharing the same bytes, tagged unions such as Win32's `INPUT`, and mirroring C layouts with `StructLayout` and `FieldOffset`.
