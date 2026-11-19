@@ -12,3 +12,5 @@
 - [Linkage and storage duration](linkage-and-storage-duration.md): translation units, unnamed namespaces, the three meanings of `static`, and `inline` variables.
 - [Arrays, std::array, std::vector and std::span](arrays-and-containers.md): built-in arrays against `std::array`, `std::vector` as `List<T>`, and `std::span` as `Span<T>`.
 - [main, its arguments and exit codes](program-entry-and-exit-codes.md): `argc` and `argv` against C#'s `args`, the exit status, and the 0 / 1 / 2 convention.
+- [Pimpl (pointer to implementation)](pimpl.md): hiding a C library's type behind a `unique_ptr` to a struct defined only in the `.cpp`, and the rule of five it brings.
+- [Three-way comparison (operator<=>)](three-way-comparison.md): C++20's `<=>` and `==`, the operators derived from them, and strong, weak and partial orderings.
