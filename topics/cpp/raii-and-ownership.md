@@ -2,11 +2,11 @@
 title: RAII and ownership
 area: cpp
 created: 2026-10-20
-updated: 2026-10-20
+updated: 2026-10-25
 prerequisites: [c/stack-and-heap]
-related: [cpp/sanitizers, c/opaque-handles]
-projects: [tante]
-tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move]
+related: [cpp/sanitizers, c/opaque-handles, cpp/program-entry-and-exit-codes]
+projects: [tante, partonforge]
+tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move, ifstream, using]
 ---
 
 # RAII and ownership
@@ -14,22 +14,36 @@ tags: [cpp, memory, raii, destructor, unique-ptr, shared-ptr, ownership, move]
 ## TL;DR
 
 - Every resource in C++ (heap memory, a file, a library handle) needs an **owner**: the one object responsible for releasing it.
+
 - **RAII** puts that responsibility in a class: the constructor acquires the resource and the destructor releases it. The destructor runs automatically at the end of the owner's scope.
+
 - Ordinary code therefore does not call `new` and `delete` itself. It owns things through **values**, **standard containers** and **smart pointers**, whose destructors do the freeing.
+
 - `std::unique_ptr` means one owner. It can be moved but not copied. `std::shared_ptr` means shared ownership by reference counting.
+
 - A class that owns a resource forbids copying, or defines what a copy means, so that two objects never free the same thing.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** The owner of a resource is the object whose destructor releases it; in well-written C++ every heap allocation has exactly one owner, or one group of `shared_ptr` owners.
+
 - <a id="c2"></a>**C2.** RAII (resource acquisition is initialisation) means acquiring a resource in an object's constructor and releasing it in its destructor, so that the release happens automatically when the object goes out of scope, also when the scope is left by an exception.
+
 - <a id="c3"></a>**C3.** A raw `new` must be paired with exactly one `delete` on every path out of the code, including early returns and exceptions; forgetting it leaks, and doing it twice or using the object afterwards is undefined behaviour. Wrapping the allocation in an owning object removes the need for a hand-written `delete`.
+
 - <a id="c4"></a>**C4.** Any C++ class can be used as a plain value (`Poly p(ctx);`), not only small types: the object then lives in the enclosing scope and its destructor runs when that scope ends, with no `new` and no pointer.
+
 - <a id="c5"></a>**C5.** Standard containers such as `std::vector` and `std::string` own their elements and their heap memory, and release them in their destructor.
+
 - <a id="c6"></a>**C6.** `std::unique_ptr<T>` owns one heap object and deletes it in its destructor; it cannot be copied, only moved with `std::move`, which transfers ownership and leaves the source empty. It is created with `std::make_unique<T>(args...)`.
+
 - <a id="c7"></a>**C7.** `std::shared_ptr<T>` keeps a reference count and deletes the object when the last `shared_ptr` to it is destroyed; two objects holding `shared_ptr`s to each other are never freed, a cycle that `std::weak_ptr` is used to break.
+
 - <a id="c8"></a>**C8.** If a class owning a resource can be copied with the default copy, both copies free the same resource; such a class deletes its copy constructor and copy assignment (`= delete`) or defines them to copy the resource itself.
+
 - <a id="c9"></a>**C9.** A function that returns a `std::unique_ptr<T>` or an owning value hands ownership to the caller, and the type says so; a function that returns a raw `T*` does not say whether the caller must free it, which only its documentation can tell.
+
+- <a id="c10"></a>**C10.** `std::ifstream` and `std::ofstream` open their file in the constructor and close it in the destructor, so a stream declared as a local variable, `std::ifstream file(path);`, needs neither `new` nor a `close()` call. By default a failed open does not throw: the stream is left in a failed state, which `if (!file)` detects.
 
 ## Explanation
 
@@ -63,6 +77,12 @@ Returning something does not transfer ownership by itself; the return type decid
 ### Wrapping a C library handle
 
 C libraries hand out resources with an init function and expect a clear function ([opaque handles](../c/opaque-handles.md)). An RAII class pairs them, and forbids copying, so the clear function runs exactly once ([C8](#c8)).
+
+### Files: the C++ form of using
+
+C# opens a file with `using var stream = File.OpenRead(path);` and the `using` closes it at the end of the block. In C++ the standard file streams are RAII classes, so the same happens without asking ([C10](#c10)). `std::ifstream file(path);` declares a local and calls its constructor, which opens the file. No `new` is involved, because the object lives in the function's frame. Its destructor closes the file when the function ends, also when an exception leaves it.
+
+One difference from C#: a stream that fails to open does not throw by default. It is left in a failed state, so the code checks `if (!file)` and throws or returns an error itself.
 
 ## Examples
 
@@ -131,17 +151,60 @@ std::unique_ptr<Big> make() {
 
 In `make`, ownership passes to the caller because the return type is `std::unique_ptr` ([C9](#c9)), not because a heap object is returned. Returning the local `b` moves it automatically; `std::move` is not needed there. Concretely, a `unique_ptr` is little more than one pointer. Moving it copies that address into the caller's `unique_ptr` and sets `b`'s to null. `b`'s destructor still runs when `make` ends, but it finds null and deletes nothing, so only the caller's `unique_ptr` will delete the `Big` ([C6](#c6)). The `Big` itself never moves: it stays where `make_unique` put it on the heap. Often the compiler skips even this step and builds `b` directly in the caller's variable. Moving in general, and `std::move`, are explained in [copy and move](copy-and-move.md).
 
+Reading a whole file, as [PartonForge](https://github.com/thomaswening/PartonForge)'s `grid_diff.cpp` does ([C10](#c10)). Compiled with `g++ -std=c++20`:
+
+```cpp
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
+std::string read_bytes(const std::string& path) {
+    std::ifstream file(path, std::ios::binary);   // opens; binary: no newline translation
+    if (!file) throw std::runtime_error("cannot open " + path);
+    std::ostringstream contents;                  // a stream that writes into a string
+    contents << file.rdbuf();                     // copies the whole file into it
+    return contents.str();
+}   // file's destructor closes the file here, also after the throw above
+
+int main() {
+    std::ofstream("hello.txt") << "hi\n";         // a temporary stream: closed at the end of this line
+    std::cout << read_bytes("hello.txt").size() << '\n';
+    try {
+        read_bytes("missing.txt");
+    } catch (const std::exception& error) {
+        std::cout << error.what() << '\n';
+    }
+}
+```
+
+Output:
+
+```text
+3
+cannot open missing.txt
+```
+
 ## Pitfalls
 
 - Treating `shared_ptr` as "the C# reference": it costs a reference count on every copy and leaks on cycles ([C7](#c7)). Prefer values and `unique_ptr`.
+
 - Using a `unique_ptr` after `std::move` from it: it is empty, and dereferencing it is undefined behaviour ([C6](#c6)).
+
 - Forgetting `= delete` on the copy operations of a class that owns a C handle: the first copy that goes out of scope frees the handle the other still uses ([C8](#c8)).
+
 - An exception that is never caught ends the program through `std::terminate`, and whether destructors run on the way out is then up to the implementation. The guarantee of [C2](#c2) is for exceptions that are caught somewhere up the call stack.
+
 - Assuming that a function returning a raw pointer hands over ownership, or that it doesn't. Freeing what you don't own is a double free; not freeing what you do own is a leak. Read the documentation, and in your own code return `unique_ptr` when ownership moves ([C9](#c9)).
+
+- Expecting `std::ifstream file(path);` to throw when the file is missing, as C#'s `File.OpenRead` does. It doesn't by default; check `if (!file)` ([C10](#c10)).
+
 - Keeping a reference or raw pointer to something after its owner is gone. RAII decides when things are freed; it does not stop you looking at them afterwards. AddressSanitizer finds this ([sanitizers](sanitizers.md)).
 
 ## Sources
 
 - Claude session on [Tante](https://github.com/thomaswening/Tante), 2026-10-20, explaining "ownership by RAII" in [ADR-0001](https://github.com/thomaswening/Tante/blob/main/docs/adr/0001-cpp20-cmake-vcpkg-guardrails.md) §3, and the RAII classes of its [build spike](https://github.com/thomaswening/Tante/blob/main/docs/spikes/2026-10-16-native-arithmetic-build.md).
+- Claude session on [PartonForge](https://github.com/thomaswening/PartonForge), 2026-10-25: Thomas's review of [PR 1](https://github.com/thomaswening/PartonForge/pull/1) asked what `std::ifstream in(p, std::ios::binary)` is, and why the file is read through a string stream.
 - [C++ Core Guidelines, R: Resource management](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource).
-- [cppreference: RAII](https://en.cppreference.com/w/cpp/language/raii), [`std::unique_ptr`](https://en.cppreference.com/w/cpp/memory/unique_ptr), [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr).
+- [cppreference: RAII](https://en.cppreference.com/w/cpp/language/raii), [`std::unique_ptr`](https://en.cppreference.com/w/cpp/memory/unique_ptr), [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr), [`std::basic_ifstream`](https://en.cppreference.com/w/cpp/io/basic_ifstream).

@@ -14,19 +14,29 @@ tags: [cpp, c, abi, linking, dll, shared-library, static-library, extern-c, pinv
 ## TL;DR
 
 - A **static library** (`.lib`, `.a`) is compiled code the linker copies into the executable at build time; nothing of it exists separately at run time.
+
 - A **shared library** (`.dll`, `.so`, `.dylib`) is a separate file loaded at run time, like a .NET assembly.
+
 - Code built separately has to agree on a binary contract, the **ABI**: how functions are named and called, and how types are laid out in memory.
+
 - C++ has no ABI shared by all compilers: classes, `std::string` and exceptions may be laid out differently by MSVC and GCC, or even by one compiler's Debug and Release builds. Plain C has one per platform.
+
 - So the safe boundary between separately compiled pieces is C (`extern "C"`, C types). .NET avoids the problem because assemblies carry IL and metadata, not machine code.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A static library is an archive of compiled object files; at link time the linker copies the code the program needs into the executable, so the library file is not needed to run the program.
+
 - <a id="c2"></a>**C2.** A shared library is loaded when the program starts or on request at run time (`LoadLibrary` on Windows, `dlopen` on Linux and macOS), and the program needs the file to be present when it runs.
+
 - <a id="c3"></a>**C3.** An ABI (application binary interface) is the contract between separately compiled code at the machine level: calling convention, the names of symbols (name mangling), the size and layout of types, and how exceptions propagate.
+
 - <a id="c4"></a>**C4.** The C++ standard does not define an ABI. Different compilers, or different standard libraries, may lay out classes and standard types differently and mangle names differently, so C++ types passed between binaries built with different toolchains or settings can break; MSVC's Debug and Release builds of `std::vector` and `std::string`, for example, differ in layout.
+
 - <a id="c5"></a>**C5.** Each platform has one C ABI that its compilers follow for C functions and C types, so a function declared `extern "C"` and using only C types can be called across compilers.
+
 - <a id="c6"></a>**C6.** `extern "C"` in C++ gives a function C linkage: its symbol is not name-mangled, so a C program, another compiler, or .NET's P/Invoke can find and call it by its plain name.
+
 - <a id="c7"></a>**C7.** A .NET assembly contains IL and metadata describing its types (any pre-compiled native code, as in ReadyToRun images, comes alongside the IL rather than replacing it), and the runtime decides type layout and compiles IL on the target machine, so assemblies can be used across .NET languages and compilers without an ABI problem of the C++ kind.
 
 ## Explanation
@@ -97,8 +107,11 @@ __declspec(dllexport) std::string greet(const std::string& name);
 ## Pitfalls
 
 - Mixing Debug and Release builds of libraries that pass standard C++ types to each other on MSVC ([C4](#c4)).
+
 - Forgetting `extern "C"` on a function meant to be found by name: its symbol is mangled, and `GetProcAddress`, `dlsym` or P/Invoke cannot find it ([C6](#c6)).
+
 - Letting a C++ exception escape an `extern "C"` function: the caller has no idea what to do with it. Catch everything at the boundary and return an error code.
+
 - Using `long` in a C interface meant for all platforms: it is 32 bits on 64-bit Windows and 64 bits on 64-bit Linux and macOS. Use `int64_t`.
 
 ## Sources

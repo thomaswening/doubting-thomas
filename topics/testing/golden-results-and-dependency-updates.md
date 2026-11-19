@@ -14,23 +14,37 @@ tags: [golden-tests, snapshot-testing, approval-testing, dependencies, regressio
 ## TL;DR
 
 - A **golden test** (also called a snapshot or approval test) compares a program's output with a stored expected result. It detects **change**, not error.
+
 - When a dependency update changes the output, the failing test means **investigate**, not "accept the new snapshot".
+
 - The expected result is corrected only with **independent evidence** that the new output is right, and that evidence goes into the commit.
+
 - A changed output doesn't say **where** the bug is. It can be in the dependency, in your own code, or in the stored result itself.
+
 - Golden tests only work if correct output is **unique**, so normalise first. Otherwise a harmless convention change breaks them.
+
 - **Pin versions**, so that output can only change in a deliberate update commit.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A golden test compares output with a stored expected result. A pass shows the output is unchanged since the result was stored, and it shows correctness only to the extent that the stored result is correct.
+
 - <a id="c2"></a>**C2.** A golden result recorded from the program's own output, and never checked independently, only proves that nothing has changed since recording. If the program was wrong then, the test protects the wrong answer.
+
 - <a id="c3"></a>**C3.** Accepting the new output whenever a golden test fails turns the test into a record of whatever the code currently does, and lets a regression through unnoticed.
+
 - <a id="c4"></a>**C4.** IF a dependency update changes an output whose correct value is unique, THEN at least one of the old and new outputs is wrong, and the test failure is the signal to find out which.
+
 - <a id="c5"></a>**C5.** The expected result is corrected only on independent evidence that the new output is right: a second implementation, a check by a different method (such as multiplying factors back), or an external source. The evidence and a reference to the upstream fix go in the same commit.
+
 - <a id="c6"></a>**C6.** Evidence is independent only if it doesn't share the code path under test: rerunning the same library, or a second program built on the same library, is not independent.
+
 - <a id="c7"></a>**C7.** If several outputs are equally correct (a GCD's sign, the order of factors), the output must be normalised to a canonical form before it is compared. Otherwise golden tests fail on harmless changes of convention, and people learn to accept failures without looking.
+
 - <a id="c8"></a>**C8.** Dependency versions are pinned (NuGet's `packages.lock.json`, vcpkg's `builtin-baseline`), so that output changes only in a deliberate update commit, where the failing tests can be traced to that one update.
+
 - <a id="c9"></a>**C9.** A wrong new output after an update doesn't prove the update is at fault. The bug may be in your own code, which the update only exposed. Checking the dependency's raw result at the boundary, before your own code processes it, tells the two apart.
+
 - <a id="c10"></a>**C10.** Two bugs can cancel: if the dependency and your own code each make an error and the errors offset, the output is correct and the golden test passes. When an update fixes the dependency's error, your own error shows up as a changed, wrong output.
 
 ## Explanation
@@ -162,9 +176,13 @@ This is why a test of each library adapter on its own, at the interface, is wort
 ## Pitfalls
 
 - **"Fails = blocks the upgrade."** No. It means "find out which version is right" ([C4](#c4)). A real bug fix is adopted, with evidence.
+
 - **"Fails = update the snapshot."** Also no ([C3](#c3)).
+
 - **"The new output is wrong, so the update is to blame."** Not necessarily. Your own code may be wrong, and the update only exposed it ([C9](#c9), [C10](#c10)). Check the raw result at the boundary first.
+
 - **Checking with the same tool.** A second program built on the same library agrees with it for the wrong reasons ([C6](#c6)).
+
 - **Golden results that were never checked.** If the first recorded output was never compared with anything independent, a pass proves only consistency ([C2](#c2)).
 
 ## Sources

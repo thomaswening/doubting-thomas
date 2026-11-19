@@ -14,19 +14,29 @@ tags: [c, cpp, memory, malloc, free, raii, destructor, garbage-collection]
 ## TL;DR
 
 - C frees **local variables** automatically when their block ends, structs held by value included, just as C# does for locals.
+
 - C never frees **heap memory** (from `malloc`) on its own: there is no garbage collector, and the code must call `free` exactly once.
+
 - Forgetting `free` leaks memory; calling it twice, or using memory after it, is undefined behaviour.
+
 - Memory goes on the heap when its size isn't known in advance or it must outlive the function that creates it, as an arbitrary-size number must.
+
 - C++ adds **destructors**: objects such as `std::string` free their heap memory automatically at the end of their scope (RAII), so well-written C++ rarely calls `delete`.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In C, an object declared inside a block without `static` (automatic storage, usually on the stack) is destroyed automatically when the block is left; this includes structs and arrays held by value.
+
 - <a id="c2"></a>**C2.** Memory obtained from `malloc`, `calloc` or `realloc` stays allocated until it is passed to `free`; C has no garbage collector and never frees it on its own.
+
 - <a id="c3"></a>**C3.** Heap memory that is no longer reachable and was never freed is a memory leak; calling `free` twice on the same pointer, or reading or writing memory after it was freed, is undefined behaviour.
+
 - <a id="c4"></a>**C4.** When a pointer variable goes out of scope, only the pointer is destroyed; the heap memory it pointed to remains allocated.
+
 - <a id="c5"></a>**C5.** Returning a pointer to a function's local variable gives a dangling pointer, because the local is destroyed when the function returns.
+
 - <a id="c6"></a>**C6.** In C++, an object's destructor runs automatically and deterministically when the object goes out of scope, including when the scope is left by an exception, so a class that frees its resource in its destructor cannot leak it (RAII).
+
 - <a id="c7"></a>**C7.** The .NET garbage collector frees managed heap memory at an unspecified time after it becomes unreachable, whereas a C++ destructor runs at a known point, the end of the owner's scope; .NET's `using` and `Dispose` give deterministic release for non-memory resources only when the code asks for it.
 
 ## Explanation
@@ -134,8 +144,11 @@ release a
 ## Pitfalls
 
 - Believing a pointer going out of scope frees what it points to ([C4](#c4)).
+
 - Returning the address of a local array or struct ([C5](#c5)); compilers often warn, but not always.
+
 - Freeing memory with a different allocator than the one that allocated it: `free` for `malloc`, `delete` for `new`, and a library's own release function for what the library allocated. On Windows, freeing in one DLL what another DLL allocated can crash, because each may use its own heap.
+
 - Expecting C++ RAII from a raw pointer: `T* p = new T;` has no destructor attached to `p`; `std::unique_ptr<T>` does.
 
 ## Sources

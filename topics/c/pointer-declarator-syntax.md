@@ -14,19 +14,29 @@ tags: [c, cpp, pointer, declarator, const, dereference]
 ## TL;DR
 
 - In a **declaration**, `*` means "pointer to". `int* p` and `int *p` are the same declaration; spacing is style.
+
 - The `*` binds to each declared name, not to the type: `int* a, b;` makes `a` a pointer and `b` a plain `int`. C# does the opposite.
+
 - In an **expression**, `*p` follows the pointer to what it points to (dereferencing), `&x` takes an address, and `a * b` is multiplication.
+
 - `p->x` is shorthand for `(*p).x`.
+
 - `const` applies to what is on its left (or, at the start, to what is on its right): `const int* p` protects the int, `int* const p` protects the pointer.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** In a C or C++ declaration, whitespace around `*` has no meaning: `int* p;`, `int *p;` and `int * p;` all declare `p` as a pointer to `int`.
+
 - <a id="c2"></a>**C2.** In C and C++, `int* a, b;` declares `a` as a pointer to `int` and `b` as an `int`, because the `*` is part of each name's declarator, not of the shared type.
+
 - <a id="c3"></a>**C3.** In C# unsafe code, `int* a, b;` declares both `a` and `b` as pointers to `int`, unlike C and C++.
+
 - <a id="c4"></a>**C4.** In an expression, unary `*p` (dereference) yields the object `p` points to, unary `&x` yields the address of `x`, and binary `a * b` is multiplication; the meaning of `*` depends on whether it appears in a declaration or an expression, and on whether it has one operand or two.
+
 - <a id="c5"></a>**C5.** `p->m` is equivalent to `(*p).m`: it accesses member `m` of the struct that `p` points to.
+
 - <a id="c6"></a>**C6.** In `const int* p` (equivalently `int const* p`) the pointed-to `int` cannot be changed through `p` but `p` can be re-pointed; in `int* const p` the pointer cannot be re-pointed but the `int` can be changed through it.
+
 - <a id="c7"></a>**C7.** A `const` in a pointer type restricts access through that pointer, not the object itself: converting `int*` to `const int*` is implicit and allowed for any non-const object, while converting `const int*` back to `int*` requires an explicit cast.
 
 ## Explanation
@@ -97,9 +107,13 @@ Expected output:
 ## Pitfalls
 
 - Writing `int* a, b;` and expecting two pointers ([C2](#c2)), especially when coming from C# ([C3](#c3)).
+
 - Writing `*p.x` meaning `(*p).x`: it parses as `*(p.x)`. Use `p->x` ([C5](#c5)).
+
 - Reading `const int* p` as "a constant pointer"; it is a pointer to a constant ([C6](#c6)).
+
 - Believing the object behind a `const int*` cannot change: only changes through that pointer are forbidden ([C7](#c7)).
+
 - Dereferencing a pointer that is null or no longer points to a live object: undefined behaviour in C, where C# would throw.
 
 ## Sources

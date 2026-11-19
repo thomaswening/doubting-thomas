@@ -14,18 +14,27 @@ tags: [c, cpp, function-pointer, declarator, delegate]
 ## TL;DR
 
 - A **function pointer** holds the address of a function and can be called like one. Its closest C# counterpart is a delegate such as `Func<long, IntPtr>`.
+
 - Read a declaration **from the name outwards**: right while you can, left when you hit a closing bracket.
+
 - `int (*f)(double)` reads "f is a pointer to a function taking a double and returning an int".
+
 - The brackets around `*f` matter: without them, `int *f(double)` declares a function returning `int*`.
+
 - A struct whose fields are function pointers is how C expresses an interface or a table of services.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** `R (*name)(P1, P2)` declares `name` as a pointer to a function that takes parameters of types `P1` and `P2` and returns `R`.
+
 - <a id="c2"></a>**C2.** `R *name(P)`, without brackets around `*name`, declares a function named `name` that takes `P` and returns `R*`; it is not a pointer variable.
+
 - <a id="c3"></a>**C3.** A C declaration is read starting at the declared name, moving right through `(...)` (function) and `[...]` (array) until a closing bracket or the end, then left through `*` (pointer to) and the type, and outwards bracket by bracket (the right-left rule).
+
 - <a id="c4"></a>**C4.** A function's name used as a value converts to a pointer to that function, so `fp = square;` and `fp = &square;` are equivalent, as are the calls `fp(3)` and `(*fp)(3)`.
+
 - <a id="c5"></a>**C5.** `typedef int (*unary_fn)(int);` in C, or `using unary_fn = int (*)(int);` in C++, names the function-pointer type so that later declarations read as `unary_fn fp;`.
+
 - <a id="c6"></a>**C6.** A struct of function pointers that a library fills in and hands to client code plays the role of an interface instance: the client calls through the fields without linking against, or knowing, the functions behind them.
 
 ## Explanation
@@ -110,7 +119,9 @@ More declarations to practise on:
 ## Pitfalls
 
 - Dropping the brackets around `*name` and declaring a function instead of a pointer ([C2](#c2)). The compiler may only complain later, when the "variable" is assigned.
+
 - Reading left to right: `int (*f)(double)` does not "start with int"; the name is the starting point ([C3](#c3)).
+
 - Calling a null function pointer: like invoking a null delegate, but in C it is undefined behaviour rather than an exception.
 
 ## Sources

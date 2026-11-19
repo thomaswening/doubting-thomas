@@ -14,20 +14,31 @@ tags: [arbitrary-precision, error-bounds, flint, arb]
 ## TL;DR
 
 - A **ball** $[m \pm r]$ is a number written as a midpoint $m$ and a radius $r$: the true value is somewhere in $[m - r, m + r]$.
+
 - Every operation on balls returns a ball that is **guaranteed** to contain the true result, rounding errors included.
+
 - That makes digits **provable**: if the whole ball rounds to the same digits, those digits are right.
+
 - The price: comparisons can answer "don't know", and the radius can come out larger than the real error.
+
 - In C and C++ it is provided by FLINT's `arb` module (formerly the Arb library), which [Tante](https://github.com/thomaswening/Tante) uses for numerical evaluation.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** A ball $[m \pm r]$ represents every real number $x$ with $|x - m| \le r$; the value it stands for is guaranteed to be one of them.
+
 - <a id="c2"></a>**C2.** Ball arithmetic guarantees inclusion: for any operation, the exact result for any inputs inside the input balls lies inside the output ball, including the rounding error of computing the midpoint.
+
 - <a id="c3"></a>**C3.** The radius is an upper bound on the error, never an estimate: it may overstate the error, but it never understates it.
+
 - <a id="c4"></a>**C4.** A ball comparison such as `a < b` returns true only if it holds for every pair of points in the two balls. When the balls overlap, both `a < b` and `a ≥ b` return false, so false means "not proven", not "no".
+
 - <a id="c5"></a>**C5.** Ball arithmetic does not know when two operands are the same quantity: for $x = [m \pm r]$, computing $x - x$ as a subtraction of two balls gives $[0 \pm 2r]$, not exactly $0$ (the dependency problem).
+
 - <a id="c6"></a>**C6.** If every number in a result ball rounds to the same n significant digits, those n digits are proven correct. If not, the usual remedy is to repeat the computation at higher working precision.
+
 - <a id="c7"></a>**C7.** Agreement between two floating-point evaluations at different precisions does not prove any digits: $e^{10^{-50}} - 1$ evaluates to $0$ at both 30 and 38 digits, while its true value is about $10^{-50}$. Ball arithmetic at 30 digits returns roughly $[0 \pm 10^{-30}]$, which shows that no digit is known yet.
+
 - <a id="c8"></a>**C8.** In FLINT's `arb`, the working precision is given in bits and passed to each operation, not stored with the number; $n$ decimal digits need about $3.32\,n$ bits ($\log_2 10 \approx 3.32$).
 
 ## Explanation
@@ -114,8 +125,11 @@ arb_clear(b);
 ## Pitfalls
 
 - **Reading false as "no".** A false comparison means "not proven" ([C4](#c4)). Branch on what was proven, and handle the third case, overlap, explicitly.
+
 - **Testing equality.** Two balls can be proven unequal (disjoint) but almost never proven equal: that needs both to be exact, with radius 0. Use `arb_overlaps` or `arb_contains` for "could these be the same number?".
+
 - **Digits versus bits.** Precision is in bits ([C8](#c8)). 30 digits need about 100 bits, not 30.
+
 - **Long loops.** Each step adds a little radius. Over thousands of steps the ball can become too wide to prove anything, even when the true error is small ([C3](#c3)). Raise the precision, or reformulate to reduce the dependency problem ([C5](#c5)).
 
 ## Sources

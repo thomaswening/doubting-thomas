@@ -14,23 +14,37 @@ tags: [c, cpp, api-design, handle, incomplete-type, raii, safehandle]
 ## TL;DR
 
 - An **opaque handle** is a pointer to a type whose definition the user never sees. The user can store it and pass it back, but not look inside, like an `IntPtr` from native code.
+
 - The library declares the type without a body in its header and defines it only in its own source, so it can change the layout without breaking users.
+
 - The hidden struct holds the library's **data**. The operations are ordinary functions of the library, declared next to it, which the user calls directly.
+
 - Every handle comes with a **create** function and a **release** function, and the user must call the release function exactly once.
+
 - A C++ wrapper class turns this into RAII: its destructor calls the release function. It must also forbid copying, or two copies would release the same handle twice.
 
 ## Key claims
 
 - <a id="c1"></a>**C1.** An opaque handle type is declared in the public header as an incomplete struct (`typedef struct db db;`) and defined only in the library's source, so client code can hold `db*` pointers but cannot access fields, create objects of the type, or depend on its size.
+
 - <a id="c2"></a>**C2.** Because clients never depend on the layout of an opaque type, the library can change its contents without clients having to be recompiled, which is why C libraries with stable binary interfaces use opaque handles.
+
 - <a id="c3"></a>**C3.** All operations on an opaque type go through the library's functions; each function that returns a new handle transfers ownership to the caller, who must release it with the library's matching function exactly once.
+
 - <a id="c4"></a>**C4.** A handle must be released by the library that created it, through its release function, never with the client's own `free`, because the client cannot know how or with which allocator the object was created.
+
 - <a id="c5"></a>**C5.** A C++ class that wraps a handle and calls the release function in its destructor makes release automatic (RAII); it must also disable copying, or implement copying by asking the library for a new handle, because the compiler-generated copy would copy the pointer and release it twice.
+
 - <a id="c6"></a>**C6.** .NET's `SafeHandle` plays the same role for native handles: it wraps an `IntPtr` and calls a release function from `Dispose` or, failing that, its finaliser.
+
 - <a id="c7"></a>**C7.** In C++, `Database(const Database&) = delete;` removes the copy constructor, so any attempt to copy a `Database` is a compile-time error; `= delete` deletes a function from the class, not an object.
+
 - <a id="c8"></a>**C8.** A function declared next to an opaque type in a C header, such as `db* db_open(const char* path);`, is a stand-alone function of the library (a non-member function), not part of the struct: the hidden struct holds only the library's data, and the client calls the functions directly by name.
+
 - <a id="c9"></a>**C9.** An API uses a handle for an object the library manages: something with state that persists between calls, a lifetime that needs cleaning up, or contents the library keeps private; operations on plain values that keep no state, such as `sqrt(double)`, need no handle. Each function taking the handle acts as a method of that object, with the handle in the role of `this`.
+
 - <a id="c10"></a>**C10.** A handle need not be a memory address: Win32's `HANDLE` and `HWND` values are identifiers that Windows looks up in its own tables, which the program never dereferences.
+
 - <a id="c11"></a>**C11.** A plug-in that is not linked against its host typically receives both a table of function pointers, through which it calls the host, and opaque handles to the host's objects, which it passes back through that table; [Tante](https://github.com/thomaswening/Tante)'s modules get `tante_host` (the table) and `tante_rational*` (handles to numbers).
 
 ## Explanation
@@ -143,10 +157,15 @@ A wrapper this simple can't be returned from a function or stored in a `std::vec
 ## Pitfalls
 
 - Copying a handle-wrapping C++ class without defining what a copy means: two destructors, one handle, a double release ([C5](#c5)).
+
 - Freeing a handle with `free` or `delete` instead of the library's release function ([C4](#c4)).
+
 - Reading `= delete` as "deletes the object": it removes a member function from the class ([C7](#c7)).
+
 - Thinking the hidden struct contains the library's functions, or a table of them: it holds data; the functions are separate ([C8](#c8)).
+
 - Using a handle after releasing it: the pointer value still looks valid, but the object behind it is gone.
+
 - Treating `FILE*` from `<stdio.h>` as a strictly opaque type: it is used as a handle, but most C libraries do define `FILE` in the header.
 
 ## Sources

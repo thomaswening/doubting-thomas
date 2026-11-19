@@ -4,7 +4,9 @@ This file is the single rulebook for any AI that reads or writes this repository
 
 **What this repository is.** Thomas's personal knowledge base. Every note records something he has learned, written so that he can read it as a reference and so that an AI can build exercises and quizzes from it. The `results/` folder logs how he did when tested, so that weak spots and topics to refresh can be found later.
 
-**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour. Where a concept has a .NET counterpart, compare to it.
+<a id="what-makes-a-note"></a>**What makes a note.** A general concept Thomas learned, one he could be quizzed on outside the project where he met it: a piece of mathematics (greatest common divisor), a tool and how it works (what a GitHub Actions workflow is, and how its trigger, jobs and steps fit together). Not a working rule or a decision about how he works ("document every CI check as a rule with a table of cases"): that belongs in his Claude configuration or in the project's documents. Not a project fact either ("Tante pins FLINT 3.6.0"). Decided by Thomas, 25 October 2026.
+
+**Who Thomas is**, for pitching explanations: a .NET (C#) developer with some C++20 and no Rust, working on research software with a mathematical and physics flavour in his own projects. At work he maintains a large legacy desktop application in C# with WPF and MVVM. There he learns about C#, software engineering, architecture, refactoring legacy code and the application's scientific domain. Notes from that work follow the confidentiality rules of [§5](#5-projects-sources-and-confidentiality). He has a master's degree in physics. He knows many mathematical concepts well, but not always their proofs and the smaller results they rest on: in topology, for example. Where a concept has a .NET counterpart, compare to it. Mathematics and physics notes follow [their own section](#mathematics-and-physics-notes).
 
 **Language.** Always English.
 
@@ -22,6 +24,10 @@ results/README.md         how to read the results log
 results/YYYY-MM-DD-<slug>.md   one file per test session
 templates/note.md         copy this to start a note
 templates/results.md      copy this to start a results file
+tools/check_docs.py       the link check (§9)
+tools/site/               builds the reading site from topics/ (§9)
+.github/workflows/        CI: docs-check.yml runs the link check on every pull request;
+                          site.yml builds the reading site and publishes it from main
 ```
 
 - `<area>` and `<note>` are lower-case kebab-case: `topics/numerics/ball-arithmetic.md`, `topics/cpp/move-semantics.md`.
@@ -37,22 +43,81 @@ Start from [templates/note.md](templates/note.md). The sections, in this order:
 3. **`## TL;DR`**: three to six bullets. Someone who reads only this should get the gist.
 4. **`## Key claims`**: the checkable core of the note (§3).
 5. **`## Explanation`**: didactic prose that builds the idea up from what the reader already knows, in short paragraphs with subsections as needed. Say *why*, not only *what*. Link the claims it explains: `[C2](#c2)`.
-6. **`## Examples`**: worked examples and code snippets, each with its language tag and the expected output or result. Prefer small, runnable snippets.
-7. **`## Pitfalls`** (optional): common mistakes and misreadings. These make good quiz questions.
-8. **`## Sources`**: where this was learned and where to read more, as links (§5).
+6. **`## Examples`** (optional): worked examples and code snippets, each with its language tag and the expected output or result. Prefer small, runnable snippets. **A snippet that illustrates one subsection of the Explanation goes right after that subsection**, not into this section: the reader sees the code while the idea is fresh. Each such snippet is a complete program or a clearly marked piece of one, followed by its output. One or two sentences before it say what the program does and which line or output to look at. Without them, a reader can't tell which part of the code carries the idea. `## Examples` then holds only a short worked example that spans the whole note. Leave the section out when everything is inline. Don't fill it with links back to the snippets, which the reader has already seen, and don't put the full program the pieces come from there: a long program at the end makes the reader scroll back and forth, and the note is about the concept, not the program. Decided by Thomas, 18 November 2026, in the reviews of [#64](https://github.com/thomaswening/doubting-thomas/pull/64) and [#65](https://github.com/thomaswening/doubting-thomas/pull/65).
+7. **`## Good habits`** (optional): what to write by default, for notes about writing code, such as constructors or error handling. Each habit is one imperative line that links the claim explaining why. It comes from an established source, such as the C++ Core Guidelines or a compiler's recommended warnings, not from taste. Pitfalls say what goes wrong; good habits say what to write instead. Leave the section out where the topic is understanding a mechanism, as for array decay.
+8. **`## Pitfalls`** (optional): common mistakes and misreadings. These make good quiz questions.
+9. **`## Exercises`** (optional): a few short tasks for active recall: predict what code does, interpret a declaration, explain a mechanism in your own words. Use it where the concept is a mechanism the reader must be able to rebuild, not for every note. Each exercise links the claims it practises. Its solution follows in a collapsed block, so that it is not read by accident:
+
+   ```html
+   <details><summary>Solution</summary>
+
+   The answer, with links to the claims.
+
+   </details>
+   ```
+
+   The empty lines inside `<details>` are needed for GitHub to render Markdown there.
+10. **`## Sources`**: where this was learned and where to read more, as links (§5).
 
 Style: plain, precise, short sentences. Define a term before using it. One idea per paragraph.
+
+**Spaced lists.** In the sections *TL;DR*, *Key claims*, *Good habits* and *Pitfalls*, an empty line separates two bullets. Their bullets often run to two lines or more. Without the empty lines, GitHub packs them into one dense block. With them, it spaces the bullets like paragraphs. Decided by Thomas, 13 November 2026.
 
 **Mathematics is written in LaTeX**, which GitHub and VS Code's Markdown preview render natively, and which an AI reads directly from the source:
 
 - Inline: `$\gcd(p, q) = x - y$`. If the expression contains characters Markdown would interpret, such as `*`, `_` or `\`, use the backtick form `` $`a_1 * b_1`$ ``.
 - Displayed: a ` ```math ` code block, or `$$ … $$` on lines of their own. Prefer the code block: it never collides with Markdown.
+- **Inline formulas stay short**: a symbol, a name or a short relation, such as $`\Lambda(A)`$ or $`A \in SL(2,\mathbb{C})`$. A formula with a fraction, a trace, a sum or an integral, indices above and below, or more than about five symbols is displayed. Inline, such a formula stretches its line and is hard to pick out of the sentence. Decided by Thomas, 13 November 2026.
+- **Inside a list item or a `<details>` block**, a displayed formula is a paragraph of its own, indented to the item's text, in the backtick form with `\displaystyle`: `` $`\displaystyle \frac{a}{b}`$ ``. GitHub shows a ` ```math ` block there as LaTeX source code once the list or block contains any inline math. A `$$ … $$` line breaks as soon as two underscores pair up as Markdown italics. The backtick form is safe from both, because Markdown leaves code spans alone. `\displaystyle` keeps fractions at full size. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43) and [#50](https://github.com/thomaswening/doubting-thomas/pull/50), 13 November 2026.
 - A literal dollar sign in prose is written `\$`.
+- GitHub rejects some macros and shows "The following macros are not allowed" in place of the formula. `\operatorname` is one of them: write `\mathrm{tr}` instead of `\operatorname{tr}`. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
+- Write three-vectors in bold, `\mathbf{x}` and `\boldsymbol{\sigma}`, not with `\vec`. In Firefox, GitHub misplaces the arrow accent and splits the formula after it. Chromium renders it correctly, so a check in one browser doesn't catch it. Found in [#43](https://github.com/thomaswening/doubting-thomas/pull/43), 12 November 2026.
 - Don't put quotation marks directly around a formula: GitHub does not recognise `"$a \ge b$"` as math. Write `meaning $a \ge b$` instead.
 - Write formulas in LaTeX everywhere a formula appears, key claims included. Code, identifiers and program output stay in backticks: `arb_t`, `x^2 - 1` as typed into a program.
-- Check that the note renders on GitHub before asking for review: in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
+- Check that the note renders on GitHub before asking for review (§9): in the pull request's *Files changed* tab, choose *Display the rich diff*, or open the file on its branch.
 
 **Snippets use only what Thomas already knows:** C#/.NET, basic C++20, and the note's prerequisites. Any other feature in a snippet is either explained right there or left out. This includes keywords such as `explicit`, member initialiser lists, move constructors and `std::exchange`. Keep each example to the smallest code that shows the concept. An advanced version belongs in the note whose topic it is, with a link to it.
+
+### Mathematics and physics notes
+
+Thomas learns mathematics by speaking it. He wants each statement written as a textbook writes it, together with the idea behind it. Rigour without motivation doesn't work for him, and neither does intuition without rigour. A note in mathematics or physics follows the rules above, plus the ones in this section. Decided by Thomas, 12 November 2026, in the review of [#40](https://github.com/thomaswening/doubting-thomas/pull/40).
+
+**Formal statements, each explained.** Definitions, propositions, lemmas and theorems appear in textbook form: a bold label, then the statement.
+
+```markdown
+**Definition (quotient space).** Let $X$ be a topological space and $\sim$ an equivalence relation on $X$. …
+```
+
+Right after each one, the text answers whichever of these questions apply:
+
+- What does it say in words? What does each symbol stand for?
+- What does it represent? What picture can you draw?
+- What does it look like in a lower dimension, or in the simplest case?
+- Why is it defined this way and not more simply?
+- Which examples fit, and which non-examples don't? A non-example shows what a condition is there for. For example, $t \mapsto (\cos t, \sin t)$ from $[0, 2\pi)$ to the circle is a continuous bijection whose inverse is not continuous. It shows why a homeomorphism needs a continuous inverse.
+
+Notation comes after the idea it names: first the operation is understood, then it gets its symbol.
+
+**Every map has a domain and a codomain.** A map is introduced with its name, its domain and its codomain, then its rule: $`\Phi : \mathbb{R}^{1,3} \to \mathrm{Herm}(2)`$, $`x \mapsto X(x)`$. A rule such as $`X \mapsto AXA^\dagger`$ alone doesn't say what the map acts on. Where several maps are chained, or one is defined through another, a commutative diagram shows how they connect. Decided by Thomas, 13 November 2026, in the review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
+
+**Mathematical diagrams are drawn, not Mermaid.** A commutative diagram, or any figure with formulas in it, is drawn by a script in `tools/figures/` with matplotlib's LaTeX-like math. The script writes a light and a dark SVG into a `figures/` folder next to the note. The note shows them with a `<picture>` element whose dark source has `media="(prefers-color-scheme: dark)"`, plus an `alt` text that describes the figure in words. Both SVGs are committed with the script. Mermaid can't set formulas, and its flowchart layout doesn't draw a commutative square as a square. Mermaid stays for flowcharts and other diagrams without formulas. Decided by Thomas, 16 November 2026, in the review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
+
+**Full proofs, in two layers.** Every result that belongs to the note's concept is proved. The **proof idea** comes first, in the open text: the picture and the one trick the proof rests on. The **full proof** follows in a collapsed block, `<details><summary>Proof</summary>`, with the empty lines that §2 asks for. Each step that uses an earlier result links it: a claim, a note or a cited result.
+
+**Every step names its tool.** A step that uses an identity, an inequality or a theorem names it, however familiar: "by the triangle inequality", "by the polarisation identity", "by the intermediate value theorem". A reader then sees which fact carries the step instead of having to recognise it. Decided by Thomas, 16 November 2026, in the review of [#43](https://github.com/thomaswening/doubting-thomas/pull/43).
+
+**Every gap is labelled.** A result that the note uses but doesn't prove is **cited**. It is stated precisely and marked *(cited)*, with a link to its note or to a source with a theorem or page number, in the form "Author, *Title*, Theorem 4.2". Nothing is used without being either proved or cited, because a leap of faith Thomas doesn't notice is the error this rule prevents. How much a citation explains depends on how obvious the result is:
+
+- An **intuitive** result gets its statement and the label, nothing more.
+- A **non-obvious** result also gets a short motivation: a picture, a low-dimensional case, or why it can't be otherwise. This is not a proof. It makes the leap of faith a reasonable one.
+
+**Rigour budget.** A note proves what belongs to its own concept and cites what lies below it. A cited result gets a note of its own when a second note needs it, or when Thomas asks about it. Until then it can wait in the backlog (§8). Foundations grow from questions, not as a course.
+
+**Physics: derivations with their assumptions.** In physics, a derivation takes the place of a proof. It lists its assumptions and approximations up front, marks where each one enters, and says what changes without it. A heuristic argument is allowed when it is labelled *(heuristic)* and says what a rigorous version would need.
+
+**Claims and exercises.** The key claims of such a note are mostly its definitions and results, stated precisely. A claim that has a proof links to it. Exercises include proofs: "prove C4", "reconstruct the proof of C2 from its idea", "which condition of the definition fails here?".
+
+**Sources.** Prefer a standard textbook. Follow its notation and its proofs, and cite it by theorem or page number, so that Thomas can check a proof against the book. Paraphrase and cite; never copy passages. Thomas's university textbooks are in the `eBooks` folder of his Google Drive. If a Google Drive connector is available, look there before the web.
 
 ## 3. Key claims
 
@@ -61,6 +126,15 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - Each claim is one or two sentences that are **true on their own**, without the rest of the note, and **checkable**: a reader can say whether an answer agrees with them. "Ball arithmetic tracks errors" is not a claim; "If two balls overlap, `a < b` cannot be decided" is.
 - Format, one per bullet, with an anchor:
   `- <a id="c3"></a>**C3.** If two balls overlap, …`
+- An empty line separates two claims (§2, spaced lists). A claim's main formula is displayed in the form for list items (§2):
+
+  ```markdown
+  - <a id="c3"></a>**C3.** For $`A \in SL(2,\mathbb{C})`$, the map $`X \mapsto A X A^\dagger`$ defines a Lorentz transformation $`\Lambda(A)`$ with matrix
+
+    $`\displaystyle \Lambda(A)^\mu{}_\nu = \frac12 \mathrm{tr}(\sigma_\mu A \sigma_\nu A^\dagger).`$
+
+  - <a id="c4"></a>**C4.** …
+  ```
 - **IDs are stable and never renumbered or reused.** A new claim takes the next free number, wherever it sits in the list. A claim found to be wrong is not deleted: it keeps its ID and is marked `**C4.** *(withdrawn 2026-11-02: reason)*`, with a corrected claim under a new ID. The results log refers to claim IDs, so renumbering would corrupt it.
 - Aim for four to ten claims per note. More means the note should be split.
 
@@ -84,18 +158,24 @@ Key claims are what makes a note testable: a quiz question is built from a claim
 - `projects` records where a concept came up or matters; it is metadata, not organisation. Notes stay organised by concept (§1).
 
 - Under `## Sources`, link where the knowledge came from (a pull request or ADR in one of Thomas's repositories, a book, a paper, documentation) and where to read further. Name the session if it came from a conversation: `Claude session on Tante, 2026-10-19`.
-- **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms, and give no link to the confidential source.
+- **Confidential material never enters this repository.** Code, names, file paths and identifiers from an employer's or a client's codebase, or from any repository Thomas does not own, are not copied. **Before writing a note whose source is such code, ask Thomas.** If he agrees, explain the concept with a snippet rewritten from scratch in generic terms. Give no link to the confidential source.
+- **Notes from work.** At work, every candidate note has such a source. Picking a proposed candidate counts as Thomas's yes, provided the note explains the general concept with a snippet written from scratch. It contains no ticket numbers, no code or identifiers from the work codebase and no names of the employer, the product or colleagues. Under `## Sources`, name the session without the project (`Claude session at work, 2026-11-16`). Knowledge only about the work codebase ("how module X loads its settings") is not a note: it fails the test of [what makes a note](#what-makes-a-note).
+  - **Public sources only.** A note from work rests only on public sources (documentation, a book, a paper, a talk), named under `## Sources`. If work is the only source, it is no note. Domain knowledge counts only as far as a textbook or a paper covers it, never the company's own methods, data or results.
+  - **Check before the push.** In a work session, Claude shows Thomas the note's full text and its sources in chat. It pushes only after his OK. The reason: this repository is public, and the `site` workflow publishes every open pull request as a preview. A note is public as soon as its branch is pushed, so a review of the pull request comes too late to stop a leak.
+  - Decided by Thomas, 16 November 2026, in [claude-config#41](https://github.com/thomaswening/claude-config/pull/41).
 - No secrets, keys, tokens, passwords or personal data, ever.
 
 ## 6. Writing to this repository
 
 - **Notes and everything outside `results/` and `backlog.md`** change only through a pull request to `main`, one coherent batch per pull request, which Thomas reviews and merges. Never commit these directly to `main`, and never merge a pull request yourself. **A note on `main` has been reviewed by Thomas**: merging is his review.
-- **At most three notes per pull request**, counting new notes and notes with substantial changes.
+- **At most three notes per pull request**, counting new notes and notes with substantial changes. A note split during review counts with all its parts. If the parts exceed the limit, they go into pull requests stacked on this one.
+- **Prerequisites first.** Before writing a note, list what its explanation relies on. Each item must be something Thomas already knows (§2) or an existing note. A missing item is a note of its own: write it first, in its own pull request. Stack the note that needs it on that branch. A note whose explanation has to stop for background is a sign that this step was skipped.
 - **A note that comes up while a pull request is under review goes into its own pull request**, never into the one under review. If it depends on the one under review, stack it on that branch. A topic that only *could* become a note goes into the backlog instead (§8).
 - **Answer review questions in the note.** A question in a review shows where the note is unclear. Fix it in the note: clearer text, a comment in the snippet, or a new claim or pitfall. Then reply on the thread and say what changed. A reply on its own is lost once the pull request is merged.
 - **Results** (`results/`) and **backlog lines** (`backlog.md`, §8) are the two exceptions: commit them directly to `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `docs(numerics): add ball arithmetic`, `docs(cpp): correct C4 in move semantics`, `chore(results): quiz on ball arithmetic`, `chore(backlog): add cpp/copy-elision`. The scope is the area, or `results`, or `backlog`, or `repo` for changes to the structure.
 - When changing a note, update its `updated` date. Keep existing claim IDs (§3).
+- **Before asking for review**, run the checks of §9 and report them in the pull request.
 
 ## 7. Testing Thomas and logging results
 
@@ -116,9 +196,67 @@ To find what Thomas should work on, read `results/` and the indexes:
 
 [backlog.md](backlog.md) lists topics that came up and could become notes, so that none is lost and open pull requests stay the notes Thomas has chosen to read now.
 
-- **Add an entry** when a question or concept comes up that no note or open pull request covers and that Thomas does not want written up yet: a review question that goes beyond the note under review, or a candidate Thomas did not pick at a checkpoint. Check the area indexes and the open pull requests first.
+- **Add an entry only when Thomas asks for it** ("put X into the backlog"), for example for a review question that goes beyond the note under review or for a checkpoint candidate he wants kept for later. Candidates he doesn't mention are left alone. Before adding, check the area indexes and the open pull requests.
 - **Format**: one line under its area's heading, `` - `<area>/<note>`: <the question or concept>. Came up in <where>, linked. `` The note id follows §1 and §4. A new area gets a new heading.
 - **Commit backlog changes directly to `main`** (§6), as `chore(backlog): …`, never inside a pull request. A backlog line is a pointer, not knowledge: nothing is quizzed from it, so it needs no review. Thomas weeds it when entries are proposed.
 - **When proposing notes**, read the backlog too, and list its entries in a group of their own, apart from the candidates of the current session, so that Thomas can tell what just came up from what has been waiting.
 - **When Thomas rejects an entry**, at a proposal or whenever he goes through the backlog, remove it on `main`.
 - **When a note is written from an entry**, remove the entry on `main` once the note's pull request is open, and name the entry in the pull request's description. The note's `## Sources` keeps where it came from. If Thomas closes the pull request without merging and wants the topic kept, put the entry back.
+
+## 9. Checks before review
+
+Run both checks before asking Thomas to review a pull request. A wrong claim or a dead link is cheaper to fix before review than after merging: the results log grades answers against the claims.
+
+### Links and anchors
+
+**Every relative link points at an existing file, and its `#fragment` at an anchor there**: a heading or a claim anchor `<a id="c3"></a>`. Splitting or renaming a note moves claims. A link to `[C3](../c/array-parameters.md#c3)` then lands on the wrong claim or nowhere.
+
+```bash
+python tools/check_docs.py . --markdown "topics/**/*.md" "templates/*.md" "*.md"
+```
+
+`tools/check_docs.py` is a copy of the docs check of Thomas's `project-docs` skill. Its first line names the version it was copied from (`head -1 tools/check_docs.py`). Its rules, messages and fixes are documented in [docs-check.md](https://github.com/thomaswening/claude-config/blob/main/skills/project-docs/references/docs-check.md), sections "Links and anchors" and "Mermaid". Here only those two checks apply: this repository has no `docs/` folder, so the requirement, ADR, roadmap and glossary checks are skipped.
+
+- **When it runs:** on every pull request, in the `docs-check` workflow ([.github/workflows/docs-check.yml](.github/workflows/docs-check.yml)). A failure turns the pull request's check red. CI also renders every Mermaid block. Locally that needs Node's `npx`. Without it, the checker prints a note and skips them.
+- **When it fails:** each `error:` line names the file, the line and the link. Point the link at the note or claim as it is now. Never renumber a claim to fix a link (§3).
+- **Changing it:** the checker is changed in claude-config first, then copied here with its version line in a pull request of its own.
+
+### Snippets
+
+**Every snippet with an expected output, and every line marked as an error, is compiled and run with GCC and Clang before review.** A claim about what a compiler does is easy to get wrong from memory. In [#11](https://github.com/thomaswening/doubting-thomas/pull/11), passing `int[3][4]` as `int**` was claimed not to compile in C. GCC 13 and Clang 18 only warn.
+
+- A snippet followed by "Expected output:" must print exactly that output with both compilers. Warnings the note mentions must appear. Warnings it does not mention are worth a sentence in the note if `-Wall -Wextra` gives them.
+- A commented-out line marked `// error: …` must fail to compile with both compilers once it is uncommented, one such line at a time, for the reason the comment gives. If it only warns, or only fails with `-pedantic-errors`, the note says so.
+- C uses `-std=c17 -Wall -Wextra`, C++ `-std=c++20 -Wall -Wextra`. Thomas writes notes on more than one machine, so check which compilers the current one has and report their versions under `## Verification`. A machine without GCC or Clang leaves the snippets unchecked: say so in the pull request. On his personal PC, both compilers are in WSL (`Ubuntu-24.04`: GCC 13.3, Clang 18.1). From PowerShell:
+
+  ```text
+  wsl -d Ubuntu-24.04 -- bash -c "gcc -std=c17 -Wall -Wextra /mnt/c/path/snip.c -o /tmp/a && /tmp/a"
+  wsl -d Ubuntu-24.04 -- bash -c "g++ -std=c++20 -Wall -Wextra /mnt/c/path/snip.cpp -o /tmp/a && /tmp/a"
+  ```
+
+  For Clang, use `clang` and `clang++` with the same flags.
+- C# snippets and fragments without a `main` are not compiled. Say so in the pull request if a claim rests on one.
+
+### Proofs
+
+**Every proof is checked against its source before review.** Nothing compiles a proof, and a wrong step can read as smoothly as a right one.
+
+- A proof that follows a textbook names the book and the theorem. Check each step against it.
+- A proof without a textbook source is marked as such in the pull request, so that Thomas checks it line by line.
+- Where a formula can be checked numerically (an identity, a matrix, a special case), do so with a throwaway script and report it.
+
+### The reading site
+
+**Every note builds into the reading site, and every formula renders there.** The site renders maths with KaTeX, GitHub with MathJax. A formula only one of them accepts shows up red on the other. The `site` workflow ([.github/workflows/site.yml](.github/workflows/site.yml)) builds the site on every pull request and fails on such a formula. It also publishes a preview of each open pull request and keeps a section **Read on the site** at the top of its description, with a link to each changed note's preview page. Don't edit inside that section: the workflow rewrites it on every push. How the site reads a note, what fails and how to fix it are in [tools/site/README.md](tools/site/README.md).
+
+### Verification in the pull request
+
+The pull request's description ends with a short section `## Verification`: what was run, its result, and what was not checked. Example:
+
+```markdown
+## Verification
+
+- `tools/check_docs.py`: 0 errors.
+- Snippets: 6 C and 3 C++ snippets with GCC 13.3 and Clang 18.1, outputs as stated. The `// error` lines in constructors.md fail with both.
+- Not checked: the C# comparison in copy-and-move.md (no `main`). Mermaid blocks (no Node locally; CI renders them).
+```

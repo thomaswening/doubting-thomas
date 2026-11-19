@@ -6,8 +6,13 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 ## cpp
 
+- `cpp/comparators-and-projections`: what the function passed to `std::min_element` or `std::sort` decides (an order, "does `a` come before `b`", not a distance), how the algorithm supplies its two arguments, the iterator it returns, and C++20 projections such as `std::ranges::min(values, {}, projection)` as C#'s `MinBy`. Builds on `cpp/iterators-and-ranges` ([#30](https://github.com/thomaswening/doubting-thomas/pull/30)) and `cpp/lambdas` ([#38](https://github.com/thomaswening/doubting-thomas/pull/38)). Came up in the review of [PartonForge PR 6](https://github.com/thomaswening/PartonForge/pull/6#discussion_r4524390645) (`nearest()` in `src/grid.cpp`).
+- `cpp/structured-bindings`: `auto [a, b] = ...` (C++17), which names the elements of an array, a struct or a pair at once, like C#'s tuple deconstruction `var (a, b) = ...`; with `const auto&` the names refer to the elements without a copy. Came up in the review of [PartonForge PR 6](https://github.com/thomaswening/PartonForge/pull/6#discussion_r4524327765) (the four header lines in `src/grid.cpp`).
 - `cpp/copy-elision`: when the compiler builds a returned object directly in the caller's variable instead of moving or copying it (RVO, NRVO; guaranteed for temporaries since C++17). Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (returning a `unique_ptr`).
 - `cpp/vector-growth`: how `std::vector` grows (size, capacity, reallocation) and which references, pointers and iterators into it a `push_back` invalidates. Came up in the review of [PR #3](https://github.com/thomaswening/doubting-thomas/pull/3) (the use-after-free example in `cpp/sanitizers`).
+- `cpp/string-view`: `std::string_view` (C++17) as a read-only, non-owning view of characters (a pointer and a length, like `std::span<const char>`, plus string operations such as `substr` and `find`), its C# counterpart `ReadOnlySpan<char>`, and why the string must outlive the view. Came up in the review of [PR #17](https://github.com/thomaswening/doubting-thomas/pull/17#discussion_r4418372048) (`std::span` in `cpp/arrays-and-containers`).
+- `cpp/static-analysis` (update): the four parts of a `.clang-tidy` file (`Checks`, `WarningsAsErrors`, `HeaderFilterRegex`, `CheckOptions`) and their .NET counterparts (enabled analyser rules, `TreatWarningsAsErrors`, `.editorconfig` settings). Came up in the review of [claude-config PR #10](https://github.com/thomaswening/claude-config/pull/10) (the clang-tidy template of the `coding-guideline` skill).
+- `cpp/static-analysis` (update): why clang-tidy needs `compile_commands.json`: it parses each file like the compiler, so it needs the same include paths, defines and language standard. Came up in the review of [claude-config PR #10](https://github.com/thomaswening/claude-config/pull/10) (the clang-tidy template of the `coding-guideline` skill).
 
 ## tools
 
@@ -25,6 +30,7 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## testing
 
 - `testing/catch2-and-ctest`: testing framework versus test runner; CTest registrations versus Catch2 cases; discovery and process exit status. Came up in the PartonForge CMake/CI review session, [Explain ctest summary script](https://chatgpt.com/c/6acf4765-8520-83eb-93d1-2474a6187073).
+- `testing/arrange-act-assert`: the arrange, act and assert structure of a unit test, and why one behaviour and one act per test makes a failure readable. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (the test style guide).
 
 ## documentation
 
@@ -37,7 +43,6 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 ## bash
 
 - `bash/exit-status-and-conditional-execution`: success/failure exit statuses, command -v, and conditional execution with ||. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
-- `bash/streams-redirection-and-pipes`: standard input, output and error; discarding output with >/dev/null; passing output through a pipe. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
 - `bash/command-substitution`: how $(...) inserts a command's output into another command, including inside double quotes. Came up in the GitHub Actions workflow review for [PartonForge](https://github.com/thomaswening/PartonForge), recorded in the handover “Understanding a GitHub Actions Workflow”.
 
 ## python
@@ -62,3 +67,38 @@ Each entry is one line under its area: the proposed note id in backticks, the qu
 
 - `formats/preserving-unknown-data`: editing selected metadata while copying unfamiliar frames, chunks and audio unchanged; why parsing and reserializing everything can lose information. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
 - `formats/conservative-writing`: why a reader may display a file that an editor should refuse to modify; unsupported flags, ambiguous duplicates and incomplete parsing. Came up while reading [CrateEdit's ID3 guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/id3.md) and the [WAV guide](https://github.com/thomaswening/CrateEdit/blob/main/docs/formats/wav.md).
+
+## regex
+
+- `regex/capturing-groups`: how capturing groups are numbered (by opening parenthesis, group 0 the whole match), and non-capturing groups `(?:...)`. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+
+## dotnet
+
+- `dotnet/linq-query-syntax`: LINQ query syntax read as nested loops; `from ... from ...` as `SelectMany`, and when it reads better than method syntax. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`RequirementTagTests`).
+- `dotnet/single-versus-first`: `Single` versus `First` as a stated assumption, and xUnit's `Assert.Single` as an assertion that also returns the element. Came up in the Claude session on [CrateEdit PR #21](https://github.com/thomaswening/CrateEdit/pull/21) (`AppCommandsTests`, `DiagnosticLogTests`).
+
+## github
+
+- `github/reviewing-existing-code`: GitHub's three-dot pull request diff, and reviewing code already on `main` through a draft PR against a base branch without it. Came up in [CrateEdit PR #22](https://github.com/thomaswening/CrateEdit/pull/22).
+
+## physics
+
+- `physics/ordering-in-parton-branching`: what angular and virtuality ordering mean in the Parton Branching method, which part is a scale choice (the argument of α_s) and which is kinematics (the resolution scale z_M, the transverse recoil), and why colour coherence motivates angular ordering. Start from arXiv:1704.01757. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-009).
+- `physics/parton-branching-splitting`: how the PB method splits a splitting function into resolvable real emissions (z below z_M, a probability density at leading order) and the Sudakov form factor (the probability of no resolvable branching), and why the full P(z) is not a density. Write it when PartonForge implements the LO kernels (REQ-010). Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-010).
+
+## numerics
+
+- `numerics/monte-carlo-integration-versus-sampling`: Monte Carlo integration works for signed functions, sampling needs a positive density; importance sampling with a positive proposal and signed weights f/g, and the sign problem it costs. Write it for the spike on PartonForge's OPEN-E. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-010, OPEN-E).
+- `numerics/uncertainty-of-an-estimated-sigma`: why a sigma estimated from N samples is itself uncertain (about 1/sqrt(2(N-1))), the Student t-distribution as the correction, and why a few seeds cannot support a 5 sigma claim. Write it when PartonForge designs REQ-086. Came up in the review of [PartonForge PR #2](https://github.com/thomaswening/PartonForge/pull/2) (REQ-086).
+
+## kotlin
+
+- `kotlin/sealed-interfaces`: a sealed interface with `data class` and `data object` cases as a closed set of results, compared with C# records and enums, and why `when` must then handle every case. Came up in [Skip the Fluff PR #23](https://github.com/thomaswening/skip-the-fluff/pull/23) (`RendererRecovery.kt`).
+
+## android
+
+- `android/webview-renderer-process`: the WebView's page runs in a separate renderer process that Android may end; what `onRenderProcessGone` reports, why returning `true` keeps the app alive, and why the dead WebView must be destroyed and replaced. Came up in [Skip the Fluff PR #23](https://github.com/thomaswening/skip-the-fluff/pull/23) (ADR-0003, point 4).
+
+## refactoring
+
+- `refactoring/effect-reasoning`: how to find what a change to legacy code can affect (return values, changed arguments, fields and static data, overrides, events, and WPF bindings that name a property in a string), Feathers's effect sketches, and pinch points as the place to test. *Working Effectively with Legacy Code*, chapters 11 and 12. Came up in the review of [PR #58](https://github.com/thomaswening/doubting-thomas/pull/58) (`refactoring/characterization-tests`, claim C6, "What could the change affect?"), Claude session at work, 2026-11-16.
