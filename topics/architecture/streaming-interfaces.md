@@ -2,7 +2,7 @@
 title: Streaming interfaces and data larger than memory
 area: architecture
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-11-19
 prerequisites: []
 related: [architecture/static-and-runtime-views]
 projects: [tante]
@@ -44,23 +44,29 @@ A memory implementation keeps a list and sorts it. A disk implementation writes 
 
 ### External merge sort
 
-Sorting on disk is the step that looks impossible: how do you sort what you cannot load? The answer is old and simple ([C3](#c3)):
+Sorting on disk is the step that looks impossible: how do you sort what you cannot load? The answer is old and simple ([C3](#c3)). It has two phases.
 
-```
-Memory holds 3 items. Input: 7 2 9 4 1 8 6 3 5
+**Phase 1: sorted runs.** Read as many items as fit in memory, sort them there, and write them to disk. Such a sorted piece on disk is a **run**. Repeat until the input is used up. With room for three items and the input `7 2 9 4 1 8 6 3 5`, this gives three runs:
 
-Phase 1: sort chunks of 3, write each as a run
-  run A: 2 7 9
-  run B: 1 4 8
-  run C: 3 5 6
+- run A: `2 7 9`
+- run B: `1 4 8`
+- run C: `3 5 6`
 
-Phase 2: merge, always taking the smallest head
-  heads 2 1 3  -> output 1   (from B)
-  heads 2 4 3  -> output 2   (from A)
-  heads 7 4 3  -> output 3   (from C)
-  ...
-  result: 1 2 3 4 5 6 7 8 9
-```
+**Phase 2: merge.** To **merge** sorted runs means to combine them into one sorted sequence. The **head** of a run is its first item not yet taken. Since each run is sorted, its head is its smallest remaining item. So the smallest item of all is always one of the heads. The merge compares the heads, outputs the smallest, and moves that run's head on by one. It repeats until every run is empty. In the table, the head of each run is in bold:
+
+| Step | Run A | Run B | Run C | Smallest head | Output so far |
+|---|---|---|---|---|---|
+| 1 | **2** 7 9 | **1** 4 8 | **3** 5 6 | 1 (B) | 1 |
+| 2 | **2** 7 9 | **4** 8 | **3** 5 6 | 2 (A) | 1 2 |
+| 3 | **7** 9 | **4** 8 | **3** 5 6 | 3 (C) | 1 2 3 |
+| 4 | **7** 9 | **4** 8 | **5** 6 | 4 (B) | 1 2 3 4 |
+| 5 | **7** 9 | **8** | **5** 6 | 5 (C) | 1 2 3 4 5 |
+| 6 | **7** 9 | **8** | **6** | 6 (C) | 1 2 3 4 5 6 |
+| 7 | **7** 9 | **8** | empty | 7 (A) | 1 2 3 4 5 6 7 |
+| 8 | **9** | **8** | empty | 8 (B) | 1 2 3 4 5 6 7 8 |
+| 9 | **9** | empty | empty | 9 (A) | 1 2 3 4 5 6 7 8 9 |
+
+On disk, each run is read through a small buffer, and the output is written as it is produced.
 
 The merge holds only the current head of each run ([C4](#c4)). Since equal items meet during the merge, it is also where duplicates are combined. In a computer-algebra system, $3xy$ from one run and $2xy$ from another become $5xy$ there. FORM, the system Tante succeeds, handles expressions of billions of terms this way.
 
@@ -70,11 +76,9 @@ Writing an item to disk and reading it back is only a copy if the item is self-c
 
 ### The same idea in .NET
 
-`IEnumerable<T>` is the .NET stream interface. It has `MoveNext` and `Current`, nothing else, so a method that takes it cannot assume memory. LINQ keeps most operators streaming ([C5](#c5)). But a stream cannot be sorted without seeing all of it, so `OrderBy` reads everything first. The example below shows when each item is read. `Count()` on a plain `IEnumerable<T>` walks the whole sequence, which shows why "how many?" does not belong in a streaming interface.
+`IEnumerable<T>` is the .NET stream interface. It has `MoveNext` and `Current`, nothing else, so a method that takes it cannot assume memory. LINQ keeps most operators streaming ([C5](#c5)). But a stream cannot be sorted without seeing all of it, so `OrderBy` reads everything first.
 
-## Examples
-
-A file-based C# program, run with `dotnet run stream.cs` (.NET 10):
+The following file-based C# program, run with `dotnet run stream.cs` (.NET 10), prints a line each time the source produces an item and each time the loop receives one. Look at the order of the `read` and `got` lines in the output:
 
 ```csharp
 IEnumerable<int> Source()
@@ -113,6 +117,8 @@ got 1
 ```
 
 `Select` interleaves reading and producing: one item in memory at a time. `OrderByDescending` reads all three before it can produce the first.
+
+`Count()` on a plain `IEnumerable<T>` walks the whole sequence, which shows why "how many?" does not belong in a streaming interface.
 
 ## Pitfalls
 

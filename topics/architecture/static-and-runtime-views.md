@@ -2,7 +2,7 @@
 title: Static and runtime views of an architecture
 area: architecture
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-11-19
 prerequisites: []
 related: [architecture/quality-goals, architecture/streaming-interfaces]
 projects: [tante]
@@ -51,17 +51,14 @@ The arrows mean something different from the arrows in a dependency graph ([C4](
 
 ### What only the runtime view shows
 
-In Tante, the static view shows `tante_core` and the expression store as two boxes with an arrow between them. The runtime view of `expand E` shows the core reading one term from the old store, appending its expansion to a new store, and repeating. It never holds the whole expression. That is the property that lets the store move to disk later ([streaming interfaces](streaming-interfaces.md)). The static view cannot show it, because it has no notion of "one at a time".
+In Tante, the static view shows the core and the expression store as two boxes with an arrow between them. The arrow means "the core may use the store":
 
-The runtime view only shows the scenario it draws ([C5](#c5)). That a script with one statement streams does not prove that all statements do. The rule that makes it true for all of them is a static one: the store's interface has no "give me everything" operation.
+```mermaid
+flowchart LR
+    core["core"] --> store["expression store"]
+```
 
-### Views in the standard outlines
-
-arc42 makes these two separate sections, 5 and 6 ([C6](#c6)), and adds a deployment view (section 7) for where the parts run. Kruchten's "4+1" view model, from 1995, is the older ancestor of this idea. Its four views are logical, development, process and physical, plus scenarios that tie them together.
-
-## Examples
-
-A runtime view in Mermaid, which GitHub renders:
+The runtime view of the statement `expand E` shows the core reading one term from the old store, appending its expansion to a new store, and repeating. It never holds the whole expression:
 
 ```mermaid
 sequenceDiagram
@@ -75,7 +72,13 @@ sequenceDiagram
     Core->>Out: sort and merge equal terms
 ```
 
-The matching static view is a single arrow `core --> store`, meaning "the core may use the store".
+That the core holds one term at a time is the property that lets the store move to disk later ([streaming interfaces](streaming-interfaces.md)). The static view cannot show it, because it has no notion of "one at a time".
+
+The runtime view only shows the scenario it draws ([C5](#c5)). That a script with one statement streams does not prove that all statements do. The rule that makes it true for all of them is a static one: the store's interface has no "give me everything" operation.
+
+### Views in the standard outlines
+
+arc42 makes these two separate sections, 5 and 6 ([C6](#c6)), and adds a deployment view (section 7) for where the parts run. Kruchten's "4+1" view model, from 1995, is the older ancestor of this idea. Its four views are logical, development, process and physical, plus scenarios that tie them together.
 
 ## Pitfalls
 

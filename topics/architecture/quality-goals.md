@@ -2,7 +2,7 @@
 title: Quality goals and their order
 area: architecture
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-11-19
 prerequisites: []
 related: [architecture/static-and-runtime-views]
 projects: [tante]
@@ -60,16 +60,14 @@ Understandability ranks fifth in Tante, although it is the reason Tante exists: 
 
 arc42, a widely used outline for architecture documents, puts the quality goals in section 1, next to the purpose ([C5](#c5)). Constraints, context and every later decision are read in their light. Its section 10 can refine them into concrete, measurable scenarios. ISO/IEC 25010 offers a vocabulary to pick goals from. Its 2011 edition lists eight characteristics: functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability and portability.
 
-## Examples
+The section is a table in this shape. Each goal says what it means for this project and names the requirements it stands for:
 
-A goal table in the shape arc42 suggests, with the requirements each goal stands for:
-
-```markdown
 | Priority | Quality goal | What it means here | Main requirements |
 |---|---|---|---|
 | 1 | Correctness | Exact arithmetic; equal results print identically | REQ-012, REQ-018 |
 | 2 | Determinism | Byte-identical output for any thread count | REQ-074 |
-```
+
+## Examples
 
 Applying the ranking to a new question: a library offers a hash map that iterates in insertion order (deterministic) and one that iterates in hash order (faster). Determinism ranks above speed, so the first is chosen, unless the iteration order never reaches the output. In that case the two are equal on determinism, and speed decides ([C6](#c6)).
 
