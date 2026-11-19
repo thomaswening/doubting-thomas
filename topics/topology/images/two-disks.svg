@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <title>Two stacked disks with identified rims and the loop O1 to N to O2 to S to O1</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e07b00"/>
+    </marker>
+  </defs>
+  <!-- disks -->
+  <ellipse cx="320" cy="110" rx="200" ry="55" fill="#2f7fd0" fill-opacity="0.12" stroke="#7f7f7f" stroke-width="2"/>
+  <ellipse cx="320" cy="290" rx="200" ry="55" fill="#2f7fd0" fill-opacity="0.12" stroke="#7f7f7f" stroke-width="2"/>
+  <text x="20" y="115" fill="#7f7f7f">disk 1</text>
+  <text x="20" y="295" fill="#7f7f7f">disk 2</text>
+  <!-- identification of rim points -->
+  <line x1="520" y1="110" x2="520" y2="290" stroke="#7f7f7f" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <line x1="120" y1="110" x2="120" y2="290" stroke="#7f7f7f" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <line x1="420" y1="157" x2="420" y2="337" stroke="#7f7f7f" stroke-width="1" stroke-dasharray="2 5"/>
+  <line x1="220" y1="157" x2="220" y2="337" stroke="#7f7f7f" stroke-width="1" stroke-dasharray="2 5"/>
+  <text x="528" y="205" fill="#7f7f7f">same point N</text>
+  <text x="128" y="205" fill="#7f7f7f">same point S</text>
+  <!-- loop: O1 -> N in disk 1, N -> O2 -> S in disk 2, S -> O1 in disk 1 -->
+  <line x1="320" y1="110" x2="512" y2="110" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="520" y1="290" x2="328" y2="290" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="320" y1="290" x2="128" y2="290" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="120" y1="110" x2="312" y2="110" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <!-- points -->
+  <g fill="#7f7f7f">
+    <circle cx="320" cy="110" r="5"/><circle cx="320" cy="290" r="5"/>
+    <circle cx="520" cy="110" r="5"/><circle cx="520" cy="290" r="5"/>
+    <circle cx="120" cy="110" r="5"/><circle cx="120" cy="290" r="5"/>
+  </g>
+  <g fill="#7f7f7f" font-weight="bold">
+    <text x="312" y="98">O₁</text><text x="312" y="278">O₂</text>
+    <text x="530" y="104">N</text><text x="530" y="284">N</text>
+    <text x="96" y="104">S</text><text x="96" y="284">S</text>
+  </g>
+  <text x="320" y="385" fill="#7f7f7f" text-anchor="middle">Each rim point of disk 1 is the same point as the rim point below it (dashed lines).</text>
+</svg>
