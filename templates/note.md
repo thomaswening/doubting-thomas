@@ -33,9 +33,21 @@ tags: []
 \frac{x^2 - 1}{x + 1} = x - 1
 ```
 
+### <A subsection>
+
+<A short, standalone example that illustrates this subsection, a fragment if that is enough. Before it, one or two sentences: what it shows and what to look for. After it, a short "Reading it:" list for what isn't obvious.>
+
+```csharp
+// snippet for this subsection
+```
+
+```text
+expected output
+```
+
 ## Examples
 
-<Worked examples and small runnable snippets, each with its expected output.>
+<Optional. Only a short worked example that spans the whole note, never the full program the snippets come from. Delete this section if every snippet sits in the Explanation.>
 
 ```csharp
 // snippet
