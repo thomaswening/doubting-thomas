@@ -35,7 +35,7 @@ tags: [c, csharp, interop, union, structlayout, fieldoffset, alignment, padding]
 
 ## Explanation
 
-Each snippet below is a complete `Program.cs` for a console project, run with .NET 10 in a 64-bit process. The compiler warns that some fields are never assigned (`CS0649`); the snippets only measure them.
+Where a snippet shows output, it was printed with .NET 10 in a 64-bit process.
 
 ### A union: several members in the same bytes
 
@@ -129,7 +129,7 @@ hi.uMsg written, read as mi.dx: 0x11223344, mi.dy: 0
 What the output shows:
 
 - `INPUT` is 40 bytes: the 4-byte tag, 4 bytes of padding, and the 32-byte union. The padding is there because `MOUSEINPUT` contains an 8-byte field (`dwExtraInfo`), so the union must start at a multiple of 8 ([C3](#c3)).
-- The program wrote a hardware event: 8 bytes, with the tag `type = 2`. Reading the same memory as a mouse event finds those bytes in `dx` and `dy`. The other 24 bytes of the union are untouched, here zero.
+- The example wrote a hardware event: 8 bytes, with the tag `type = 2`. Reading the same memory as a mouse event finds those bytes in `dx` and `dy`. The other 24 bytes of the union are untouched, here zero.
 - The C# field names `mi`, `ki` and `hi` are copied from the C header. `data` is a name this note chose: the C union has none. The [note on Win32 type names](../windows/win32-types-and-hungarian-notation.md) explains the field names inside.
 
 ### Sequential layout: matching a C struct

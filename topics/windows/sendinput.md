@@ -39,7 +39,7 @@ tags: [windows, win32, interop, sendinput, keyboard, uipi, idle, power-managemen
 
 ## Explanation
 
-The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10 while nobody touched keyboard or mouse. Its `Native` declarations of `SendInput`, `GetLastInputInfo`, `SetThreadExecutionState` and the constants follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out. The program pressed Scroll Lock twice, which leaves the lock state as it was.
+In the snippets, `Native.SendInput` and the other `Native.` names stand for P/Invoke declarations of the Win32 functions and constants, written as in the [P/Invoke note](pinvoke-and-unmanaged-memory.md). Where a snippet shows output, it was printed on Windows 11 with .NET 10.
 
 ### From key to character
 
@@ -87,26 +87,17 @@ For this note only `KEYBDINPUT` matters. Its fields:
 | `time` | `DWORD` | `uint` | a timestamp; 0 lets Windows fill it in |
 | `dwExtraInfo` | `ULONG_PTR` | `nuint` | a value the sender may attach; usually 0 |
 
-The program first prints the sizes:
+`Marshal.SizeOf` confirms the sizes in the diagram:
 
 ```csharp
-Console.WriteLine($"sizeof INPUT: {Marshal.SizeOf<INPUT>()}, KEYBDINPUT: {Marshal.SizeOf<KEYBDINPUT>()}");
+Console.WriteLine($"INPUT: {Marshal.SizeOf<INPUT>()}, KEYBDINPUT: {Marshal.SizeOf<KEYBDINPUT>()}");
 ```
 
 ```text
-sizeof INPUT: 40, KEYBDINPUT: 24
+INPUT: 40, KEYBDINPUT: 24
 ```
 
-`SendInput` checks its `size` argument against the real `sizeof(INPUT)` ([C1](#c1)). A C# union that declares only `KEYBDINPUT` makes `INPUT` 32 bytes: the call inserts nothing and fails with error 87. It is the classic `SendInput` bug, and it looks exactly like "nothing happens". Passing a size 8 bytes short shows it:
-
-```csharp
-uint bad = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>() - 8);
-Console.WriteLine($"wrong cbSize: {bad}, error {Marshal.GetLastPInvokeError()}");
-```
-
-```text
-wrong cbSize: 0, error 87
-```
+`SendInput` checks its `size` argument against the real `sizeof(INPUT)` ([C1](#c1)). A C# union that declares only `KEYBDINPUT` makes `INPUT` 32 bytes: the call inserts nothing and fails with error 87. It is the classic `SendInput` bug, and it looks exactly like "nothing happens". The next section shows it.
 
 ### Key down, key up
 
@@ -114,7 +105,7 @@ One key press is two events ([C3](#c3)): key down, with `dwFlags = 0`, and key u
 
 Put all events of one action in one array and one call. `SendInput` inserts them as a block, so the user's own keystrokes can't land in the middle.
 
-The helper `Key` builds one event: `type` set to `INPUT_KEYBOARD`, and in the union's `ki` member the virtual key and, for key up, the flag. All other fields stay 0. The program then presses Scroll Lock twice, four events in one call:
+The example presses Scroll Lock twice: four events in one call. Then it sends the same events once more with a size 8 bytes short, the size a union without `MOUSEINPUT` would have:
 
 ```csharp
 static INPUT Key(ushort vk, bool up) => new()
@@ -128,10 +119,24 @@ INPUT[] inputs =
     Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
     Key(Native.VK_SCROLL, up: false), Key(Native.VK_SCROLL, up: true),
 ];
+
 uint sent = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+Console.WriteLine($"right size: {sent} events");
+
+uint bad = Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>() - 8);
+Console.WriteLine($"8 bytes short: {bad} events, error {Marshal.GetLastPInvokeError()}");
 ```
 
-`sent` was 4: all four events were inserted. Scroll Lock serves well for experiments: it types no character, and pressing it twice puts its light back as it was.
+```text
+right size: 4 events
+8 bytes short: 0 events, error 87
+```
+
+Reading it:
+
+- `Key` builds one event: `type` is `INPUT_KEYBOARD`, and the union's `ki` member gets the virtual key and, for key up, the flag `KEYEVENTF_KEYUP`. All other fields stay 0.
+- The array holds down, up, down, up. Scroll Lock serves well for experiments: it types no character, and pressing it twice puts its light back as it was.
+- With the right size, all four events were inserted. With the wrong size, none were, and the error is 87, `ERROR_INVALID_PARAMETER` ([C1](#c1), [C2](#c2)).
 
 ### Virtual keys against Unicode
 
@@ -179,7 +184,7 @@ flowchart TD
 
 **The last-input time** is when the session last saw keyboard or mouse input. `GetLastInputInfo` reports it. Screen savers and idle-lock policies (such as the *machine inactivity limit* security policy) look at how long ago that was. `SetThreadExecutionState` doesn't touch it. Input does, and `SendInput` counts as input ([C6](#c6)).
 
-The program measured both. `IdleMs` asks `GetLastInputInfo` for the tick count of the last input and subtracts it from the current tick count: the result is how many milliseconds ago the last input was. The program waits four seconds without input, reads the idle time, calls `SetThreadExecutionState`, reads it again, then sends the Scroll Lock events from above and reads it a third time:
+The example measures the difference. It reads the idle time once without input, once after `SetThreadExecutionState`, and once after sending the Scroll Lock events from the previous section:
 
 ```csharp
 static uint IdleMs()
@@ -189,25 +194,28 @@ static uint IdleMs()
     return (uint)Environment.TickCount - info.dwTime;
 }
 
-Thread.Sleep(4000);
-Console.WriteLine($"idle before: {IdleMs()} ms");
+Console.WriteLine($"no input: {IdleMs()} ms");
 
 Native.SetThreadExecutionState(Native.ES_CONTINUOUS | Native.ES_SYSTEM_REQUIRED | Native.ES_DISPLAY_REQUIRED);
-Console.WriteLine($"idle after SetThreadExecutionState: {IdleMs()} ms");
-Native.SetThreadExecutionState(Native.ES_CONTINUOUS);   // end the request
+Console.WriteLine($"after SetThreadExecutionState: {IdleMs()} ms");
+Native.SetThreadExecutionState(Native.ES_CONTINUOUS);
 
-// ... the SendInput call from "Key down, key up" ...
-Thread.Sleep(50);
-Console.WriteLine($"sent: {sent}, idle after SendInput: {IdleMs()} ms");
+Native.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+Console.WriteLine($"after SendInput: {IdleMs()} ms");
 ```
 
 ```text
-idle before: 6766 ms
-idle after SetThreadExecutionState: 6766 ms
-sent: 4, idle after SendInput: 47 ms
+no input: 1329 ms
+after SetThreadExecutionState: 1329 ms
+after SendInput: 0 ms
 ```
 
-`SetThreadExecutionState` left the idle time where it was. `SendInput` reset it to almost zero. The times vary from run to run; the difference doesn't.
+Reading it:
+
+- `IdleMs` asks `GetLastInputInfo` for the tick count of the last input and subtracts it from the current tick count. The result is how many milliseconds ago the last input was. `LASTINPUTINFO` is a struct of two `uint` fields, `cbSize` and `dwTime`.
+- The last real input had been 1.3 seconds earlier.
+- `SetThreadExecutionState` left the idle time where it was ([C7](#c7)). The second call, with `ES_CONTINUOUS` alone, ends the request again.
+- `SendInput` reset it to almost zero ([C6](#c6)). The exact times vary; the difference doesn't.
 
 So the two are not interchangeable. `SetThreadExecutionState` keeps the machine awake but leaves idle timers running: the screen saver still starts, and an idle-lock policy still locks. Input resets them. An idle-lock policy exists for security, so on a managed machine, whether a program may reset it is the organisation's decision.
 
@@ -273,4 +281,4 @@ Synthetic input is not perfectly disguised. A low-level keyboard hook sees an `L
 - Microsoft Learn, [`GetLastInputInfo`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getlastinputinfo) and [`SetThreadExecutionState`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate).
 - Microsoft Learn, [Mandatory Integrity Control](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control): integrity levels behind UIPI.
 - Microsoft Learn, [`KBDLLHOOKSTRUCT`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct): the `LLKHF_INJECTED` flag.
-- Claude session, 2026-11-18: the program was run there with .NET 10.
+- Claude session, 2026-11-18: the snippets were run there with .NET 10.

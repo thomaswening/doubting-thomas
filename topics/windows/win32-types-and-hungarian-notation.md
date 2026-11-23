@@ -85,7 +85,7 @@ Constants are in capitals and start with a prefix for the API they belong to: `V
 
 A field called `cbSize` at the start of a struct means: before the call, set this to the struct's size in bytes ([C5](#c5)). Windows uses it to tell versions of the struct apart. A newer Windows may know a longer version of the struct, and the size says which one your program was built with.
 
-The snippet calls `GetLastInputInfo` twice: once with `cbSize` set correctly, once with `cbSize` left at 0. It is a complete `Program.cs` for a console project with `AllowUnsafeBlocks`, run with .NET 10:
+The snippet calls `GetLastInputInfo` twice: once with `cbSize` set correctly, once with `cbSize` left at 0. Its output was printed with .NET 10:
 
 ```csharp
 using System.Runtime.InteropServices;
