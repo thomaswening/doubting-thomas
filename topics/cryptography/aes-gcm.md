@@ -104,7 +104,9 @@ Counter mode alone hides the data but protects nothing else. Each plaintext bit 
 
 That lets an attacker who knows the layout of the data change it on purpose, without the key. Say a settings file ends in `admin=0`. The character `0` is `0x30` (`0011 0000`), and `1` is `0x31` (`0011 0001`). They differ only in the lowest bit. The attacker flips the lowest bit of the last ciphertext byte, and the file decrypts to `admin=1`. The attacker never saw the keystream and never decrypted anything.
 
-GCM adds an **authentication tag** ([C2](#c2)). After encrypting, it computes a keyed checksum (GHASH) over the ciphertext and the associated data, and stores the 16-byte result. A .NET comparison: like a hash you'd store to detect a corrupt download, except that it is keyed. Without the key, an attacker can't compute a matching tag for modified data.
+GCM adds an **authentication tag** ([C2](#c2)). After encrypting, it computes a keyed checksum (GHASH) over the ciphertext and the associated data, and stores the 16-byte result. A .NET comparison: like a hash you'd store to detect a corrupt download, except that it is **keyed**: a secret key is one of its inputs.
+
+The difference matters against an attacker. A download page that lists a SHA-256 hash detects accidents: anyone can recompute `SHA256.HashData(file)`. But that is exactly the problem. An attacker who swaps the file simply recomputes the hash and swaps that too. A keyed checksum needs the key as well as the data. Without the key, an attacker who changes the data can't compute the tag that would match it. The tag is checked by the one party that does have the key: whoever decrypts. In .NET, the classic keyed checksum is `HMACSHA256.HashData(key, data)`, next to the unkeyed `SHA256.HashData(data)`. GCM's GHASH plays the same role, with a key that GCM derives from the AES key.
 
 At decryption, `AesGcm` recomputes the tag. If it differs, it throws `AuthenticationTagMismatchException` and clears the output buffer ([C3](#c3)). This gives a password store two things at once:
 
