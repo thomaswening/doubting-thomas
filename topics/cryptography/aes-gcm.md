@@ -72,6 +72,49 @@ At decryption, `AesGcm` recomputes the tag. If it differs, it throws `Authentica
 - **Tampering is detected.** A flipped bit anywhere fails.
 - **A wrong password is detected.** A wrong password gives a wrong key, which gives a wrong tag. No separate "password check" value needs storing.
 
+The example below encrypts a short text with a random key, decrypts it, and then tries twice more: once with one ciphertext bit flipped, once with a different key. The output was printed with .NET 10:
+
+```csharp
+byte[] key = RandomNumberGenerator.GetBytes(32);
+byte[] nonce = RandomNumberGenerator.GetBytes(12);
+byte[] plaintext = "github: hunter2"u8.ToArray();
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16];
+
+using var gcm = new AesGcm(key, tagSizeInBytes: 16);
+gcm.Encrypt(nonce, plaintext, ciphertext, tag);
+Console.WriteLine($"plaintext {plaintext.Length} bytes, ciphertext {ciphertext.Length} bytes, tag {tag.Length} bytes");
+
+byte[] decrypted = new byte[ciphertext.Length];
+gcm.Decrypt(nonce, ciphertext, tag, decrypted);
+Console.WriteLine(Encoding.UTF8.GetString(decrypted));
+
+ciphertext[0] ^= 1;                              // flip one bit
+try { gcm.Decrypt(nonce, ciphertext, tag, decrypted); }
+catch (AuthenticationTagMismatchException) { Console.WriteLine("flipped bit: AuthenticationTagMismatchException"); }
+ciphertext[0] ^= 1;                              // flip it back
+
+using var wrong = new AesGcm(RandomNumberGenerator.GetBytes(32), tagSizeInBytes: 16);
+try { wrong.Decrypt(nonce, ciphertext, tag, decrypted); }
+catch (AuthenticationTagMismatchException) { Console.WriteLine("wrong key: AuthenticationTagMismatchException"); }
+Console.WriteLine($"output cleared: {decrypted.AsSpan().IndexOfAnyExcept((byte)0) < 0}");
+```
+
+```text
+plaintext 15 bytes, ciphertext 15 bytes, tag 16 bytes
+github: hunter2
+flipped bit: AuthenticationTagMismatchException
+wrong key: AuthenticationTagMismatchException
+output cleared: True
+```
+
+Reading it:
+
+- `new AesGcm(key, tagSizeInBytes: 16)` sets up AES-GCM with a 32-byte key. The caller provides every buffer: `Encrypt` writes into `ciphertext` and `tag`, `Decrypt` into `decrypted`.
+- The ciphertext is exactly as long as the plaintext, 15 bytes. The 16-byte tag comes on top ([C1](#c1)).
+- One flipped bit, and decryption refuses. A wrong key, and it refuses too ([C2](#c2)).
+- After the failed decryption, the output buffer holds only zeros, not half-decrypted text ([C3](#c3)).
+
 ### The nonce: once, really once
 
 Counter mode's keystream depends only on the key and the nonce. Use the same pair twice, and you get the same keystream twice ([C4](#c4)). Then for two ciphertexts:
@@ -80,7 +123,35 @@ Counter mode's keystream depends only on the key and the nonce. Use the same pai
 C_1 \oplus C_2 = (P_1 \oplus K) \oplus (P_2 \oplus K) = P_1 \oplus P_2
 ```
 
-The keystream $K$ cancels. An attacker who knows or guesses one plaintext gets the other ([C5](#c5)). The example below does exactly that. It also breaks the tag: from two messages under one nonce, an attacker can work out GHASH's key and then forge tags for messages of their choice.
+The keystream $K$ cancels. An attacker who knows or guesses one plaintext gets the other ([C5](#c5)). It also breaks the tag: from two messages under one nonce, an attacker can work out GHASH's key and then forge tags for messages of their choice.
+
+The example below makes the mistake on purpose. It encrypts two 16-byte messages with the same key and the same nonce. Then it plays the attacker, who has both ciphertexts and knows the second message, but not the key:
+
+```csharp
+byte[] key = RandomNumberGenerator.GetBytes(32);
+byte[] nonce = RandomNumberGenerator.GetBytes(12);
+byte[] p1 = "pin=4711 user=al"u8.ToArray();
+byte[] p2 = "pin=0000 user=bo"u8.ToArray();
+byte[] c1 = new byte[16], c2 = new byte[16], t = new byte[16];
+using (var gcm = new AesGcm(key, 16))
+{
+    gcm.Encrypt(nonce, p1, c1, t);
+    gcm.Encrypt(nonce, p2, c2, t);   // the mistake: the same nonce again
+}
+
+byte[] x = new byte[16];
+for (int i = 0; i < 16; i++) x[i] = (byte)(c1[i] ^ c2[i] ^ p2[i]);
+Console.WriteLine($"recovered without the key: {Encoding.UTF8.GetString(x)}");
+```
+
+```text
+recovered without the key: pin=4711 user=al
+```
+
+Reading it:
+
+- The loop computes $`C_1 \oplus C_2 \oplus P_2`$ byte by byte. By the formula above, that is $`P_1`$: the first message, recovered without the key.
+- The tags were ignored. Nothing in the attack needs them.
 
 How to get unique nonces:
 
@@ -94,6 +165,32 @@ The nonce isn't secret. It's stored in the file, like the salt.
 A store file starts with a header: a format marker, the KDF's iteration count, the salt, the nonce. The reader needs these *before* it can decrypt, so they can't be encrypted. But they must not be changeable either: an attacker who lowers the iteration count in the header would make the next save weaker.
 
 That is what **associated data** is for ([C7](#c7)). You pass the header bytes to `Encrypt` and `Decrypt` as `associatedData`. GCM doesn't encrypt or store them, but includes them in the tag. Change one header byte, and decryption fails.
+
+The example below encrypts with a 4-byte header as associated data, changes one byte of the header, and tries to decrypt:
+
+```csharp
+byte[] key = RandomNumberGenerator.GetBytes(32);
+byte[] nonce = RandomNumberGenerator.GetBytes(12);
+byte[] header = "PWS1"u8.ToArray();
+byte[] plaintext = "github: hunter2"u8.ToArray();
+byte[] ciphertext = new byte[plaintext.Length], tag = new byte[16], decrypted = new byte[plaintext.Length];
+
+using var gcm = new AesGcm(key, tagSizeInBytes: 16);
+gcm.Encrypt(nonce, plaintext, ciphertext, tag, associatedData: header);
+
+header[3] = (byte)'2';                           // "PWS1" becomes "PWS2"
+try { gcm.Decrypt(nonce, ciphertext, tag, decrypted, associatedData: header); }
+catch (AuthenticationTagMismatchException) { Console.WriteLine("changed header: AuthenticationTagMismatchException"); }
+```
+
+```text
+changed header: AuthenticationTagMismatchException
+```
+
+Reading it:
+
+- The header itself isn't encrypted or stored by `Encrypt`. The program keeps it, here in its own array, in a file at the start.
+- Key, nonce, ciphertext and tag are all intact. Only the header changed, and the tag no longer matches.
 
 ### The file layout
 
@@ -110,127 +207,45 @@ offset  length  field                    encrypted?   in the tag?
 
 Overhead: 52 bytes, whatever the length of the data.
 
+The method below writes a store in this layout. It combines the [key derivation note](password-key-derivation.md) with the sections above:
+
+```csharp
+static byte[] Seal(ReadOnlySpan<byte> password, ReadOnlySpan<byte> plaintext)
+{
+    const int HeaderLength = 4 + 4 + 16 + 12, Iterations = 600_000;
+    byte[] file = new byte[HeaderLength + 16 + plaintext.Length];
+    Span<byte> header = file.AsSpan(0, HeaderLength);
+    "PWS1"u8.CopyTo(header);
+    BinaryPrimitives.WriteInt32LittleEndian(header[4..], Iterations);
+    RandomNumberGenerator.Fill(header.Slice(8, 16));    // new salt at every save
+    RandomNumberGenerator.Fill(header.Slice(24, 12));   // new nonce at every save
+
+    byte[] key = Rfc2898DeriveBytes.Pbkdf2(password, header.Slice(8, 16), Iterations, HashAlgorithmName.SHA256, 32);
+    try
+    {
+        using var gcm = new AesGcm(key, tagSizeInBytes: 16);
+        gcm.Encrypt(header.Slice(24, 12), plaintext,
+                    file.AsSpan(HeaderLength + 16), file.AsSpan(HeaderLength, 16),
+                    associatedData: header);
+    }
+    finally { CryptographicOperations.ZeroMemory(key); }
+    return file;
+}
+```
+
+Reading it:
+
+- `file` is allocated once at its final size. Every part of the layout is a `Span` slice of it, so `Encrypt` writes the tag and the ciphertext straight into their places.
+- The header comes first: marker, iteration count, then a new random salt and a new random nonce. So every save gets a new key as well as a new nonce ([C4](#c4)).
+- The whole header goes in as associated data, so none of it can change undetected ([C7](#c7)).
+- The key is wiped right after use, in `finally`.
+- Sealing 15 bytes gave a 67-byte file: 52 bytes of overhead plus 15.
+
+Opening a store is the same in reverse. Read the marker and the iteration count from the header, derive the key from the password and the stored salt, and call `Decrypt` with the stored nonce, the tag and the same header as associated data. A wrong password, a changed header byte and a flipped ciphertext bit all end in the same `AuthenticationTagMismatchException`, as the earlier examples showed.
+
 ### Why not AES-CBC?
 
 Older code often uses `Aes.Create()` with its default mode, CBC, which encrypts but doesn't authenticate ([C8](#c8)). Decrypting tampered CBC data either yields garbage or fails on the padding at the end. If an attacker can tell those two outcomes apart, by an error message or by timing, they can decrypt the data byte by byte through repeated tries. Fixing CBC means adding an HMAC over the ciphertext, and checking it before decrypting. AES-GCM does both jobs in one primitive, which is why it is the default choice in new code.
-
-## Examples
-
-### A password-protected store
-
-The full program was run with .NET 10. It combines the [key derivation note](password-key-derivation.md) with AES-GCM and the layout above:
-
-```csharp
-using System.Buffers.Binary;
-using System.Security.Cryptography;
-using System.Text;
-
-byte[] file = Store.Seal("correct horse"u8, "github: hunter2"u8);
-Console.WriteLine($"plaintext 15 bytes, file {file.Length} bytes");
-Console.WriteLine(Encoding.UTF8.GetString(Store.Open("correct horse"u8, file)));
-
-try { Store.Open("wrong horse"u8, file); }
-catch (AuthenticationTagMismatchException e) { Console.WriteLine($"wrong password: {e.GetType().Name}"); }
-
-byte[] tampered = (byte[])file.Clone();
-BinaryPrimitives.WriteInt32LittleEndian(tampered.AsSpan(4), 1000);   // lower the iteration count
-try { Store.Open("correct horse"u8, tampered); }
-catch (AuthenticationTagMismatchException) { Console.WriteLine("header tampered: AuthenticationTagMismatchException"); }
-
-byte[] flipped = (byte[])file.Clone();
-flipped[^1] ^= 1;
-try { Store.Open("correct horse"u8, flipped); }
-catch (AuthenticationTagMismatchException) { Console.WriteLine("ciphertext bit flipped: AuthenticationTagMismatchException"); }
-
-static class Store
-{
-    // Layout: "PWS1" | iterations (int32 LE) | salt (16) | nonce (12) | tag (16) | ciphertext
-    const int HeaderLength = 4 + 4 + 16 + 12;
-    const int Iterations = 600_000;
-
-    public static byte[] Seal(ReadOnlySpan<byte> password, ReadOnlySpan<byte> plaintext)
-    {
-        byte[] file = new byte[HeaderLength + 16 + plaintext.Length];
-        Span<byte> header = file.AsSpan(0, HeaderLength);
-        "PWS1"u8.CopyTo(header);
-        BinaryPrimitives.WriteInt32LittleEndian(header[4..], Iterations);
-        RandomNumberGenerator.Fill(header.Slice(8, 16));    // new salt at every save
-        RandomNumberGenerator.Fill(header.Slice(24, 12));   // new nonce at every save
-
-        byte[] key = Rfc2898DeriveBytes.Pbkdf2(password, header.Slice(8, 16), Iterations, HashAlgorithmName.SHA256, 32);
-        try
-        {
-            using var gcm = new AesGcm(key, tagSizeInBytes: 16);
-            gcm.Encrypt(header.Slice(24, 12), plaintext,
-                        file.AsSpan(HeaderLength + 16), file.AsSpan(HeaderLength, 16),
-                        associatedData: header);
-        }
-        finally { CryptographicOperations.ZeroMemory(key); }
-        return file;
-    }
-
-    public static byte[] Open(ReadOnlySpan<byte> password, byte[] file)
-    {
-        ReadOnlySpan<byte> header = file.AsSpan(0, HeaderLength);
-        if (!header[..4].SequenceEqual("PWS1"u8)) throw new InvalidDataException("not a store");
-        int iterations = BinaryPrimitives.ReadInt32LittleEndian(header[4..]);
-
-        byte[] key = Rfc2898DeriveBytes.Pbkdf2(password, header.Slice(8, 16), iterations, HashAlgorithmName.SHA256, 32);
-        try
-        {
-            byte[] plaintext = new byte[file.Length - HeaderLength - 16];
-            using var gcm = new AesGcm(key, tagSizeInBytes: 16);
-            gcm.Decrypt(header.Slice(24, 12), file.AsSpan(HeaderLength + 16), file.AsSpan(HeaderLength, 16),
-                        plaintext, associatedData: header);
-            return plaintext;
-        }
-        finally { CryptographicOperations.ZeroMemory(key); }
-    }
-}
-```
-
-Expected output:
-
-```text
-plaintext 15 bytes, file 67 bytes
-github: hunter2
-wrong password: AuthenticationTagMismatchException
-header tampered: AuthenticationTagMismatchException
-ciphertext bit flipped: AuthenticationTagMismatchException
-```
-
-- 67 bytes = 52 bytes of header and tag + 15 bytes of ciphertext, as long as the plaintext ([C1](#c1)).
-- All three failures throw the same exception, and no plaintext comes back ([C2](#c2), [C3](#c3)).
-- The changed iteration count would also give a different key. The point is that *any* header byte is covered, including ones that don't change the key, such as the format marker ([C7](#c7)).
-- A real program would keep the plaintext and the key in a buffer that zeroes itself, not in plain arrays and `string` literals.
-
-### What a repeated nonce gives away
-
-```csharp
-byte[] key = RandomNumberGenerator.GetBytes(32);
-byte[] nonce = RandomNumberGenerator.GetBytes(12);
-byte[] p1 = "pin=4711 user=al"u8.ToArray();
-byte[] p2 = "pin=0000 user=bo"u8.ToArray();
-byte[] c1 = new byte[16], c2 = new byte[16], t = new byte[16];
-using (var gcm = new AesGcm(key, 16))
-{
-    gcm.Encrypt(nonce, p1, c1, t);
-    gcm.Encrypt(nonce, p2, c2, t);   // the mistake: the same nonce again
-}
-
-// The attacker has c1 and c2 and knows p2, but not the key.
-byte[] x = new byte[16];
-for (int i = 0; i < 16; i++) x[i] = (byte)(c1[i] ^ c2[i] ^ p2[i]);
-Console.WriteLine($"recovered without the key: {Encoding.UTF8.GetString(x)}");
-```
-
-Expected output:
-
-```text
-recovered without the key: pin=4711 user=al
-```
-
-The attacker computed $`C_1 \oplus C_2 \oplus P_2 = P_1`$ ([C5](#c5)).
 
 ## Good habits
 
@@ -288,4 +303,4 @@ The attacker computed $`C_1 \oplus C_2 \oplus P_2 = P_1`$ ([C5](#c5)).
 - A. Joux, [Authentication Failures in NIST version of GCM](https://csrc.nist.gov/csrc/media/projects/block-cipher-techniques/documents/bcm/joux_comments.pdf), comment to NIST, 2006: forging tags after a nonce is repeated.
 - Microsoft Learn, [`AesGcm` class](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aesgcm): nonce and tag sizes, the constructor with `tagSizeInBytes`, `AuthenticationTagMismatchException`, clearing the plaintext on failure.
 - OWASP, [Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html): authenticated modes as the default.
-- Claude session, 2026-11-18: both snippets were run there with .NET 10.
+- Claude session, 2026-11-18: every snippet was run there with .NET 10.

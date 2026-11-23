@@ -45,7 +45,7 @@ tags: [cryptography, kdf, pbkdf2, argon2, salt, password, brute-force]
 
 `AesGcm` wants a 32-byte key. You could take the password's UTF-8 bytes, pad them, and use that. But a cipher's security assumes the key is one of $2^{256}$ equally likely values. A password chosen by a person comes from a far smaller set: dictionary words, names, years, the same patterns everyone uses.
 
-Hashing it to 32 bytes fixes the length, not the guessability. If an attacker has your encrypted file, they can try passwords offline: for each guess, compute the key, try to decrypt, check whether it worked. With a plain SHA-256, one CPU core computed a million hashes in a third of a second on the laptop used for this note. A graphics card does far more. A password that would survive a few thousand guesses survives seconds.
+Hashing it to 32 bytes fixes the length, not the guessability. If an attacker has your encrypted file, they can try passwords offline: for each guess, compute the key, try to decrypt, check whether it worked. With a plain SHA-256, one CPU core computes millions of guesses per second (the next section measures it). A graphics card does far more. A password that would survive a few thousand guesses survives seconds.
 
 ### Slow on purpose
 
@@ -59,6 +59,32 @@ flowchart LR
     key --> aes["AES-GCM decrypts the store"]
 ```
 
+The example below compares the two costs on one laptop core: a million plain SHA-256 hashes, then one key from PBKDF2 with 600,000 iterations. The output was printed with .NET 10:
+
+```csharp
+byte[] salt = RandomNumberGenerator.GetBytes(16);
+
+var sw = Stopwatch.StartNew();
+for (int i = 0; i < 1_000_000; i++) SHA256.HashData("correct horse"u8);
+Console.WriteLine($"one million SHA-256 hashes: {sw.ElapsedMilliseconds} ms");
+
+sw.Restart();
+byte[] key = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, salt, 600_000, HashAlgorithmName.SHA256, 32);
+Console.WriteLine($"one PBKDF2 key, 600000 iterations: {sw.ElapsedMilliseconds} ms");
+```
+
+```text
+one million SHA-256 hashes: 164 ms
+one PBKDF2 key, 600000 iterations: 46 ms
+```
+
+Reading it:
+
+- A plain hash costs well under a microsecond: about six million guesses per second on one core.
+- One PBKDF2 key costs 46 ms, as long as about 280,000 plain hashes. That factor is what an offline attacker pays per guess ([C2](#c2)). For you, 46 ms at unlock goes unnoticed.
+- `Rfc2898DeriveBytes.Pbkdf2` takes the password, the salt, the iteration count, the hash function and the key length in bytes, and returns the key ([C6](#c6)).
+- The `"correct horse"u8` literal keeps the example short. A real program gets the password from the user as bytes or characters, never as a `string`. The [note on keeping secrets in .NET memory](../dotnet/secrets-in-memory.md) explains why.
+
 The cost is a dial. More iterations make each guess more expensive, and each unlock slower. RFC 8018 says the count should be "as large as possible" while the delay stays acceptable. OWASP's current figure for PBKDF2-HMAC-SHA256 is 600,000 iterations ([C4](#c4)). Computers get faster, so the figure goes up over the years. That is why the count belongs in the file ([C7](#c7)).
 
 ### The salt
@@ -66,6 +92,28 @@ The cost is a dial. More iterations make each guess more expensive, and each unl
 Without a salt, the password `hunter2` gives the same key in every file in the world. An attacker could compute the keys for the ten million most common passwords once, store them, and then test every stolen file against that table in no time.
 
 A **salt** is 16 random bytes, generated when the file is created and stored in its header ([C3](#c3)). It goes into the KDF together with the password. The same password now gives a different key in every file, so a precomputed table is useless. Every file has to be attacked on its own, at full KDF cost per guess.
+
+The example below derives three keys from the same password: two with the same salt, one with a new salt:
+
+```csharp
+byte[] salt = RandomNumberGenerator.GetBytes(16);
+byte[] k1 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, salt, 600_000, HashAlgorithmName.SHA256, 32);
+byte[] k2 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, salt, 600_000, HashAlgorithmName.SHA256, 32);
+byte[] k3 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, RandomNumberGenerator.GetBytes(16), 600_000, HashAlgorithmName.SHA256, 32);
+
+Console.WriteLine($"same salt: same key = {k1.AsSpan().SequenceEqual(k2)}");
+Console.WriteLine($"other salt: same key = {k1.AsSpan().SequenceEqual(k3)}");
+```
+
+```text
+same salt: same key = True
+other salt: same key = False
+```
+
+Reading it:
+
+- Same password, same salt: the same key every time. So the key never has to be stored. The program keeps the salt and derives the key again at each unlock ([C1](#c1)).
+- Same password, new salt: a different key. Two files protected with the same password don't share a key ([C3](#c3)).
 
 The salt is not secret. It sits in clear next to the ciphertext, like the IV of a cipher. Its only job is to be different. In .NET terms: the salt is to the KDF what a per-instance seed is to a hash table that resists collision attacks.
 
@@ -93,48 +141,6 @@ And it only matters once someone has the file and tries offline. It does nothing
 ### Caching the derived key
 
 Typing a long master password at every use is tiring. A common design derives the key once, then keeps it for a while, protected by the operating system: on Windows with DPAPI's `CurrentUser` scope ([DPAPI](../windows/dpapi.md)). The next unlock reads the cached key instead of asking. If the cache is lost (a password reset, a new PC), the program asks for the master password again and nothing else is lost. The cache holds the *derived key*, not the password, so the password itself is never stored.
-
-## Examples
-
-### Deriving keys, and what the salt does
-
-Run with .NET 10 on a 2026 laptop:
-
-```csharp
-using System.Diagnostics;
-using System.Security.Cryptography;
-
-byte[] salt = RandomNumberGenerator.GetBytes(16);
-var sw = Stopwatch.StartNew();
-byte[] k1 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, salt, 600_000, HashAlgorithmName.SHA256, 32);
-Console.WriteLine($"PBKDF2, 600000 iterations: {sw.ElapsedMilliseconds} ms");
-
-byte[] k2 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, salt, 600_000, HashAlgorithmName.SHA256, 32);
-byte[] k3 = Rfc2898DeriveBytes.Pbkdf2("correct horse"u8, RandomNumberGenerator.GetBytes(16), 600_000, HashAlgorithmName.SHA256, 32);
-Console.WriteLine($"same password, same salt: same key = {k1.AsSpan().SequenceEqual(k2)}");
-Console.WriteLine($"same password, other salt: same key = {k1.AsSpan().SequenceEqual(k3)}");
-
-sw.Restart();
-for (int i = 0; i < 1_000_000; i++) SHA256.HashData("correct horse"u8);
-Console.WriteLine($"one million plain SHA-256 hashes: {sw.ElapsedMilliseconds} ms");
-```
-
-Output (times vary by machine):
-
-```text
-PBKDF2, 600000 iterations: 51 ms
-same password, same salt: same key = True
-same password, other salt: same key = False
-one million plain SHA-256 hashes: 331 ms
-```
-
-- The same password and salt always give the same key, so nothing but the salt needs storing ([C1](#c1)).
-- Another salt gives another key ([C3](#c3)).
-- One PBKDF2 run took as long as about 150,000 plain hashes. That factor is what an offline attacker pays per guess ([C2](#c2)).
-
-The `"correct horse"u8` literal is a shortcut for the demo. A real program gets the password from the user as bytes or characters, never as a `string`. The note on keeping secrets in .NET memory explains why.
-
-A complete store that uses this key with AES-GCM is in the [AES-GCM note](aes-gcm.md#examples).
 
 ## Good habits
 
@@ -194,4 +200,4 @@ A complete store that uses this key with AES-GCM is in the [AES-GCM note](aes-gc
 - A. Biryukov, D. Dinu, D. Khovratovich, S. Josefsson, [RFC 9106: Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications](https://www.rfc-editor.org/rfc/rfc9106.html), 2021: Argon2id, recommended parameters, 16-byte salts.
 - OWASP, [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html): Argon2id first, minimum parameters, 600,000 iterations for PBKDF2-HMAC-SHA256.
 - Microsoft Learn, [`Rfc2898DeriveBytes.Pbkdf2`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.rfc2898derivebytes.pbkdf2) and [SYSLIB0060](https://aka.ms/dotnet-warnings/SYSLIB0060).
-- Claude session, 2026-11-18: the snippet was run there with .NET 10.
+- Claude session, 2026-11-18: the snippets were run there with .NET 10.
