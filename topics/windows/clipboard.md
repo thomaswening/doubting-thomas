@@ -43,7 +43,7 @@ tags: [windows, win32, clipboard, interop, secrets, clipboard-history]
 
 ## Explanation
 
-The snippets in this section are pieces of one console program (`net10.0-windows`, `AllowUnsafeBlocks` on), run on Windows 11 with .NET 10. Its `Native` declarations follow the patterns of the [P/Invoke note](pinvoke-and-unmanaged-memory.md) and are left out. The program saved the clipboard's text first and put it back at the end.
+In the snippets, `Native.OpenClipboard` and the other `Native.` names stand for P/Invoke declarations of the Win32 functions and constants, written as in the [P/Invoke note](pinvoke-and-unmanaged-memory.md). Where a snippet shows output, it was printed on Windows 11 with .NET 10.
 
 ### What the clipboard is
 
@@ -84,7 +84,7 @@ The clipboard is a shared resource with a lock. `OpenClipboard` takes the lock, 
 
 `EmptyClipboard` does two things. It frees whatever was on the clipboard, and it records the window that opened the clipboard as the new **owner**. The owner matters to Windows: if you open the clipboard with a null window handle, there is no owner, and `SetClipboardData` refuses to work ([C3](#c3)). A tray tool has no visible window, so it creates a hidden one. In plain Win32 that is a *message-only window* (parent `HWND_MESSAGE`). In WPF, a hidden `Window` whose handle comes from `new WindowInteropHelper(window).EnsureHandle()` does the same job.
 
-The four steps, with the retry, and the sequence number read after closing:
+The example below copies a secret with the four steps. `Open` retries a failed `OpenClipboard` a few times. `SetUnicode` and `SetDword` put one format each on the clipboard and come in the next sections. At the end, the method returns the sequence number, read after closing:
 
 ```csharp
 public static uint CopySecret(nint owner, ReadOnlySpan<char> secret)
@@ -113,23 +113,11 @@ static void Open(nint owner)
 }
 ```
 
-The program creates a message-only window as the owner, copies a password with it and reads the clipboard back:
+Reading it:
 
-```csharp
-nint hwnd = Native.CreateWindowExW(0, "STATIC", "clip", 0, 0, 0, 0, 0, Native.HWND_MESSAGE, 0, 0, 0);
-
-char[] password = "hunter2".ToCharArray();
-uint before = Native.GetClipboardSequenceNumber();
-uint mine = Clip.CopySecret(hwnd, password);
-CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(password.AsSpan()));
-Console.WriteLine($"sequence: {before} -> {mine} (changed: {mine != before})");
-Console.WriteLine($"reads back: {Clip.ReadText(hwnd) == "hunter2"}");
-```
-
-```text
-sequence: 50 -> 58 (changed: True)
-reads back: True
-```
+- `owner` is the handle of the hidden window. Passing 0 instead would make the `SetClipboardData` calls fail ([C3](#c3)).
+- `try`/`finally` makes sure `CloseClipboard` runs even if a step throws, so the clipboard never stays locked for other programs.
+- In a test with a message-only window as the owner, the password could be read back from the clipboard afterwards. The sequence number went from 50 to 58.
 
 ### The memory: GlobalAlloc and handing it over
 
@@ -193,9 +181,11 @@ flowchart TD
     check -->|"no: the user copied something since"| leave["Leave the clipboard alone"]
 ```
 
-Read the number *after* closing the clipboard. Each `EmptyClipboard` and `SetClipboardData` changes it, so a number read earlier would never match. In the run above it went from 50 to 58: the empty and each of the four `SetClipboardData` calls count as changes. Only "changed or not" is meaningful, never the size of the step.
+Read the number *after* closing the clipboard. Each `EmptyClipboard` and `SetClipboardData` changes it, so a number read earlier would never match. In the test of `CopySecret` above it went from 50 to 58: the empty and each of the four `SetClipboardData` calls count as changes. Only "changed or not" is meaningful, never the size of the step.
 
 The number is a check, not a notification: to learn about changes as they happen, a program registers with `AddClipboardFormatListener` and handles `WM_CLIPBOARDUPDATE`. For a single expiry check, the number is enough.
+
+The example below is the check the timer runs. It gets the number `CopySecret` returned, and empties the clipboard only if the current number is still the same:
 
 ```csharp
 public static bool ClearIfUnchanged(nint owner, uint sequence)
@@ -207,22 +197,11 @@ public static bool ClearIfUnchanged(nint owner, uint sequence)
 }
 ```
 
-The program clears its own copy, then copies a second secret and lets "the user" copy something over it before the timer:
+Reading it:
 
-```csharp
-Console.WriteLine($"clear if unchanged: {Clip.ClearIfUnchanged(hwnd, mine)}");
-Console.WriteLine($"empty now: {Clip.ReadText(hwnd) is null}");
-
-uint mine2 = Clip.CopySecret(hwnd, "x".ToCharArray());
-Clip.SetText(hwnd, "user copied this");
-Console.WriteLine($"clear after user copied: {Clip.ClearIfUnchanged(hwnd, mine2)}");
-```
-
-```text
-clear if unchanged: True
-empty now: True
-clear after user copied: False
-```
+- A different number means someone changed the clipboard since our copy. The method returns `false` and touches nothing.
+- The same number means our password is still there. The method opens, empties and closes the clipboard.
+- Both cases were tested. Called right after `CopySecret`, it emptied the clipboard. Called after other text had been copied over the password, it returned `false` and left that text in place.
 
 ### Keeping a password out of Win+V history and cloud sync
 
@@ -316,4 +295,4 @@ The history formats can only be checked by hand: with clipboard history turned o
 - Microsoft Learn, [Clipboard Formats](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats): standard, registered and synthesised formats, and the section *Cloud Clipboard and Clipboard History Formats*.
 - Microsoft Learn, [`OpenClipboard`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openclipboard), [`EmptyClipboard`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-emptyclipboard), [`SetClipboardData`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclipboarddata), [`GetClipboardSequenceNumber`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber), [`RegisterClipboardFormatW`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerclipboardformatw).
 - Microsoft Learn, [Message-only windows](https://learn.microsoft.com/en-us/windows/win32/winmsg/window-features#message-only-windows).
-- Claude session, 2026-11-18: the program was run there with .NET 10.
+- Claude session, 2026-11-18: the snippets were tested there with .NET 10.
