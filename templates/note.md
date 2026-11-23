@@ -35,7 +35,7 @@ tags: []
 
 ### <A subsection>
 
-<A snippet that illustrates this subsection goes right here, with its output. Before it, one or two sentences: what this program does and what to look for in its output.>
+<A short, standalone example that illustrates this subsection, a fragment if that is enough. Before it, one or two sentences: what it shows and what to look for. After it, a short "Reading it:" list for what isn't obvious.>
 
 ```csharp
 // snippet for this subsection

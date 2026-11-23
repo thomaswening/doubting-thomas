@@ -41,7 +41,7 @@ tags: [dotnet, security, secrets, securestring, zeromemory, pinned-object-heap, 
 
 ## Explanation
 
-Each snippet below is a complete `Program.cs` for a console project with `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`, run with .NET 10.
+Where a snippet shows output, it was printed with .NET 10.
 
 ### Why not a string?
 

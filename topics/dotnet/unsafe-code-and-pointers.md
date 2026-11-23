@@ -39,7 +39,7 @@ tags: [csharp, unsafe, pointers, void-pointer, fixed, span, nint]
 
 ## Explanation
 
-Each snippet below is a complete `Program.cs` for a console project with `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`, run with .NET 10.
+Where a snippet shows output, it was printed with .NET 10.
 
 ### unsafe: code the compiler can't check
 

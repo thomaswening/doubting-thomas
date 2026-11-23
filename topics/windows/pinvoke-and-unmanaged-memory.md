@@ -41,7 +41,7 @@ tags: [dotnet, interop, pinvoke, libraryimport, marshalling, safehandle, nint, p
 
 ## Explanation
 
-Each snippet below is a complete `Program.cs` for a console project with `<TargetFramework>net10.0-windows</TargetFramework>` and `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`. All were run with .NET 10 on Windows 11, and the output shown is what they printed.
+Where a snippet shows output, it was printed with .NET 10 on Windows 11.
 
 ### Calling a native function
 
@@ -242,7 +242,7 @@ The handle itself, the `nint` that `GlobalAlloc` returns, is an **opaque handle*
 
 #### Trying it out
 
-The program below allocates a 16-byte block through the `SafeGlobalHandle` declaration from above. It then asks Windows for the block's size, passing the `SafeGlobalHandle` where the C function expects an `HGLOBAL`, and lets the `using` block end. `ReleaseHandle` prints a line, so you can see when the release happens: at the end of the `using`, without any `GlobalFree` call in your own code.
+The example below allocates a 16-byte block through the `SafeGlobalHandle` declaration from above. It then asks Windows for the block's size, passing the `SafeGlobalHandle` where the C function expects an `HGLOBAL`, and lets the `using` block end. `ReleaseHandle` prints a line, so you can see when the release happens: at the end of the `using`, without any `GlobalFree` call in your own code.
 
 ```csharp
 using System.Runtime.InteropServices;
