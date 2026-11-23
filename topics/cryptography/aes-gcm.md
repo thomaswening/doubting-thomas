@@ -2,7 +2,7 @@
 title: AES-GCM and authenticated encryption
 area: cryptography
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-23
 prerequisites: []
 related: [cryptography/password-key-derivation]
 projects: []
@@ -47,11 +47,48 @@ tags: [cryptography, aes, gcm, aead, nonce, authentication-tag, aesgcm]
 
 AES is a function: 32 key bytes and 16 input bytes in, 16 scrambled bytes out ([C1](#c1)). That's all. A password store is longer than 16 bytes, so something must decide how to apply AES to many blocks. That is the **mode**.
 
-The naive mode, encrypting each block on its own (ECB), leaks patterns: equal plaintext blocks give equal ciphertext blocks. Real modes mix in a varying value. GCM uses **counter mode**: it encrypts the numbers *nonce‖1*, *nonce‖2*, *nonce‖3*, … with AES and XORs the results, the **keystream**, onto the plaintext.
+The naive mode, encrypting each block on its own (ECB), leaks patterns: equal plaintext blocks give equal ciphertext blocks. Real modes mix in a value that changes from block to block. GCM uses **counter mode**, which rests on one bitwise operation, XOR.
+
+### XOR
+
+**XOR** (exclusive or) compares two bits. The result is 1 when they differ and 0 when they are equal:
+
+| a | b | a XOR b |
+|---|---|---------|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+On bytes, XOR works bit by bit, each bit with the bit at the same position. In C#, the operator is `^`, and `a ^= b` means `a = a ^ b`, like `+=`. In formulas, XOR is written $\oplus$. Here is one byte, the letter `h` (`0x68`), XORed with an arbitrary byte `0xB3`:
+
+```text
+  0110 1000   0x68  'h'
+^ 1011 0011   0xB3
+= 1101 1011   0xDB
+```
+
+Three rules follow from the table:
+
+- XOR with 0 changes nothing: $x \oplus 0 = x$.
+- XOR with itself gives 0: $x \oplus x = 0$.
+- The order doesn't matter: $a \oplus b \oplus c$ gives the same result however you group and reorder it, like `+`.
+
+Together they give the one property encryption needs: XOR the same value on twice, and it is gone again. $(x \oplus k) \oplus k = x \oplus (k \oplus k) = x \oplus 0 = x$. In the byte above, `0xDB ^ 0xB3` gives `0x68` again, the `h`.
+
+### Counter mode
+
+Counter mode turns AES into a generator of random-looking bytes, the **keystream**, and XORs them onto the plaintext:
+
+1. **Build counter blocks.** Each block is 16 bytes: the 12-byte nonce, followed by a 4-byte counter. Written *nonce ‖ 2*, where ‖ means "followed by" (concatenation, like `nonce.Concat(counter)` in LINQ). The plaintext uses the counters 2, 3, 4, … GCM reserves counter 1 for the tag.
+2. **Encrypt the counter blocks with AES.** Each gives 16 keystream bytes. Enough blocks are encrypted to cover the plaintext.
+3. **XOR the keystream onto the plaintext**, byte by byte: ciphertext byte $i$ = plaintext byte $i$ $\oplus$ keystream byte $i$. The last keystream bytes are dropped, so the ciphertext is exactly as long as the plaintext.
+
+Decryption builds the same keystream from the same key and nonce and XORs it on again. By the rule above, that removes it and leaves the plaintext. The **nonce** (number used once) is what makes the keystream differ from one encryption to the next under the same key.
 
 ```mermaid
 flowchart LR
-    n["nonce ‖ counter 1, 2, 3, …"] --> aes["AES with the key"]
+    n["nonce ‖ counter 2, 3, 4, …"] --> aes["AES with the key"]
     aes --> ks["keystream"]
     ks --> x(("XOR"))
     p["plaintext"] --> x
@@ -63,7 +100,9 @@ flowchart LR
 
 ### The tag: encryption you can trust
 
-Counter mode alone hides the data but protects nothing else. Flip bit 5 of the ciphertext, and bit 5 of the plaintext flips at decryption, silently. An attacker who knows where the password sits in the file can change it without knowing it.
+Counter mode alone hides the data but protects nothing else. Each plaintext bit is its ciphertext bit XOR one keystream bit. So if an attacker flips a ciphertext bit, decryption flips exactly the same plaintext bit, and reports no error.
+
+That lets an attacker who knows the layout of the data change it on purpose, without the key. Say a settings file ends in `admin=0`. The character `0` is `0x30` (`0011 0000`), and `1` is `0x31` (`0011 0001`). They differ only in the lowest bit. The attacker flips the lowest bit of the last ciphertext byte, and the file decrypts to `admin=1`. The attacker never saw the keystream and never decrypted anything.
 
 GCM adds an **authentication tag** ([C2](#c2)). After encrypting, it computes a keyed checksum (GHASH) over the ciphertext and the associated data, and stores the 16-byte result. A .NET comparison: like a hash you'd store to detect a corrupt download, except that it is keyed. Without the key, an attacker can't compute a matching tag for modified data.
 
@@ -112,18 +151,51 @@ Reading it:
 
 - `new AesGcm(key, tagSizeInBytes: 16)` sets up AES-GCM with a 32-byte key. The caller provides every buffer: `Encrypt` writes into `ciphertext` and `tag`, `Decrypt` into `decrypted`.
 - The ciphertext is exactly as long as the plaintext, 15 bytes. The 16-byte tag comes on top ([C1](#c1)).
+- `ciphertext[0] ^= 1` XORs the first ciphertext byte with `0000 0001`, which flips its lowest bit. The same line again flips it back.
 - One flipped bit, and decryption refuses. A wrong key, and it refuses too ([C2](#c2)).
 - After the failed decryption, the output buffer holds only zeros, not half-decrypted text ([C3](#c3)).
 
 ### The nonce: once, really once
 
-Counter mode's keystream depends only on the key and the nonce. Use the same pair twice, and you get the same keystream twice ([C4](#c4)). Then for two ciphertexts:
+Counter mode's keystream depends only on the key and the nonce. Use the same pair twice, and you get the same keystream twice ([C4](#c4)).
+
+Name the pieces. Two messages are encrypted with the same key and the same nonce:
+
+- $`P_1`$ and $`P_2`$ are the two plaintexts, as byte arrays.
+- $K$ is the keystream. It is the same for both, because key and nonce are the same.
+- $`C_1`$ and $`C_2`$ are the two ciphertexts. By counter mode, $`C_1 = P_1 \oplus K`$ and $`C_2 = P_2 \oplus K`$.
+- $\oplus$ is XOR, byte by byte at each position, `^` in C#.
+
+The attacker has $`C_1`$ and $`C_2`$, from two saved versions of a file, say. They XOR the two ciphertexts and apply the rules from the XOR section:
 
 ```math
-C_1 \oplus C_2 = (P_1 \oplus K) \oplus (P_2 \oplus K) = P_1 \oplus P_2
+\begin{aligned}
+C_1 \oplus C_2 &= (P_1 \oplus K) \oplus (P_2 \oplus K) && \text{insert what } C_1 \text{ and } C_2 \text{ are} \\
+               &= P_1 \oplus P_2 \oplus (K \oplus K) && \text{reorder} \\
+               &= P_1 \oplus P_2 \oplus 0           && x \oplus x = 0 \\
+               &= P_1 \oplus P_2                    && x \oplus 0 = x
+\end{aligned}
 ```
 
-The keystream $K$ cancels. An attacker who knows or guesses one plaintext gets the other ([C5](#c5)). It also breaks the tag: from two messages under one nonce, an attacker can work out GHASH's key and then forge tags for messages of their choice.
+The keystream is gone: it was XORed on twice. What's left mixes only the two plaintexts. If the attacker knows $`P_2`$ (an entry they added themselves, or a standard header), they XOR it on once more, and it is gone too:
+
+```math
+C_1 \oplus C_2 \oplus P_2 = P_1 \oplus P_2 \oplus P_2 = P_1
+```
+
+That is the first message, recovered without the key ([C5](#c5)). Here it is for one byte, with a made-up keystream byte `0xB3`. Message 1 has the character `4` at this position, message 2 has `0`:
+
+| | value | bits |
+|---|---|---|
+| $`P_1`$, the character `4` | `0x34` | `0011 0100` |
+| $`P_2`$, the character `0` | `0x30` | `0011 0000` |
+| $K$, made up | `0xB3` | `1011 0011` |
+| $`C_1 = P_1 \oplus K`$ | `0x87` | `1000 0111` |
+| $`C_2 = P_2 \oplus K`$ | `0x83` | `1000 0011` |
+| $`C_1 \oplus C_2`$ | `0x04` | `0000 0100` |
+| $`C_1 \oplus C_2 \oplus P_2`$ | `0x34` | `0011 0100`, the `4` again |
+
+Nonce reuse also breaks the tag: from two messages under one nonce, an attacker can work out GHASH's key and then forge tags for messages of their choice. The example below doesn't show that part.
 
 The example below makes the mistake on purpose. It encrypts two 16-byte messages with the same key and the same nonce. Then it plays the attacker, who has both ciphertexts and knows the second message, but not the key:
 
@@ -150,7 +222,9 @@ recovered without the key: pin=4711 user=al
 
 Reading it:
 
-- The loop computes $`C_1 \oplus C_2 \oplus P_2`$ byte by byte. By the formula above, that is $`P_1`$: the first message, recovered without the key.
+- The loop runs over the 16 byte positions. At each position `i`, it XORs the two ciphertext bytes and the known plaintext byte: `c1[i] ^ c2[i] ^ p2[i]`. That is the second formula above, one byte at a time, as in the table.
+- The cast `(byte)` is needed because C# computes `byte ^ byte` as `int`, as it does for `byte + byte`.
+- The result is the first message, recovered without the key.
 - The tags were ignored. Nothing in the attack needs them.
 
 How to get unique nonces:
