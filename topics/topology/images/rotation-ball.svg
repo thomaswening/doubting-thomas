@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 340" width="560" height="340" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <title>The rotation ball, cut through the z axis, with the loop of rotations by 0 to 2 pi about z</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e07b00"/>
+    </marker>
+  </defs>
+  <circle cx="170" cy="170" r="130" fill="#2f7fd0" fill-opacity="0.12" stroke="#7f7f7f" stroke-width="2"/>
+  <!-- path: centre up to top (t from 0 to pi), then from bottom up to centre (t from pi to 2 pi) -->
+  <line x1="170" y1="170" x2="170" y2="48" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="170" y1="300" x2="170" y2="178" stroke="#e07b00" stroke-width="3" marker-end="url(#arrow)"/>
+  <!-- identification of top and bottom -->
+  <path d="M 178 40 C 470 40, 470 300, 178 300" fill="none" stroke="#7f7f7f" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <g fill="#7f7f7f">
+    <circle cx="170" cy="170" r="5"/><circle cx="170" cy="40" r="5"/><circle cx="170" cy="300" r="5"/>
+  </g>
+  <g fill="#7f7f7f">
+    <text x="180" y="175">identity (t = 0, 2π)</text>
+    <text x="180" y="30">π about +z  (t = π)</text>
+    <text x="180" y="325">π about −z: the same rotation</text>
+    <text x="405" y="175">same point</text>
+    <text x="80" y="110">t: 0 → π</text>
+    <text x="70" y="240">t: π → 2π</text>
+  </g>
+</svg>
