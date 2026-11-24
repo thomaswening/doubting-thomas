@@ -113,6 +113,33 @@ record Rule(string Who, string Rights, string AppliesTo);
 
 *Object* means file and *container* means folder. **OI** passes the rule to files, **CI** to subfolders, and **IO** says the rule does not apply to the folder it sits on, only to what is created below it.
 
+The same rule, set on the folder `SharedTodo\`, reaches different items with each choice. A thick border with ✓ means the rule applies; a dashed border with ✗ means it does not:
+
+```mermaid
+flowchart LR
+    subgraph all["OI + CI: this folder, subfolders and files"]
+        direction TB
+        a0["SharedTodo\ ✓<br/>(rule set here)"] --> a1["todo.json ✓"]
+        a0 --> a2["Archive\ ✓"] --> a3["old.json ✓"]
+    end
+    subgraph folders["CI: this folder and subfolders"]
+        direction TB
+        b0["SharedTodo\ ✓<br/>(rule set here)"] --> b1["todo.json ✗"]
+        b0 --> b2["Archive\ ✓"] --> b3["old.json ✗"]
+    end
+    subgraph below["OI + CI + IO: subfolders and files only"]
+        direction TB
+        c0["SharedTodo\ ✗<br/>(rule set here)"] --> c1["todo.json ✓"]
+        c0 --> c2["Archive\ ✓"] --> c3["old.json ✓"]
+    end
+    classDef on stroke-width:3px
+    classDef off stroke-dasharray:5 5
+    class a0,a1,a2,a3,b0,b2,c1,c2,c3 on
+    class b1,b3,c0 off
+```
+
+Reading it: CI alone stops at files, at every depth. IO only removes the folder the rule sits on. Everything below it still gets the rule.
+
 A file or folder gets its rules **when it is created**, copied from the folder it is created in. The rules on the folders above decide what a new file can be done with.
 
 ### The example: a shared to-do list
